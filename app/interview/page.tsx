@@ -57,7 +57,9 @@ export default function InterviewPage() {
     }
   };
 
-  const handleSubmit = () => setStage("feedback");
+  const handleSubmit = (answer: string) => {
+    setStage("feedback");
+  };
 
   const handleNext = () => {
     if (current >= TOTAL) {
@@ -68,6 +70,7 @@ export default function InterviewPage() {
     }
   };
 
+  // ── Setup screen ──────────────────────────────────────────────
   if (stage === "setup") {
     return (
       <div className="min-h-screen bg-white">
@@ -89,7 +92,9 @@ export default function InterviewPage() {
               <select
                 className="w-full border border-[rgba(0,0,0,0.12)] rounded-xl px-4 py-3 font-inter text-sm text-text bg-white focus:outline-none focus:ring-2 focus:ring-[#319AFF]"
                 value={setup.domain}
-                onChange={(e) => setSetup({ ...setup, domain: e.target.value })}
+                onChange={(e) =>
+                  setSetup({ ...setup, domain: e.target.value })
+                }
               >
                 <option value="">Select your domain</option>
                 <option value="Software Engineering (SDE)">Software Engineering (SDE)</option>
@@ -164,6 +169,7 @@ export default function InterviewPage() {
     );
   }
 
+  // ── Interview / Feedback screen ───────────────────────────────
   return (
     <div className="min-h-screen bg-white">
       <Navbar
