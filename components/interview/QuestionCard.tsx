@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { countWords } from "@/lib/utils";
-import { INTERVIEW_QUESTION } from "@/lib/mockData";
+
 
 interface QuestionCardProps {
   questionNumber: number;
   totalQuestions: number;
+  question?: string;   // ← add this
   onSubmit: (answer: string) => void;
 }
 
@@ -27,7 +28,7 @@ export function QuestionCard({
         Question {questionNumber} of {totalQuestions}
       </p>
       <h2 className="font-fustat font-bold text-[22px] text-text leading-[1.4] my-3 mb-7">
-        {INTERVIEW_QUESTION}
+        {question ?? "Loading question…"}
       </h2>
       <textarea
         value={answer}
