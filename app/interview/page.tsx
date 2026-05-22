@@ -24,6 +24,8 @@ export default function InterviewPage() {
   const [questions, setQuestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
+  const [evaluating, setEvaluating] = useState(false);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -57,9 +59,30 @@ export default function InterviewPage() {
     }
   };
 
-  const handleSubmit = (answer: string) => {
+  const handleSubmit = async (answer: string) => {
+  setEvaluating(true);
+  try {
+    const res = await fetch("/api/evaluate-answer", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        question: questions[current - 1],
+        answer,
+        domain: setup.domain,
+        experience: setup.experience,
+      }),
+    });
+    const data = await res.json();
+    if (data.feedback) {
+      setFeedback(data.feedback);
+    }
+  } catch {
+    // fallback to mock feedback
+  } finally {
+    setEvaluating(false);
     setStage("feedback");
-  };
+  }
+};
 
   const handleNext = () => {
     if (current >= TOTAL) {
@@ -192,7 +215,7 @@ export default function InterviewPage() {
                 Question {current} of {TOTAL} — submitted
               </p>
             </div>
-            <FeedbackPanel feedback={MOCK_FEEDBACK} onNext={handleNext} />
+            <FeedbackPanel feedback={feedback} onNext={handleNext} />
           </>
         )}
       </div>
