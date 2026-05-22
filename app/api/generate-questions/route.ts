@@ -21,7 +21,18 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "user",
-            content: `Generate exactly 5 interview questions for a ${experience} candidate applying for ${domain} role at a ${companyType}. Mix behavioral and technical questions. Return a JSON array of exactly 5 strings. No preamble, no explanation, just the array.`,
+            content: `Generate exactly 5 deep, specific interview questions for a ${experience} candidate applying for a ${domain} role at a ${companyType} company. 
+
+            Rules:
+            - 2 questions must be technical and domain-specific (test actual knowledge, not just opinions)
+            - 2 questions must be behavioral but require specific examples with measurable outcomes
+            - 1 question must be a problem-solving scenario with constraints
+            
+            For ${domain} technical questions: ask about specific concepts, tradeoffs, architecture decisions, or debugging scenarios.
+            For ${companyType} companies: service = process and communication focus, product = impact and ownership focus, startup = ambiguity and speed focus.
+            
+            Do NOT ask generic questions like "tell me about yourself" or "what are your strengths".
+            Return a JSON array of exactly 5 strings. No preamble, no explanation, just the array.`,
           },
         ],
         max_tokens: 1024,
