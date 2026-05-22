@@ -1,28 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const { domain, experience, companyType } = await req.json();
+  try {
+    const { domain, experience, companyType } = await req.json();
 
-  const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
-  const message = `Generate exactly 5 interview questions for a ${experience} candidate applying for ${domain} role at a ${companyType}. Mix behavioral and technical questions. For service companies focus on communication and process. For product companies focus on problem solving and impact. For startups focus on ownership and handling ambiguity. Return a JSON array of exactly 5 strings. No preamble, no explanation, just the array.`;
-
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: message }] }],
-      }),
+    if (!apiKey) {
+      return NextResponse.json({ error: "Missing API key" }, { status: 500 });
     }
-  );
 
-  const json = await res.json();
-  const text = json.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-  const match = text.match(/\[[\s\S]*\]/);
-  if (!match) return NextResponse.json({ error: "Failed to parse questions" }, { status: 500 });
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.1-8b-instant",
+        messages: [
+          {
+            role: "user",
+            content: `Generate exactly 5 interview questions for a ${experience} candidate applying for ${domain} role at a ${companyType}. Mix behavioral and technical questions. Return a JSON array of exactly 5 strings. No preamble, no explanation, just the array.`,
+          },
+        ],
+        max_tokens: 1024,
+      }),
+    });
 
-  const questions = JSON.parse(match[0]);
-  return NextResponse.json({ questions });
+    if (!res.ok) {
+      const errText = await res.text();
+      return NextResponse.json({ error: `API error: ${errText}` }, { status: 500 });
+    }
+
+    const json = await res.json();
+    const text = json.choices?.[0]?.message?.content ?? "";
+    const match = text.match(/\[[\s\S]*\]/);
+
+    if (!match) {
+      return NextResponse.json({ error: `Could not parse: ${text}` }, { status: 500 });
+    }
+
+    const questions = JSON.parse(match[0]);
+    return NextResponse.json({ questions });
+
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
 }
