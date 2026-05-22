@@ -1,20 +1,19 @@
 "use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { countWords } from "@/lib/utils";
 
-
 interface QuestionCardProps {
   questionNumber: number;
   totalQuestions: number;
-  question?: string;   // ← add this
+  question?: string;
   onSubmit: (answer: string) => void;
 }
 
 export function QuestionCard({
   questionNumber,
   totalQuestions,
+  question,
   onSubmit,
 }: QuestionCardProps) {
   const [answer, setAnswer] = useState("");
