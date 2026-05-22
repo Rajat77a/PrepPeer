@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.GROQ_API_KEY;
-  
   return NextResponse.json({ 
-    hasKey: !!apiKey,
-    keyLength: apiKey?.length ?? 0,
-    firstChars: apiKey?.substring(0, 8) ?? "none"
+    env: {
+      hasGroq: !!process.env.GROQ_API_KEY,
+      allKeys: Object.keys(process.env).filter(k => k.includes("GROQ") || k.includes("API"))
+    }
   });
 }
