@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
 import { FeedbackPanel } from "@/components/interview/FeedbackPanel";
+import { TabSwitchWarning } from "@/components/interview/TabSwitchWarning";
+import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 
 const TOTAL = 5;
@@ -32,6 +34,21 @@ export default function InterviewPage() {
     experience: "",
     companyType: "",
   });
+
+  const {
+    strikeCount,
+    showWarningModal,
+    dismissWarning,
+    shouldAutoSubmit,
+    timerDisplay,
+    resetTimer,
+  } = useAntiCheat();
+
+  useEffect(() => {
+    if (shouldAutoSubmit) {
+      router.push("/results");
+    }
+  }, [shouldAutoSubmit, router]);
 
   const handleStart = async () => {
     if (!setup.domain || !setup.experience || !setup.companyType) {
@@ -101,6 +118,7 @@ export default function InterviewPage() {
     } else {
       setCurrent((c) => c + 1);
       setAiDetected(null);
+      resetTimer();
       setStage("interview");
     }
   };
@@ -202,12 +220,48 @@ export default function InterviewPage() {
   // ── Interview / Feedback screen ───────────────────────────────
   return (
     <div className="min-h-screen bg-white">
+      <TabSwitchWarning
+        strikeCount={strikeCount}
+        onDismiss={dismissWarning}
+        visible={showWarningModal}
+      />
       <Navbar
         variant="inner"
         sessionLabel={`${setup.domain} · ${setup.experience} · ${setup.companyType}`}
         progress={{ current, total: TOTAL }}
       />
       <div className="max-w-[800px] mx-auto px-6 py-20">
+
+        {/* Timer + protection bar */}
+        {stage === "interview" && !evaluating && (
+          <div className="flex items-center justify-between mb-6">
+            <span style={{
+              padding: "5px 10px",
+              borderRadius: "99px",
+              background: "rgba(0,200,150,0.06)",
+              border: "1px solid rgba(0,200,150,0.15)",
+              fontSize: "11px",
+              fontWeight: 600,
+              color: "#00A07A",
+              fontFamily: "var(--font-inter)",
+            }}>
+              🛡 Session Protected
+            </span>
+            <div style={{
+              padding: "6px 14px",
+              borderRadius: "99px",
+              background: "rgba(0,0,0,0.03)",
+              border: "1px solid rgba(0,0,0,0.06)",
+              fontSize: "14px",
+              fontWeight: 600,
+              color: "#0A0A0F",
+              fontFamily: "var(--font-inter)",
+            }}>
+              ⏱ {timerDisplay}
+            </div>
+          </div>
+        )}
+
         {stage === "interview" ? (
           evaluating ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
@@ -256,6 +310,25 @@ export default function InterviewPage() {
             )}
           </>
         )}
+
+        {/* Strike indicator */}
+        {strikeCount > 0 && (
+          <div className="flex items-center justify-center mt-6">
+            <span style={{
+              fontSize: "12px",
+              fontWeight: 600,
+              color: strikeCount >= 2 ? "#CC4422" : "#996600",
+              padding: "4px 12px",
+              borderRadius: "99px",
+              background: strikeCount >= 2 ? "rgba(255,107,61,0.08)" : "rgba(255,190,61,0.08)",
+              border: `1px solid ${strikeCount >= 2 ? "rgba(255,107,61,0.15)" : "rgba(255,190,61,0.15)"}`,
+              fontFamily: "var(--font-inter)",
+            }}>
+              ⚠ {strikeCount} tab switch{strikeCount > 1 ? "es" : ""} detected
+            </span>
+          </div>
+        )}
+
       </div>
     </div>
   );
