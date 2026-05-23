@@ -61,44 +61,46 @@ export default function InterviewPage() {
   };
 
   const handleSubmit = async (answer: string) => {
-  setEvaluating(true);
-  try {
-    const [evalRes, detectRes] = await Promise.all([
-      fetch("/api/evaluate-answer", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          question: questions[current - 1],
-          answer,
-          domain: setup.domain,
-          experience: setup.experience,
+    setEvaluating(true);
+    try {
+      const [evalRes, detectRes] = await Promise.all([
+        fetch("/api/evaluate-answer", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question: questions[current - 1],
+            answer,
+            domain: setup.domain,
+            experience: setup.experience,
+          }),
         }),
-      }),
-      fetch("/api/detect-ai", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answer }),
-      }),
-    ]);
+        fetch("/api/detect-ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answer }),
+        }),
+      ]);
 
-    const evalData = await evalRes.json();
-    const detectData = await detectRes.json();
+      const evalData = await evalRes.json();
+      const detectData = await detectRes.json();
 
-    if (evalData.feedback) setFeedback(evalData.feedback);
-    if (detectData) setAiDetected(detectData);
+      if (evalData.feedback) setFeedback(evalData.feedback);
+      if (detectData) setAiDetected(detectData);
 
-  } catch {
-    // fallback
-  } finally {
-    setEvaluating(false);
-    setStage("feedback");
-  }
-};
+    } catch {
+      // fallback
+    } finally {
+      setEvaluating(false);
+      setStage("feedback");
+    }
+  };
+
   const handleNext = () => {
     if (current >= TOTAL) {
       router.push("/results");
     } else {
       setCurrent((c) => c + 1);
+      setAiDetected(null);
       setStage("interview");
     }
   };
@@ -117,7 +119,6 @@ export default function InterviewPage() {
           </p>
 
           <div className="flex flex-col gap-6">
-            {/* Domain */}
             <div>
               <label className="font-inter font-semibold text-sm text-text mb-2 block">
                 Branch / Domain
@@ -125,9 +126,7 @@ export default function InterviewPage() {
               <select
                 className="w-full border border-[rgba(0,0,0,0.12)] rounded-xl px-4 py-3 font-inter text-sm text-text bg-white focus:outline-none focus:ring-2 focus:ring-[#319AFF]"
                 value={setup.domain}
-                onChange={(e) =>
-                  setSetup({ ...setup, domain: e.target.value })
-                }
+                onChange={(e) => setSetup({ ...setup, domain: e.target.value })}
               >
                 <option value="">Select your domain</option>
                 <option value="Software Engineering (SDE)">Software Engineering (SDE)</option>
@@ -141,7 +140,6 @@ export default function InterviewPage() {
               </select>
             </div>
 
-            {/* Experience */}
             <div>
               <label className="font-inter font-semibold text-sm text-text mb-2 block">
                 Experience Level
@@ -163,7 +161,6 @@ export default function InterviewPage() {
               </div>
             </div>
 
-            {/* Company Type */}
             <div>
               <label className="font-inter font-semibold text-sm text-text mb-2 block">
                 Company Type
@@ -212,12 +209,19 @@ export default function InterviewPage() {
       />
       <div className="max-w-[800px] mx-auto px-6 py-20">
         {stage === "interview" ? (
-          <QuestionCard
-            questionNumber={current}
-            totalQuestions={TOTAL}
-            question={questions[current - 1]}
-            onSubmit={handleSubmit}
-          />
+          evaluating ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="w-10 h-10 border-4 border-[#319AFF] border-t-transparent rounded-full animate-spin" />
+              <p className="font-inter text-muted text-sm">Evaluating your answer…</p>
+            </div>
+          ) : (
+            <QuestionCard
+              questionNumber={current}
+              totalQuestions={TOTAL}
+              question={questions[current - 1]}
+              onSubmit={handleSubmit}
+            />
+          )
         ) : (
           <>
             <div className="rounded-3xl p-10 bg-white border border-[rgba(0,132,255,0.15)] opacity-60">
@@ -225,21 +229,31 @@ export default function InterviewPage() {
                 Question {current} of {TOTAL} — submitted
               </p>
             </div>
-            {aiDetected?.isAI && (
-  <div className="mb-4 flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
-    <span className="text-red-500 text-xl">⚠️</span>
-    <div>
-      <p className="font-inter font-semibold text-sm text-red-700">
-        AI-generated answer detected ({aiDetected.confidence}% confidence)
-      </p>
-      <p className="font-inter text-sm text-red-600 mt-0.5">
-        {aiDetected.reason}
-      </p>
-    </div>
-  </div>
-)}
-<FeedbackPanel feedback={feedback} onNext={handleNext} />
-            <FeedbackPanel feedback={feedback} onNext={handleNext} />
+
+            {aiDetected?.isAI ? (
+              <div className="mt-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-6">
+                <span className="text-red-500 text-2xl">⚠️</span>
+                <div>
+                  <p className="font-inter font-bold text-base text-red-700">
+                    AI-generated answer detected ({aiDetected.confidence}% confidence)
+                  </p>
+                  <p className="font-inter text-sm text-red-600 mt-1 mb-4">
+                    {aiDetected.reason}
+                  </p>
+                  <p className="font-inter text-sm text-red-700 font-medium">
+                    Please write your own answer to get feedback and score.
+                  </p>
+                  <button
+                    onClick={() => { setStage("interview"); setAiDetected(null); }}
+                    className="mt-4 bg-red-600 hover:bg-red-700 text-white font-inter font-semibold text-sm px-6 py-3 rounded-xl transition-all"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <FeedbackPanel feedback={feedback} onNext={handleNext} />
+            )}
           </>
         )}
       </div>
