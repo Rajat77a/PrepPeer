@@ -225,6 +225,20 @@ export default function InterviewPage() {
                 Question {current} of {TOTAL} — submitted
               </p>
             </div>
+            {aiDetected?.isAI && (
+  <div className="mb-4 flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-4">
+    <span className="text-red-500 text-xl">⚠️</span>
+    <div>
+      <p className="font-inter font-semibold text-sm text-red-700">
+        AI-generated answer detected ({aiDetected.confidence}% confidence)
+      </p>
+      <p className="font-inter text-sm text-red-600 mt-0.5">
+        {aiDetected.reason}
+      </p>
+    </div>
+  </div>
+)}
+<FeedbackPanel feedback={feedback} onNext={handleNext} />
             <FeedbackPanel feedback={feedback} onNext={handleNext} />
           </>
         )}
