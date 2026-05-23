@@ -26,6 +26,7 @@ export default function InterviewPage() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
   const [evaluating, setEvaluating] = useState(false);
+  const [aiDetected, setAiDetected] = useState<{isAI: boolean, confidence: number, reason: string} | null>(null);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -62,28 +63,37 @@ export default function InterviewPage() {
   const handleSubmit = async (answer: string) => {
   setEvaluating(true);
   try {
-    const res = await fetch("/api/evaluate-answer", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        question: questions[current - 1],
-        answer,
-        domain: setup.domain,
-        experience: setup.experience,
+    const [evalRes, detectRes] = await Promise.all([
+      fetch("/api/evaluate-answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: questions[current - 1],
+          answer,
+          domain: setup.domain,
+          experience: setup.experience,
+        }),
       }),
-    });
-    const data = await res.json();
-    if (data.feedback) {
-      setFeedback(data.feedback);
-    }
+      fetch("/api/detect-ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answer }),
+      }),
+    ]);
+
+    const evalData = await evalRes.json();
+    const detectData = await detectRes.json();
+
+    if (evalData.feedback) setFeedback(evalData.feedback);
+    if (detectData) setAiDetected(detectData);
+
   } catch {
-    // fallback to mock feedback
+    // fallback
   } finally {
     setEvaluating(false);
     setStage("feedback");
   }
 };
-
   const handleNext = () => {
     if (current >= TOTAL) {
       router.push("/results");
