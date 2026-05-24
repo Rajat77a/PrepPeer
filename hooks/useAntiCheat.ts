@@ -36,7 +36,7 @@ const PASTE_CHAR_THRESHOLD = 80;
 const FAST_SUBMIT_THRESHOLD_SECONDS = 15;
 const DEBOUNCE_MS = 1000;
 
-export function useAntiCheat(): UseAntiCheatReturn {
+export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
   const [state, setState] = useState<AntiCheatState>({
     pasteDetected: false,
     pasteCharCount: 0,
@@ -91,6 +91,7 @@ export function useAntiCheat(): UseAntiCheatReturn {
 
   // ── Layer 3: Tab Switch Detection ───────────────────────
   const recordSwitch = useCallback(() => {
+    if (!active) return; // only track when interview is active
     const now = Date.now();
     if (now - lastSwitchTime.current < DEBOUNCE_MS) return;
     lastSwitchTime.current = now;
@@ -104,19 +105,17 @@ export function useAntiCheat(): UseAntiCheatReturn {
       setShowWarningModal(true);
       return { ...prev, tabSwitchCount: newCount };
     });
-  }, []);
+  }, [active]);
 
   useEffect(() => {
-    // Only fire when user LEAVES the tab (document.hidden = true)
     const handleVisibilityChange = () => {
       if (document.hidden) {
         recordSwitch();
       }
     };
 
-    // Only fire blur if visibilitychange didn't already catch it
     const handleWindowBlur = () => {
-      if (document.hidden) return; // already counted above
+      if (document.hidden) return;
       recordSwitch();
     };
 
