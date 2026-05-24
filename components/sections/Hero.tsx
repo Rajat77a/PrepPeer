@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 import { Button } from "@/components/ui/Button";
 import { HashLinkButton } from "@/components/ui/HashLinkButton";
+import TypingText from "@/components/sections/TypingText";
 
 const heroVariants = {
   hidden: {},
@@ -319,7 +320,8 @@ export function Hero() {
               variants={itemVariants}
               className="hero-h1 text-text flex-1 min-w-0"
             >
-              Know where you <span className="text-blue">stand</span>.
+              <span className="block">Know your rank as</span>
+              <TypingText />
             </motion.h1>
             <HeroOrb
               linkRef={orbLinkRef}
