@@ -1,43 +1,51 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const words = [
-  "Software Engineer",
-  "Data Scientist",
-  "Product Manager",
-  "Marketing Manager",
-  "Finance Analyst",
-  "Operations Manager",
+  "Software Engineer.",
+  "Data Scientist.",
+  "Product Manager.",
+  "Marketing Manager.",
+  "Finance Analyst.",
+  "Operations Manager.",
 ];
 
 export default function TypingText() {
   const [wordIndex, setWordIndex] = useState(0);
+  const [characterCount, setCharacterCount] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setWordIndex((current) => (current + 1) % words.length);
-    }, 2500);
+    const currentWord = words[wordIndex];
+    const isFullyTyped = characterCount === currentWord.length;
+    const isFullyDeleted = characterCount === 0;
+    const delay = isFullyTyped && !isDeleting ? 1800 : isDeleting ? 30 : 60;
 
-    return () => window.clearInterval(interval);
-  }, []);
+    const timeout = window.setTimeout(() => {
+      if (!isDeleting && isFullyTyped) {
+        setIsDeleting(true);
+        return;
+      }
+
+      if (isDeleting && isFullyDeleted) {
+        setIsDeleting(false);
+        setWordIndex((current) => (current + 1) % words.length);
+        return;
+      }
+
+      setCharacterCount((current) => current + (isDeleting ? -1 : 1));
+    }, delay);
+
+    return () => window.clearTimeout(timeout);
+  }, [characterCount, isDeleting, wordIndex]);
 
   return (
     <span className="typing-text">
-      <span className="typing-text-sizer">Operations Manager</span>
-      <AnimatePresence mode="wait">
-        <motion.span
-          animate={{ opacity: 1, y: 0 }}
-          className="typing-text-value"
-          exit={{ opacity: 0, y: -18 }}
-          initial={{ opacity: 0, y: 18 }}
-          key={words[wordIndex]}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {words[wordIndex]}
-        </motion.span>
-      </AnimatePresence>
+      <span className="typing-text-sizer">Operations Manager.</span>
+      <span className="typing-text-value">
+        {words[wordIndex].slice(0, characterCount) || "\u00A0"}
+      </span>
       <style>{`
         .typing-text {
           position: relative;
@@ -59,6 +67,13 @@ export default function TypingText() {
           left: 0;
           top: 0;
           color: #0084FF;
+          border-right: 2px solid #0084FF;
+          animation: blink 1s step-end infinite;
+        }
+
+        @keyframes blink {
+          0%, 100% { border-color: #0084FF; }
+          50% { border-color: transparent; }
         }
       `}</style>
     </span>
