@@ -46,7 +46,7 @@ export default function InterviewPage() {
     shouldAutoSubmit,
     timerDisplay,
     resetTimer,
-  } = useAntiCheat();
+  } = useAntiCheat(stage === "interview" || stage === "feedback");
 
   useEffect(() => {
     if (shouldAutoSubmit) {
@@ -279,7 +279,6 @@ export default function InterviewPage() {
       />
       <div className="max-w-[800px] mx-auto px-6 py-20">
 
-        {/* Timer + protection bar */}
         {stage === "interview" && !evaluating && (
           <div className="flex items-center justify-between mb-6">
             <span className="flex items-center gap-1.5" style={{
@@ -382,7 +381,6 @@ export default function InterviewPage() {
           )}
         </AnimatePresence>
 
-        {/* Strike indicator */}
         {strikeCount > 0 && (
           <div className="flex items-center justify-center mt-6">
             <span style={{
