@@ -8,6 +8,9 @@ import { FeedbackPanel } from "@/components/interview/FeedbackPanel";
 import { TabSwitchWarning } from "@/components/interview/TabSwitchWarning";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
+import { Clock, ShieldCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { EASE_OUT } from "@/lib/motion";
 
 const TOTAL = 5;
 
@@ -29,6 +32,7 @@ export default function InterviewPage() {
   const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
   const [evaluating, setEvaluating] = useState(false);
   const [aiDetected, setAiDetected] = useState<{isAI: boolean, confidence: number, reason: string} | null>(null);
+  const [questionScores, setQuestionScores] = useState<{question: string, score: number}[]>([]);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -46,6 +50,15 @@ export default function InterviewPage() {
 
   useEffect(() => {
     if (shouldAutoSubmit) {
+      // Save whatever scores we have so far
+      const avgScore = questionScores.length > 0
+        ? Math.round(questionScores.reduce((sum, q) => sum + q.score, 0) / questionScores.length)
+        : 0;
+      sessionStorage.setItem("preppeer_results", JSON.stringify({
+        compositeScore: avgScore,
+        dimensions: feedback.dimensions,
+        questionScores: questionScores,
+      }));
       router.push("/results");
     }
   }, [shouldAutoSubmit, router]);
@@ -101,7 +114,13 @@ export default function InterviewPage() {
       const evalData = await evalRes.json();
       const detectData = await detectRes.json();
 
-      if (evalData.feedback) setFeedback(evalData.feedback);
+      if (evalData.feedback) {
+        setFeedback(evalData.feedback);
+        setQuestionScores((prev) => [
+          ...prev,
+          { question: `Q${current}`, score: evalData.feedback.compositeScore }
+        ]);
+      }
       if (detectData) setAiDetected(detectData);
 
     } catch {
@@ -114,6 +133,14 @@ export default function InterviewPage() {
 
   const handleNext = () => {
     if (current >= TOTAL) {
+      const avgScore = questionScores.length > 0
+        ? Math.round(questionScores.reduce((sum, q) => sum + q.score, 0) / questionScores.length)
+        : 0;
+      sessionStorage.setItem("preppeer_results", JSON.stringify({
+        compositeScore: avgScore,
+        dimensions: feedback.dimensions,
+        questionScores: questionScores,
+      }));
       router.push("/results");
     } else {
       setCurrent((c) => c + 1);
@@ -235,7 +262,7 @@ export default function InterviewPage() {
         {/* Timer + protection bar */}
         {stage === "interview" && !evaluating && (
           <div className="flex items-center justify-between mb-6">
-            <span style={{
+            <span className="flex items-center gap-1.5" style={{
               padding: "5px 10px",
               borderRadius: "99px",
               background: "rgba(0,200,150,0.06)",
@@ -245,9 +272,10 @@ export default function InterviewPage() {
               color: "#00A07A",
               fontFamily: "var(--font-inter)",
             }}>
-              🛡 Session Protected
+              <ShieldCheck size={12} color="#00A07A" />
+              Session Protected
             </span>
-            <div style={{
+            <div className="flex items-center gap-2" style={{
               padding: "6px 14px",
               borderRadius: "99px",
               background: "rgba(0,0,0,0.03)",
@@ -257,59 +285,82 @@ export default function InterviewPage() {
               color: "#0A0A0F",
               fontFamily: "var(--font-inter)",
             }}>
-              ⏱ {timerDisplay}
+              <Clock size={14} color="#6B7280" />
+              {timerDisplay}
             </div>
           </div>
         )}
 
-        {stage === "interview" ? (
-          evaluating ? (
-            <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <div className="w-10 h-10 border-4 border-[#319AFF] border-t-transparent rounded-full animate-spin" />
-              <p className="font-inter text-muted text-sm">Evaluating your answer…</p>
-            </div>
-          ) : (
-            <QuestionCard
-              questionNumber={current}
-              totalQuestions={TOTAL}
-              question={questions[current - 1]}
-              onSubmit={handleSubmit}
-            />
-          )
-        ) : (
-          <>
-            <div className="rounded-3xl p-10 bg-white border border-[rgba(0,132,255,0.15)] opacity-60">
-              <p className="font-inter text-sm text-muted mb-2">
-                Question {current} of {TOTAL} — submitted
-              </p>
-            </div>
-
-            {aiDetected?.isAI ? (
-              <div className="mt-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-6">
-                <span className="text-red-500 text-2xl">⚠️</span>
-                <div>
-                  <p className="font-inter font-bold text-base text-red-700">
-                    AI-generated answer detected ({aiDetected.confidence}% confidence)
-                  </p>
-                  <p className="font-inter text-sm text-red-600 mt-1 mb-4">
-                    {aiDetected.reason}
-                  </p>
-                  <p className="font-inter text-sm text-red-700 font-medium">
-                    Please write your own answer to get feedback and score.
-                  </p>
-                  <button
-                    onClick={() => { setStage("interview"); setAiDetected(null); }}
-                    className="mt-4 bg-red-600 hover:bg-red-700 text-white font-inter font-semibold text-sm px-6 py-3 rounded-xl transition-all"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              </div>
+        <AnimatePresence mode="wait">
+          {stage === "interview" ? (
+            evaluating ? (
+              <motion.div
+                key="evaluating"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex flex-col items-center justify-center py-20 gap-4"
+              >
+                <div className="w-10 h-10 border-4 border-[#319AFF] border-t-transparent rounded-full animate-spin" />
+                <p className="font-inter text-muted text-sm">Evaluating your answer…</p>
+              </motion.div>
             ) : (
-              <FeedbackPanel feedback={feedback} onNext={handleNext} />
-            )}
-          </>
-        )}
+              <motion.div
+                key={`q-${current}`}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.35, ease: EASE_OUT }}
+              >
+                <QuestionCard
+                  questionNumber={current}
+                  totalQuestions={TOTAL}
+                  question={questions[current - 1]}
+                  onSubmit={handleSubmit}
+                />
+              </motion.div>
+            )
+          ) : (
+            <motion.div
+              key={`f-${current}`}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: EASE_OUT }}
+            >
+              <div className="rounded-3xl p-10 bg-white border border-[rgba(0,132,255,0.15)] opacity-60">
+                <p className="font-inter text-sm text-muted mb-2">
+                  Question {current} of {TOTAL} — submitted
+                </p>
+              </div>
+
+              {aiDetected?.isAI ? (
+                <div className="mt-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-6">
+                  <span className="text-red-500 text-2xl">⚠️</span>
+                  <div>
+                    <p className="font-inter font-bold text-base text-red-700">
+                      AI-generated answer detected ({aiDetected.confidence}% confidence)
+                    </p>
+                    <p className="font-inter text-sm text-red-600 mt-1 mb-4">
+                      {aiDetected.reason}
+                    </p>
+                    <p className="font-inter text-sm text-red-700 font-medium">
+                      Please write your own answer to get feedback and score.
+                    </p>
+                    <button
+                      onClick={() => { setStage("interview"); setAiDetected(null); }}
+                      className="mt-4 bg-red-600 hover:bg-red-700 text-white font-inter font-semibold text-sm px-6 py-3 rounded-xl transition-all"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <FeedbackPanel feedback={feedback} onNext={handleNext} />
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Strike indicator */}
         {strikeCount > 0 && (
