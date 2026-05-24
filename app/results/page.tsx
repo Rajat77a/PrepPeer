@@ -1,11 +1,32 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { SessionScoreCard } from "@/components/results/SessionScoreCard";
 import { QuestionBreakdownChart } from "@/components/results/QuestionBreakdownChart";
 import { Navbar } from "@/components/ui/Navbar";
 import { SESSION_REPORT } from "@/lib/mockData";
+import type { SessionReport } from "@/lib/types";
 
 export default function ResultsPage() {
+  const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
+
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem("preppeer_results");
+      if (stored) {
+        const realData = JSON.parse(stored);
+        setReport((prev) => ({
+          ...prev,
+          compositeScore: realData.compositeScore ?? prev.compositeScore,
+          dimensions: realData.dimensions ?? prev.dimensions,
+          questionScores: realData.questionScores ?? prev.questionScores,
+        }));
+      }
+    } catch {
+      // fallback to mock
+    }
+  }, []);
+
   const handleShare = async () => {
     const url =
       typeof window !== "undefined"
@@ -29,8 +50,8 @@ export default function ResultsPage() {
         <p className="font-inter text-muted mb-8">
           Your complete score card and per-question breakdown.
         </p>
-        <SessionScoreCard report={SESSION_REPORT} onShare={handleShare} />
-        <QuestionBreakdownChart data={SESSION_REPORT.questionScores} />
+        <SessionScoreCard report={report} onShare={handleShare} />
+        <QuestionBreakdownChart data={report.questionScores} />
       </div>
     </div>
   );
