@@ -42,7 +42,7 @@ export default function TestimonialCarousel() {
   useEffect(() => {
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % testimonials.length);
-    }, 6500);
+    }, 5000);
 
     return () => window.clearInterval(interval);
   }, []);
