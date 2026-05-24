@@ -50,18 +50,32 @@ export default function InterviewPage() {
 
   useEffect(() => {
     if (shouldAutoSubmit) {
-      // Save whatever scores we have so far
       const avgScore = questionScores.length > 0
         ? Math.round(questionScores.reduce((sum, q) => sum + q.score, 0) / questionScores.length)
         : 0;
+
+      const avgDimensions = questionScores.length > 0
+        ? feedback.dimensions.map((d) => ({ ...d }))
+        : [
+            { label: "Communication", value: 0, color: "#0084FF" },
+            { label: "Problem Solving", value: 0, color: "#319AFF" },
+            { label: "Specificity", value: 0, color: "#FF6B3D" },
+            { label: "Confidence", value: 0, color: "#0084FF" },
+          ];
+
+      const allQuestionScores = Array.from({ length: TOTAL }, (_, i) => {
+        const existing = questionScores.find((q) => q.question === `Q${i + 1}`);
+        return existing ?? { question: `Q${i + 1}`, score: 0 };
+      });
+
       sessionStorage.setItem("preppeer_results", JSON.stringify({
         compositeScore: avgScore,
-        dimensions: feedback.dimensions,
-        questionScores: questionScores,
+        dimensions: avgDimensions,
+        questionScores: allQuestionScores,
       }));
       router.push("/results");
     }
-  }, [shouldAutoSubmit, router]);
+  }, [shouldAutoSubmit, router, questionScores, feedback]);
 
   const handleStart = async () => {
     if (!setup.domain || !setup.experience || !setup.companyType) {
@@ -136,10 +150,16 @@ export default function InterviewPage() {
       const avgScore = questionScores.length > 0
         ? Math.round(questionScores.reduce((sum, q) => sum + q.score, 0) / questionScores.length)
         : 0;
+
+      const allQuestionScores = Array.from({ length: TOTAL }, (_, i) => {
+        const existing = questionScores.find((q) => q.question === `Q${i + 1}`);
+        return existing ?? { question: `Q${i + 1}`, score: 0 };
+      });
+
       sessionStorage.setItem("preppeer_results", JSON.stringify({
         compositeScore: avgScore,
         dimensions: feedback.dimensions,
-        questionScores: questionScores,
+        questionScores: allQuestionScores,
       }));
       router.push("/results");
     } else {
