@@ -104,7 +104,7 @@ export function useAntiCheat(): UseAntiCheatReturn {
   // window blur/focus catches Alt+Tab, taskbar clicks, switching apps.
   // Debounce prevents double-counting when both fire together.
   const lastSwitchTime = useRef<number>(0);
-  const DEBOUNCE_MS = 500;
+  const DEBOUNCE_MS = 1000;
 
   const recordSwitch = useCallback(() => {
     const now = Date.now();
