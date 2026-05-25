@@ -129,13 +129,19 @@ export default function InterviewPage() {
       const evalData = await evalRes.json();
       const detectData = await detectRes.json();
 
+      const isAI = detectData?.isAI === true;
+
       if (evalData.feedback) {
         setFeedback(evalData.feedback);
-        setQuestionScores((prev) => [
-          ...prev,
-          { question: `Q${current}`, score: evalData.feedback.compositeScore }
-        ]);
+        // Only save score if answer is NOT AI generated
+        if (!isAI) {
+          setQuestionScores((prev) => [
+            ...prev,
+            { question: `Q${current}`, score: evalData.feedback.compositeScore }
+          ]);
+        }
       }
+
       if (detectData) setAiDetected(detectData);
 
     } catch {
