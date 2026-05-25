@@ -3,7 +3,7 @@ import { Hero } from "@/components/sections/Hero";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Features } from "@/components/sections/Features";
 import { LeaderboardSection } from "@/components/sections/Leaderboard";
-import { Pricing } from "@/components/sections/Pricing";
+import SquishyPricing from "@/components/ui/squishy-pricing";
 import { CTA } from "@/components/sections/CTA";
 import { Footer } from "@/components/sections/Footer";
 import TypingText from "@/components/sections/TypingText";
@@ -21,7 +21,7 @@ export default function HomePage() {
         <Features />
         <LeaderboardSection />
         <TestimonialCarousel />
-        <Pricing />
+        <SquishyPricing />
         <CTA />
         <Footer />
       </main>
