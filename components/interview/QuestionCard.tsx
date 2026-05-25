@@ -8,6 +8,11 @@ interface QuestionCardProps {
   totalQuestions: number;
   question?: string;
   onSubmit: (answer: string) => void;
+  antiCheatProps?: {
+    onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+    onContextMenu: (e: React.MouseEvent<HTMLTextAreaElement>) => void;
+    onPaste: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
+  };
 }
 
 export function QuestionCard({
@@ -15,6 +20,7 @@ export function QuestionCard({
   totalQuestions,
   question,
   onSubmit,
+  antiCheatProps,
 }: QuestionCardProps) {
   const [answer, setAnswer] = useState("");
   const wordCount = countWords(answer);
@@ -34,6 +40,7 @@ export function QuestionCard({
         onChange={(e) => setAnswer(e.target.value)}
         placeholder="Type your answer here... (minimum 20 words)"
         className="w-full min-h-[180px] rounded-xl border border-[rgba(0,0,0,0.1)] p-4 font-inter text-[15px] resize-y outline-none focus:border-blue focus:shadow-[0_0_0_3px_rgba(0,132,255,0.1)] transition-shadow"
+        {...(antiCheatProps ?? {})}
       />
       <p className="font-inter text-[13px] text-muted text-right mt-2">
         {wordCount} / {minWords} words minimum
