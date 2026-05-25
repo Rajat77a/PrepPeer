@@ -165,7 +165,7 @@ function PricingColumn({ plan }: { plan: Plan }) {
           >
             <Link
               href={plan.href}
-              className="block rounded-[22px] bg-white px-5 py-5 text-center font-inter text-lg font-extrabold text-[#0F172A] shadow-[0_16px_40px_rgba(15,23,42,0.2)] transition-transform hover:scale-[1.015]"
+              className="block rounded-[22px] border-2 border-white bg-white px-5 py-5 text-center font-inter text-lg font-extrabold text-[#0F172A] shadow-[0_16px_40px_rgba(15,23,42,0.2)] transition-all duration-300 ease-out hover:scale-[1.015] hover:bg-white/10 hover:text-white hover:shadow-[0_18px_46px_rgba(255,255,255,0.14)]"
             >
               {plan.cta}
             </Link>
