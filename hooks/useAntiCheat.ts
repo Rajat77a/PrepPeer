@@ -15,6 +15,8 @@ interface UseAntiCheatReturn {
     onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     onContextMenu: (e: React.MouseEvent<HTMLTextAreaElement>) => void;
     onPaste: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
+    onCopy: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
+    onCut: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   };
   state: AntiCheatState;
   strikeCount: number;
@@ -56,7 +58,12 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (
         (e.ctrlKey || e.metaKey) &&
-        (e.key === "v" || e.key === "V" || e.key === "c" || e.key === "C" || e.key === "a" || e.key === "A")
+        (e.key === "v" ||
+          e.key === "V" ||
+          e.key === "c" ||
+          e.key === "C" ||
+          e.key === "a" ||
+          e.key === "A")
       ) {
         e.preventDefault();
         return;
@@ -73,11 +80,26 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
     []
   );
 
+  const handleCopy = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      e.preventDefault();
+    },
+    []
+  );
+
+  const handleCut = useCallback(
+    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+      e.preventDefault();
+    },
+    []
+  );
+
   // ── Layer 2: Paste Event Detection ──────────────────────
   const handlePaste = useCallback(
     (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
       e.preventDefault();
       const pastedText = e.clipboardData.getData("text");
+
       if (pastedText.length >= PASTE_CHAR_THRESHOLD) {
         setState((prev) => ({
           ...prev,
@@ -91,18 +113,24 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
 
   // ── Layer 3: Tab Switch Detection ───────────────────────
   const recordSwitch = useCallback(() => {
-    if (!active) return; // only track when interview is active
+    if (!active) return;
+
     const now = Date.now();
+
     if (now - lastSwitchTime.current < DEBOUNCE_MS) return;
+
     lastSwitchTime.current = now;
 
     setState((prev) => {
       const newCount = prev.tabSwitchCount + 1;
+
       if (newCount >= 3) {
         setShouldAutoSubmit(true);
         return { ...prev, tabSwitchCount: newCount };
       }
+
       setShowWarningModal(true);
+
       return { ...prev, tabSwitchCount: newCount };
     });
   }, [active]);
@@ -123,7 +151,10 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
     window.addEventListener("blur", handleWindowBlur);
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
       window.removeEventListener("blur", handleWindowBlur);
     };
   }, [recordSwitch]);
@@ -133,7 +164,9 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
     timerRef.current = setInterval(() => {
       setState((prev) => ({
         ...prev,
-        timeElapsed: Math.floor((Date.now() - questionStartTime.current) / 1000),
+        timeElapsed: Math.floor(
+          (Date.now() - questionStartTime.current) / 1000
+        ),
       }));
     }, 1000);
 
@@ -144,6 +177,7 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
 
   const resetTimer = useCallback(() => {
     questionStartTime.current = Date.now();
+
     setState((prev) => ({
       ...prev,
       timeElapsed: 0,
@@ -159,14 +193,16 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
 
   const minutes = Math.floor(state.timeElapsed / 60);
   const seconds = state.timeElapsed % 60;
-  const timerDisplay = `${minutes.toString().padStart(2, "0")}:${seconds
+
+  const timerDisplay = `${minutes
     .toString()
-    .padStart(2, "0")}`;
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 
   const getSubmissionMeta = useCallback(() => {
     const elapsed = Math.floor(
       (Date.now() - questionStartTime.current) / 1000
     );
+
     return {
       timeToSubmitSeconds: elapsed,
       pasteDetected: state.pasteDetected,
@@ -180,6 +216,8 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
       onKeyDown: handleKeyDown,
       onContextMenu: handleContextMenu,
       onPaste: handlePaste,
+      onCopy: handleCopy,
+      onCut: handleCut,
     },
     state,
     strikeCount: state.tabSwitchCount,
