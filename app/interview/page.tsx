@@ -93,6 +93,7 @@ export default function InterviewPage() {
       const data = await res.json();
       if (data.questions) {
         setQuestions(data.questions);
+        sessionStorage.removeItem("preppeer_results");
         setStage("interview");
       } else {
         setError("Failed to generate questions. Try again.");
