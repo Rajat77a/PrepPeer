@@ -46,6 +46,7 @@ export default function InterviewPage() {
     shouldAutoSubmit,
     timerDisplay,
     resetTimer,
+    textareaProps,
   } = useAntiCheat(stage === "interview" || stage === "feedback");
 
   useEffect(() => {
@@ -133,7 +134,6 @@ export default function InterviewPage() {
 
       if (evalData.feedback) {
         setFeedback(evalData.feedback);
-        // Only save score if answer is NOT AI generated
         if (!isAI) {
           setQuestionScores((prev) => [
             ...prev,
@@ -343,6 +343,7 @@ export default function InterviewPage() {
                   totalQuestions={TOTAL}
                   question={questions[current - 1]}
                   onSubmit={handleSubmit}
+                  antiCheatProps={textareaProps}
                 />
               </motion.div>
             )
