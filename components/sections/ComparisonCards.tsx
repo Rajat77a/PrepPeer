@@ -95,11 +95,11 @@ export default function ComparisonCards() {
           display: flex;
           min-height: 360px;
           flex-direction: column;
-          background: #101827;
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #1B2B5E;
+          border: 1px solid rgba(96, 177, 255, 0.18);
           border-radius: 16px;
           padding: 28px;
-          box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+          box-shadow: 0 18px 44px rgba(27, 43, 94, 0.14);
           transition: background-color 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, transform 0.28s ease;
         }
 
@@ -116,7 +116,7 @@ export default function ComparisonCards() {
           font-size: 54px;
           font-weight: 800;
           line-height: 0.85;
-          color: rgba(255, 255, 255, 0.16);
+          color: rgba(96, 177, 255, 0.18);
           transition: color 0.28s ease;
         }
 
@@ -143,7 +143,7 @@ export default function ComparisonCards() {
         .comparison-description {
           margin: 0;
           font-size: 14px;
-          color: #AEB7C6;
+          color: rgba(255, 255, 255, 0.68);
           line-height: 1.65;
           transition: color 0.28s ease;
         }
@@ -185,11 +185,11 @@ export default function ComparisonCards() {
         }
 
         .comparison-bullet-con {
-          color: #AEB7C6;
+          color: rgba(255, 255, 255, 0.62);
         }
 
         .comparison-bullet-con span {
-          background: #6B7280;
+          background: rgba(255, 255, 255, 0.42);
         }
 
         .comparison-card:hover .comparison-number,
