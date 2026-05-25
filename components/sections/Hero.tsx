@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 import { Button } from "@/components/ui/Button";
@@ -92,8 +91,6 @@ const mysteryCaptionVariants = {
     transition: { duration: 0.25, ease: EASE_OUT },
   },
 };
-
-const NAV_TRANSITION_MS = 580;
 
 function MysteryRankValue() {
   return (
@@ -211,11 +208,9 @@ function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps
 }
 
 export function Hero() {
-  const router = useRouter();
   const sectionRef = useRef<HTMLElement>(null);
   const orbLinkRef = useRef<HTMLAnchorElement>(null);
   const [orbHovered, setOrbHovered] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
   const [navGlowPx, setNavGlowPx] = useState({ x: 0, y: 0 });
 
   const syncGlowOrigin = useCallback(() => {
@@ -248,18 +243,15 @@ export function Hero() {
   };
 
   const handleOrbHoverEnd = () => {
-    if (!isNavigating) setOrbHovered(false);
+    setOrbHovered(false);
   };
 
-  const handleOrbClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
+  const handleOrbClick = () => {
     syncGlowOrigin();
     setOrbHovered(true);
-    setIsNavigating(true);
-    window.setTimeout(() => router.push("/interview"), NAV_TRANSITION_MS);
   };
 
-  const showPageGlow = orbHovered || isNavigating;
+  const showPageGlow = orbHovered;
 
   return (
     <section
@@ -373,22 +365,6 @@ export function Hero() {
         </motion.div>
       </div>
 
-      {/* Click transition — blue bloom expands from orb then route change */}
-      <AnimatePresence>
-        {isNavigating && (
-          <motion.div
-            className="pointer-events-none fixed inset-0 z-[200]"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.55, ease: EASE_OUT }}
-            style={{
-              background: `radial-gradient(circle 95vmax at ${navGlowPx.x}px ${navGlowPx.y}px, rgba(49, 154, 255, 0.55) 0%, rgba(96, 177, 255, 0.28) 38%, rgba(255, 255, 255, 0.97) 72%)`,
-            }}
-            aria-hidden
-          />
-        )}
-      </AnimatePresence>
     </section>
   );
 }

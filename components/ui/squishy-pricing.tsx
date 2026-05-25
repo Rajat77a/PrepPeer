@@ -283,14 +283,6 @@ function BGComponent2() {
         }}
         transition={{ ...TRANSITION, delay: 0.04 }}
       />
-      <motion.div
-        className="absolute left-1/2 top-6 h-40 w-72 rounded-[40px] border-2 border-[#A5B4FC]/70 bg-[#A5B4FC]/14"
-        variants={{
-          rest: { x: -86, y: -80, rotate: 0, scale: 0.82 },
-          hover: { x: -150, y: 24, rotate: 0, scale: 1.05 },
-        }}
-        transition={{ ...TRANSITION, delay: 0.08 }}
-      />
     </motion.div>
   );
 }

@@ -42,7 +42,7 @@ export default function TestimonialCarousel() {
   useEffect(() => {
     const interval = window.setInterval(() => {
       setActiveIndex((current) => (current + 1) % testimonials.length);
-    }, 5000);
+    }, 4000);
 
     return () => window.clearInterval(interval);
   }, []);
@@ -50,6 +50,7 @@ export default function TestimonialCarousel() {
   return (
     <section className="testimonial-carousel">
       <div className="testimonial-carousel-inner">
+        <p className="testimonial-carousel-kicker">Rank stories from PrepPeer students</p>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeIndex}
@@ -88,6 +89,15 @@ export default function TestimonialCarousel() {
         .testimonial-carousel-inner {
           max-width: 760px;
           margin: 0 auto;
+        }
+
+        .testimonial-carousel-kicker {
+          margin: 0 0 18px;
+          font-size: 12px;
+          color: #0084FF;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          font-weight: 800;
         }
 
         .testimonial-carousel-quote {
