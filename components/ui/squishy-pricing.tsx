@@ -266,9 +266,9 @@ function BGComponent1() {
 
 function BGComponent2() {
   return (
-    <motion.div className="absolute inset-0 opacity-35" aria-hidden>
+    <motion.div className="absolute inset-0 opacity-55" aria-hidden>
       <motion.div
-        className="absolute -right-24 top-24 h-64 w-64 rounded-[52px] bg-white/18"
+        className="absolute -right-24 top-24 h-64 w-64 rounded-[52px] border-2 border-[#C7D2FE]/70 bg-[#C7D2FE]/16"
         variants={{
           rest: { x: 0, y: 0, rotate: 78, scale: 1 },
           hover: { x: -92, y: 38, rotate: 76, scale: 1.2 },
@@ -276,7 +276,7 @@ function BGComponent2() {
         transition={TRANSITION}
       />
       <motion.div
-        className="absolute -bottom-24 left-10 h-52 w-52 rounded-[44px] border border-white/25 bg-white/12"
+        className="absolute -bottom-24 left-10 h-52 w-52 rounded-[44px] border-2 border-[#EEF2FF]/65 bg-[#EEF2FF]/14"
         variants={{
           rest: { x: -82, y: 36, rotate: 0, scale: 1 },
           hover: { x: 74, y: -86, rotate: 0, scale: 1.18 },
@@ -284,7 +284,7 @@ function BGComponent2() {
         transition={{ ...TRANSITION, delay: 0.04 }}
       />
       <motion.div
-        className="absolute left-1/2 top-6 h-40 w-72 rounded-[40px] bg-white/12"
+        className="absolute left-1/2 top-6 h-40 w-72 rounded-[40px] border-2 border-[#A5B4FC]/70 bg-[#A5B4FC]/14"
         variants={{
           rest: { x: -86, y: -80, rotate: 0, scale: 0.82 },
           hover: { x: -150, y: 24, rotate: 0, scale: 1.05 },
