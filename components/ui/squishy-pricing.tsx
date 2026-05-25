@@ -13,8 +13,6 @@ type Plan = {
   href: string;
   bg: string;
   accent: string;
-  featurePanel: string;
-  featureText: string;
   features: string[];
   popular?: boolean;
 };
@@ -34,8 +32,6 @@ const plans: Plan[] = [
     href: "/interview",
     bg: "bg-[#0F172A]",
     accent: "#0F172A",
-    featurePanel: "bg-white border-[#CBD5E1]",
-    featureText: "text-[#0F172A]",
     features: [
       "3 full mock interviews every month",
       "5 questions per session with timed flow",
@@ -54,8 +50,6 @@ const plans: Plan[] = [
     href: "/interview",
     bg: "bg-[#4F46E5]",
     accent: "#4F46E5",
-    featurePanel: "bg-[#EEF2FF] border-[#C7D2FE]",
-    featureText: "text-[#312E81]",
     popular: true,
     features: [
       "Unlimited mocks — practice until you're ready",
@@ -76,8 +70,6 @@ const plans: Plan[] = [
     href: "/contact",
     bg: "bg-[#1E3A5F]",
     accent: "#1E3A5F",
-    featurePanel: "bg-white border-[#CBD5E1]",
-    featureText: "text-[#1E3A5F]",
     features: [
       "Everything in Pro for every enrolled student",
       "Batch readiness dashboard for TPOs",
@@ -91,8 +83,8 @@ const plans: Plan[] = [
 
 export default function SquishyPricing() {
   return (
-    <section id="pricing" className="section-padding bg-[#f4f7fc] w-full">
-      <div className="mx-auto max-w-6xl px-6 md:px-12">
+    <section id="pricing" className="section-padding w-full bg-[#f4f7fc]">
+      <div className="mx-auto max-w-7xl px-6 md:px-10">
         <div className="mb-14 text-center">
           <p className="mb-3 font-inter text-xs font-bold uppercase tracking-[0.14em] text-blue">
             Pricing
@@ -105,7 +97,7 @@ export default function SquishyPricing() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
           {plans.map((plan) => (
             <PricingColumn key={plan.id} plan={plan} />
           ))}
@@ -120,19 +112,19 @@ function PricingColumn({ plan }: { plan: Plan }) {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="mb-3 h-6">
+      <div className="mb-2 h-7">
         {plan.popular && (
-          <span className="rounded-full bg-[#4F46E5] px-3 py-1 text-xs font-bold text-white">
+          <span className="rounded-full bg-[#4F46E5] px-4 py-1.5 text-xs font-bold text-white shadow-[0_12px_28px_rgba(79,70,229,0.35)]">
             Most popular
           </span>
         )}
       </div>
 
       <motion.article
-        className={`relative flex h-[430px] w-full max-w-[360px] flex-col overflow-hidden rounded-[28px] p-7 text-white shadow-[0_22px_70px_rgba(15,23,42,0.22)] ${plan.bg}`}
+        className={`relative flex h-[520px] w-full max-w-[400px] flex-col overflow-hidden rounded-[34px] p-8 text-white shadow-[0_28px_90px_rgba(15,23,42,0.25)] ${plan.bg}`}
         initial="rest"
-        whileHover="hover"
         animate="rest"
+        whileHover="hover"
         variants={{
           rest: { scale: 1 },
           hover: { scale: 1.035 },
@@ -144,46 +136,52 @@ function PricingColumn({ plan }: { plan: Plan }) {
         {plan.id === "college" && <BGComponent3 />}
 
         <div className="relative z-10 flex h-full flex-col">
-          <span className="w-fit rounded-full bg-white/15 px-3 py-1 text-xs font-bold text-white">
+          <span className="w-fit rounded-full bg-white/16 px-4 py-2 text-sm font-bold text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.16)]">
             {plan.label}
           </span>
 
           <motion.div
-            className="mt-8"
+            className="mt-10"
             variants={{
               rest: { scale: 1 },
-              hover: { scale: 1.06 },
+              hover: { scale: 1.075 },
             }}
             transition={TRANSITION}
           >
-            <p className="font-fustat text-[52px] font-extrabold leading-none tracking-[-2px] text-white">
+            <p className="font-fustat text-[clamp(56px,5vw,78px)] font-extrabold leading-none tracking-[-3px] text-white">
               {plan.price}
             </p>
-            <p className="mt-2 font-inter text-sm font-semibold text-white/70">/Month</p>
+            <p className="mt-4 font-inter text-2xl font-extrabold text-white/72">/Month</p>
           </motion.div>
 
-          <p className="mt-7 font-inter text-[15px] leading-relaxed text-white/78">
+          <p className="mt-9 max-w-[310px] font-inter text-[18px] font-medium leading-[1.55] text-white/90">
             {plan.description}
           </p>
 
-          <Link
-            href={plan.href}
-            className="mt-auto block rounded-2xl bg-white px-5 py-3.5 text-center font-inter text-sm font-bold text-[#0F172A] shadow-[0_14px_34px_rgba(15,23,42,0.18)] transition-transform hover:scale-[1.02]"
+          <motion.div
+            className="mt-auto"
+            whileTap={{ scale: 0.965 }}
+            transition={{ duration: 0.18, ease: "easeInOut" }}
           >
-            {plan.cta}
-          </Link>
+            <Link
+              href={plan.href}
+              className="block rounded-[22px] bg-white px-5 py-5 text-center font-inter text-lg font-extrabold text-[#0F172A] shadow-[0_16px_40px_rgba(15,23,42,0.2)] transition-transform hover:scale-[1.015]"
+            >
+              {plan.cta}
+            </Link>
+          </motion.div>
         </div>
       </motion.article>
 
       <button
         type="button"
         onClick={() => setExpanded((current) => !current)}
-        className="mt-4 font-inter text-sm font-bold text-[#475569] transition-colors hover:text-[#4F46E5]"
+        className="mt-4 font-inter text-base font-extrabold text-[#475569] transition-colors hover:text-[#4F46E5]"
       >
         {expanded ? "Hide features ↑" : "See what's included ↓"}
       </button>
 
-      <div className="w-full max-w-[360px]">
+      <div className="w-full max-w-[400px]">
         <AnimatePresence initial={false}>
           {expanded && (
             <motion.div
@@ -193,12 +191,10 @@ function PricingColumn({ plan }: { plan: Plan }) {
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="overflow-hidden"
             >
-              <ul
-                className={`mt-4 space-y-3 rounded-3xl border p-5 font-inter text-sm font-semibold leading-snug shadow-[0_18px_48px_rgba(15,23,42,0.08)] ${plan.featurePanel} ${plan.featureText}`}
-              >
-                {plan.features.map((feature) => (
+              <ul className="mt-4 space-y-3 rounded-[26px] border border-slate-200 bg-white p-5 font-inter text-sm font-bold leading-snug text-slate-800 shadow-[0_18px_52px_rgba(15,23,42,0.1)]">
+                {plan.features.map((feature, index) => (
                   <li key={feature} className="flex items-start gap-3">
-                    <CheckIcon color={plan.accent} />
+                    <FeatureBullet color={plan.accent} index={index} />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -211,16 +207,18 @@ function PricingColumn({ plan }: { plan: Plan }) {
   );
 }
 
-function CheckIcon({ color }: { color: string }) {
+function FeatureBullet({ color, index }: { color: string; index: number }) {
+  const shapes = ["rounded-full", "rounded-[7px] rotate-45", "rounded-[9px]"];
   return (
     <span
-      className="mt-0.5 grid h-5 w-5 shrink-0 rotate-45 place-items-center rounded-[7px] shadow-[0_8px_18px_rgba(15,23,42,0.16)]"
+      className={`relative mt-0.5 grid h-5 w-5 shrink-0 place-items-center shadow-[0_8px_18px_rgba(15,23,42,0.16)] ${shapes[index % shapes.length]}`}
       style={{ backgroundColor: color }}
     >
+      <span className={`absolute h-2 w-2 bg-white/25 ${shapes[(index + 1) % shapes.length]}`} />
       <svg
         aria-hidden="true"
         viewBox="0 0 16 16"
-        className="h-3.5 w-3.5 -rotate-45 text-white"
+        className={`relative h-3.5 w-3.5 text-white ${index % shapes.length === 1 ? "-rotate-45" : ""}`}
         fill="none"
       >
         <path
@@ -239,28 +237,28 @@ function BGComponent1() {
   return (
     <motion.div className="absolute inset-0 opacity-45" aria-hidden>
       <motion.div
-        className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-white/18"
+        className="absolute -bottom-28 -left-24 h-72 w-72 rounded-full border border-white/30 bg-white/9"
         variants={{
           rest: { x: 0, y: 0, scale: 1, rotate: 0 },
-          hover: { x: -72, y: 84, scale: 1.22, rotate: 18 },
+          hover: { x: 78, y: -76, scale: 1.18, rotate: 14 },
         }}
         transition={TRANSITION}
       />
       <motion.div
-        className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full border border-white/35 bg-white/10"
+        className="absolute -right-28 -top-24 h-72 w-72 rounded-full bg-white/18"
         variants={{
-          rest: { x: 0, y: 0, scale: 1, rotate: -12 },
-          hover: { x: 78, y: -74, scale: 1.12, rotate: 12 },
+          rest: { x: 0, y: 0, scale: 1, rotate: 0 },
+          hover: { x: -92, y: 94, scale: 1.22, rotate: -16 },
         }}
-        transition={{ ...TRANSITION, delay: 0.06 }}
+        transition={{ ...TRANSITION, delay: 0.04 }}
       />
       <motion.div
-        className="absolute left-8 top-36 h-28 w-44 rounded-full bg-white/12 blur-[1px]"
+        className="absolute left-0 top-[46%] h-32 w-64 rounded-full bg-white/12"
         variants={{
-          rest: { x: -36, y: 24, scale: 0.9, rotate: -16 },
-          hover: { x: 56, y: 8, scale: 1.18, rotate: 6 },
+          rest: { x: -150, y: 44, scale: 0.88, rotate: -18 },
+          hover: { x: 52, y: -4, scale: 1.22, rotate: 6 },
         }}
-        transition={{ ...TRANSITION, delay: 0.1 }}
+        transition={{ ...TRANSITION, delay: 0.08 }}
       />
     </motion.div>
   );
@@ -270,26 +268,26 @@ function BGComponent2() {
   return (
     <motion.div className="absolute inset-0 opacity-35" aria-hidden>
       <motion.div
-        className="absolute -right-20 top-10 h-44 w-44 rounded-[38px] bg-white/20"
+        className="absolute -right-24 top-24 h-64 w-64 rounded-[52px] bg-white/18"
         variants={{
-          rest: { x: 0, y: 0, rotate: 16, scale: 1 },
-          hover: { x: -88, y: 70, rotate: -14, scale: 1.18 },
+          rest: { x: 0, y: 0, rotate: 78, scale: 1 },
+          hover: { x: -92, y: 38, rotate: 76, scale: 1.2 },
         }}
         transition={TRANSITION}
       />
       <motion.div
-        className="absolute -bottom-16 -left-16 h-44 w-44 rounded-[38px] bg-white/16"
+        className="absolute -bottom-24 left-10 h-52 w-52 rounded-[44px] border border-white/25 bg-white/12"
         variants={{
-          rest: { x: 0, y: 0, rotate: -18, scale: 1 },
-          hover: { x: 92, y: -78, rotate: 15, scale: 1.12 },
+          rest: { x: -82, y: 36, rotate: 0, scale: 1 },
+          hover: { x: 74, y: -86, rotate: 0, scale: 1.18 },
         }}
         transition={{ ...TRANSITION, delay: 0.04 }}
       />
       <motion.div
-        className="absolute left-1/2 top-1/2 h-28 w-56 rounded-[32px] bg-white/14"
+        className="absolute left-1/2 top-6 h-40 w-72 rounded-[40px] bg-white/12"
         variants={{
-          rest: { x: -140, y: -120, rotate: 28, scale: 0.85 },
-          hover: { x: -112, y: -44, rotate: -4, scale: 1.08 },
+          rest: { x: -86, y: -80, rotate: 0, scale: 0.82 },
+          hover: { x: -150, y: 24, rotate: 0, scale: 1.05 },
         }}
         transition={{ ...TRANSITION, delay: 0.08 }}
       />
@@ -299,23 +297,23 @@ function BGComponent2() {
 
 function BGComponent3() {
   return (
-    <motion.div className="absolute inset-0 opacity-40" aria-hidden>
+    <motion.div className="absolute inset-0 opacity-42" aria-hidden>
       {[0, 1, 2].map((index) => (
         <motion.div
           key={index}
-          className="absolute left-1/2 top-[66%] h-40 w-40 -translate-x-1/2 rotate-45 rounded-[30px] border border-white/20 bg-white/14"
+          className="absolute left-[62%] top-[64%] h-48 w-48 rotate-45 rounded-[36px] border border-white/20 bg-white/13"
           variants={{
-            rest: { x: 92 - index * 42, y: 80 + index * 26, scale: 1 - index * 0.12 },
-            hover: { x: 14 - index * 14, y: -90 - index * 18, scale: 1.16 - index * 0.08 },
+            rest: { x: 70 - index * 34, y: 76 + index * 28, scale: 1 - index * 0.1 },
+            hover: { x: -78 - index * 18, y: -126 - index * 18, scale: 1.16 - index * 0.06 },
           }}
           transition={{ ...TRANSITION, delay: index * 0.06 }}
         />
       ))}
       <motion.div
-        className="absolute -right-16 top-12 h-48 w-48 rounded-full bg-white/12"
+        className="absolute -right-20 top-16 h-60 w-60 rounded-full bg-white/12"
         variants={{
           rest: { x: 0, y: 0, scale: 1 },
-          hover: { x: -86, y: 84, scale: 1.18 },
+          hover: { x: -104, y: 78, scale: 1.18 },
         }}
         transition={{ ...TRANSITION, delay: 0.05 }}
       />
