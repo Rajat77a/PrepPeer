@@ -3,33 +3,27 @@
 const cards = [
   {
     number: "01",
-    versus: "vs. Generic Mock Tests",
-    subtitle: "Testbook, IndiaBIX",
-    title: "Not a question bank.\nA real interview.",
-    description:
-      "Mock test sites give you MCQs. PrepPeer asks open-ended interview questions tailored to your exact role, experience level, and company type — then scores your written answer the way a real interviewer would.",
-    pro: "Role-specific, typed answers, AI scored",
-    con: "Generic MCQs, no real feedback",
+    label: "VS. GENERIC MOCK TESTS",
+    title: "Not a question bank. A real interview.",
+    description: "Role-specific questions scored the way a real interviewer would.",
+    pro: "Real interview flow",
+    con: "Generic MCQs, no feedback",
   },
   {
     number: "02",
-    versus: "vs. Human Mock Interviews",
-    subtitle: "Coaching, career counselors",
-    title: "No scheduling.\nNo waiting.\nNo Rs.2000/session.",
-    description:
-      "Human mock interviews cost Rs.2,000–15,000 and need to be booked days in advance. PrepPeer is available 24/7, gives feedback in seconds.",
-    pro: "Free to start, instant, available 24/7",
-    con: "Rs.2k–15k/session, schedule-dependent",
+    label: "VS. HUMAN MOCK INTERVIEWS",
+    title: "No scheduling. No waiting. No ₹2000/session.",
+    description: "Available 24/7, feedback in seconds, free to start.",
+    pro: "Free, instant, 24/7",
+    con: "₹2k–15k, schedule needed",
   },
   {
     number: "03",
-    versus: "vs. ChatGPT Prep",
-    subtitle: "Claude, Gemini",
-    title: "ChatGPT coaches you.\nOnly PrepPeer ranks you.",
-    description:
-      "AI chatbots give you feedback in isolation. PrepPeer aggregates scores across thousands of real sessions — so you know where you stand among everyone applying for the same role.",
-    pro: "Real peer benchmark, live leaderboard",
-    con: "No rank, no benchmark, no peers",
+    label: "VS. CHATGPT PREP",
+    title: "ChatGPT coaches you. Only PrepPeer ranks you.",
+    description: "Real peer benchmark across thousands of sessions.",
+    pro: "Live rank, real benchmark",
+    con: "No rank, no peers",
   },
 ];
 
@@ -42,9 +36,8 @@ export default function ComparisonCards() {
         <div className="comparison-grid">
           {cards.map((card) => (
             <article className="comparison-card" key={card.number}>
-              <span className="comparison-number">{card.number}</span>
-              <p className="comparison-versus">{card.versus}</p>
-              <p className="comparison-subtitle">{card.subtitle}</p>
+              <p className="comparison-number">{card.number}</p>
+              <p className="comparison-versus">{card.label}</p>
               <h3 className="comparison-card-title">{card.title}</h3>
               <p className="comparison-description">{card.description}</p>
               <div className="comparison-bottom">
@@ -75,7 +68,6 @@ export default function ComparisonCards() {
         .comparison-label {
           margin: 0 0 12px;
           font-size: 12px;
-          text-transform: none;
           letter-spacing: 0.08em;
           color: #0084FF;
           font-weight: 700;
@@ -100,65 +92,65 @@ export default function ComparisonCards() {
         }
 
         .comparison-card {
-          position: relative;
           display: flex;
-          min-height: 430px;
+          min-height: 360px;
           flex-direction: column;
-          background: #ffffff;
+          background: #101827;
+          border: 1px solid rgba(255, 255, 255, 0.08);
           border-radius: 16px;
           padding: 28px;
-          box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+          box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+          transition: background-color 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, transform 0.28s ease;
+        }
+
+        .comparison-card:hover {
+          background: #0084FF;
+          border-color: rgba(255, 255, 255, 0.24);
+          box-shadow: 0 18px 44px rgba(0, 132, 255, 0.28);
+          transform: translateY(-4px);
         }
 
         .comparison-number {
-          position: absolute;
-          top: 20px;
-          right: 24px;
+          margin: 0 0 32px;
           font-family: var(--font-fustat), sans-serif;
-          font-size: 36px;
+          font-size: 54px;
           font-weight: 800;
-          line-height: 1;
-          color: rgba(0,132,255,0.12);
+          line-height: 0.85;
+          color: rgba(255, 255, 255, 0.16);
+          transition: color 0.28s ease;
         }
 
         .comparison-versus {
-          margin: 0 0 6px;
-          max-width: 220px;
+          margin: 0 0 14px;
           font-size: 11px;
           text-transform: uppercase;
           letter-spacing: 0.18em;
-          color: #A8A49E;
+          color: #60B1FF;
           font-weight: 700;
-        }
-
-        .comparison-subtitle {
-          margin: 0 0 28px;
-          font-size: 10px;
-          color: #C4C0BA;
-          font-weight: 600;
+          transition: color 0.28s ease;
         }
 
         .comparison-card-title {
-          margin: 0 0 18px;
+          margin: 0 0 16px;
           font-family: var(--font-fustat), sans-serif;
           font-weight: 700;
-          font-size: 20px;
-          line-height: 1.18;
-          color: #0A0A0F;
-          white-space: pre-line;
+          font-size: 22px;
+          line-height: 1.15;
+          color: #ffffff;
+          transition: color 0.28s ease;
         }
 
         .comparison-description {
           margin: 0;
-          font-size: 13px;
-          color: #6B6863;
+          font-size: 14px;
+          color: #AEB7C6;
           line-height: 1.65;
+          transition: color 0.28s ease;
         }
 
         .comparison-bottom {
           margin-top: auto;
-          padding-top: 20px;
-          border-top: 1px solid #E5E2DC;
+          padding-top: 22px;
         }
 
         .comparison-bullet {
@@ -166,9 +158,10 @@ export default function ComparisonCards() {
           align-items: center;
           gap: 9px;
           margin: 0;
-          font-size: 11px;
+          font-size: 12px;
           font-weight: 600;
           line-height: 1.4;
+          transition: color 0.28s ease;
         }
 
         .comparison-bullet + .comparison-bullet {
@@ -180,22 +173,36 @@ export default function ComparisonCards() {
           height: 6px;
           border-radius: 50%;
           flex: 0 0 auto;
+          transition: background-color 0.28s ease;
         }
 
         .comparison-bullet-pro {
-          color: #0084FF;
+          color: #60B1FF;
         }
 
         .comparison-bullet-pro span {
-          background: #0084FF;
+          background: #60B1FF;
         }
 
         .comparison-bullet-con {
-          color: #A8A49E;
+          color: #AEB7C6;
         }
 
         .comparison-bullet-con span {
-          background: #C4C0BA;
+          background: #6B7280;
+        }
+
+        .comparison-card:hover .comparison-number,
+        .comparison-card:hover .comparison-versus,
+        .comparison-card:hover .comparison-card-title,
+        .comparison-card:hover .comparison-description,
+        .comparison-card:hover .comparison-bullet-pro,
+        .comparison-card:hover .comparison-bullet-con {
+          color: #ffffff;
+        }
+
+        .comparison-card:hover .comparison-bullet span {
+          background: #ffffff;
         }
 
         @media (max-width: 767px) {
