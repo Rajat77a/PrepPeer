@@ -12,7 +12,9 @@ type Plan = {
   cta: string;
   href: string;
   bg: string;
-  textColor: string;
+  accent: string;
+  featurePanel: string;
+  featureText: string;
   features: string[];
   popular?: boolean;
 };
@@ -31,7 +33,9 @@ const plans: Plan[] = [
     cta: "Start Free",
     href: "/interview",
     bg: "bg-[#0F172A]",
-    textColor: "text-slate-400",
+    accent: "#0F172A",
+    featurePanel: "bg-white border-[#CBD5E1]",
+    featureText: "text-[#0F172A]",
     features: [
       "3 full mock interviews every month",
       "5 questions per session with timed flow",
@@ -49,7 +53,9 @@ const plans: Plan[] = [
     cta: "Get Pro →",
     href: "/interview",
     bg: "bg-[#4F46E5]",
-    textColor: "text-indigo-200",
+    accent: "#4F46E5",
+    featurePanel: "bg-[#EEF2FF] border-[#C7D2FE]",
+    featureText: "text-[#312E81]",
     popular: true,
     features: [
       "Unlimited mocks — practice until you're ready",
@@ -69,7 +75,9 @@ const plans: Plan[] = [
     cta: "Contact Us",
     href: "/contact",
     bg: "bg-[#1E3A5F]",
-    textColor: "text-slate-400",
+    accent: "#1E3A5F",
+    featurePanel: "bg-white border-[#CBD5E1]",
+    featureText: "text-[#1E3A5F]",
     features: [
       "Everything in Pro for every enrolled student",
       "Batch readiness dashboard for TPOs",
@@ -109,7 +117,6 @@ export default function SquishyPricing() {
 
 function PricingColumn({ plan }: { plan: Plan }) {
   const [expanded, setExpanded] = useState(plan.id === "pro");
-  const textColor = plan.textColor;
 
   return (
     <div className="flex flex-col items-center">
@@ -171,7 +178,7 @@ function PricingColumn({ plan }: { plan: Plan }) {
       <button
         type="button"
         onClick={() => setExpanded((current) => !current)}
-        className={`mt-4 font-inter text-sm font-semibold ${textColor}`}
+        className="mt-4 font-inter text-sm font-bold text-[#475569] transition-colors hover:text-[#4F46E5]"
       >
         {expanded ? "Hide features ↑" : "See what's included ↓"}
       </button>
@@ -186,10 +193,12 @@ function PricingColumn({ plan }: { plan: Plan }) {
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="overflow-hidden"
             >
-              <ul className={`space-y-3 pt-4 font-inter text-sm leading-snug ${textColor}`}>
+              <ul
+                className={`mt-4 space-y-3 rounded-3xl border p-5 font-inter text-sm font-semibold leading-snug shadow-[0_18px_48px_rgba(15,23,42,0.08)] ${plan.featurePanel} ${plan.featureText}`}
+              >
                 {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5">
-                    <CheckIcon />
+                  <li key={feature} className="flex items-start gap-3">
+                    <CheckIcon color={plan.accent} />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -202,43 +211,56 @@ function PricingColumn({ plan }: { plan: Plan }) {
   );
 }
 
-function CheckIcon() {
+function CheckIcon({ color }: { color: string }) {
   return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 16 16"
-      className="mt-0.5 h-4 w-4 shrink-0 text-white"
-      fill="none"
+    <span
+      className="mt-0.5 grid h-5 w-5 shrink-0 rotate-45 place-items-center rounded-[7px] shadow-[0_8px_18px_rgba(15,23,42,0.16)]"
+      style={{ backgroundColor: color }}
     >
-      <path
-        d="M3.25 8.25L6.25 11.25L12.75 4.75"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="2"
-      />
-    </svg>
+      <svg
+        aria-hidden="true"
+        viewBox="0 0 16 16"
+        className="h-3.5 w-3.5 -rotate-45 text-white"
+        fill="none"
+      >
+        <path
+          d="M3.25 8.25L6.25 11.25L12.75 4.75"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="2.4"
+        />
+      </svg>
+    </span>
   );
 }
 
 function BGComponent1() {
   return (
-    <motion.div className="absolute inset-0 opacity-35" aria-hidden>
+    <motion.div className="absolute inset-0 opacity-45" aria-hidden>
       <motion.div
-        className="absolute -right-12 -top-10 h-36 w-36 rounded-full bg-white/20"
+        className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-white/18"
         variants={{
-          rest: { borderRadius: "999px", scale: 1, rotate: 0 },
-          hover: { borderRadius: "42% 58% 60% 40%", scale: 1.18, rotate: 18 },
+          rest: { x: 0, y: 0, scale: 1, rotate: 0 },
+          hover: { x: -72, y: 84, scale: 1.22, rotate: 18 },
         }}
         transition={TRANSITION}
       />
       <motion.div
-        className="absolute bottom-16 left-6 h-16 w-32 rounded-[999px] bg-white/15"
+        className="absolute -bottom-20 -left-20 h-56 w-56 rounded-full border border-white/35 bg-white/10"
         variants={{
-          rest: { borderRadius: "999px", rotate: -10, x: 0 },
-          hover: { borderRadius: "45% 55% 35% 65%", rotate: 8, x: 18 },
+          rest: { x: 0, y: 0, scale: 1, rotate: -12 },
+          hover: { x: 78, y: -74, scale: 1.12, rotate: 12 },
         }}
         transition={{ ...TRANSITION, delay: 0.06 }}
+      />
+      <motion.div
+        className="absolute left-8 top-36 h-28 w-44 rounded-full bg-white/12 blur-[1px]"
+        variants={{
+          rest: { x: -36, y: 24, scale: 0.9, rotate: -16 },
+          hover: { x: 56, y: 8, scale: 1.18, rotate: 6 },
+        }}
+        transition={{ ...TRANSITION, delay: 0.1 }}
       />
     </motion.div>
   );
@@ -246,22 +268,30 @@ function BGComponent1() {
 
 function BGComponent2() {
   return (
-    <motion.div className="absolute inset-0 opacity-30" aria-hidden>
+    <motion.div className="absolute inset-0 opacity-35" aria-hidden>
       <motion.div
-        className="absolute right-7 top-12 h-24 w-24 rounded-2xl bg-white/20"
+        className="absolute -right-20 top-10 h-44 w-44 rounded-[38px] bg-white/20"
         variants={{
-          rest: { x: 0, y: 0, rotate: 8 },
-          hover: { x: -34, y: 54, rotate: -10 },
+          rest: { x: 0, y: 0, rotate: 16, scale: 1 },
+          hover: { x: -88, y: 70, rotate: -14, scale: 1.18 },
         }}
         transition={TRANSITION}
       />
       <motion.div
-        className="absolute bottom-14 left-7 h-24 w-24 rounded-2xl bg-white/15"
+        className="absolute -bottom-16 -left-16 h-44 w-44 rounded-[38px] bg-white/16"
         variants={{
-          rest: { x: 0, y: 0, rotate: -10 },
-          hover: { x: 42, y: -58, rotate: 12 },
+          rest: { x: 0, y: 0, rotate: -18, scale: 1 },
+          hover: { x: 92, y: -78, rotate: 15, scale: 1.12 },
         }}
         transition={{ ...TRANSITION, delay: 0.04 }}
+      />
+      <motion.div
+        className="absolute left-1/2 top-1/2 h-28 w-56 rounded-[32px] bg-white/14"
+        variants={{
+          rest: { x: -140, y: -120, rotate: 28, scale: 0.85 },
+          hover: { x: -112, y: -44, rotate: -4, scale: 1.08 },
+        }}
+        transition={{ ...TRANSITION, delay: 0.08 }}
       />
     </motion.div>
   );
@@ -269,18 +299,26 @@ function BGComponent2() {
 
 function BGComponent3() {
   return (
-    <motion.div className="absolute inset-0 opacity-35" aria-hidden>
+    <motion.div className="absolute inset-0 opacity-40" aria-hidden>
       {[0, 1, 2].map((index) => (
         <motion.div
           key={index}
-          className="absolute left-1/2 top-[58%] h-28 w-28 -translate-x-1/2 rotate-45 rounded-2xl bg-white/15"
+          className="absolute left-1/2 top-[66%] h-40 w-40 -translate-x-1/2 rotate-45 rounded-[30px] border border-white/20 bg-white/14"
           variants={{
-            rest: { y: index * 18, scale: 1 - index * 0.12 },
-            hover: { y: -20 - index * 8, scale: 1.04 - index * 0.1 },
+            rest: { x: 92 - index * 42, y: 80 + index * 26, scale: 1 - index * 0.12 },
+            hover: { x: 14 - index * 14, y: -90 - index * 18, scale: 1.16 - index * 0.08 },
           }}
           transition={{ ...TRANSITION, delay: index * 0.06 }}
         />
       ))}
+      <motion.div
+        className="absolute -right-16 top-12 h-48 w-48 rounded-full bg-white/12"
+        variants={{
+          rest: { x: 0, y: 0, scale: 1 },
+          hover: { x: -86, y: 84, scale: 1.18 },
+        }}
+        transition={{ ...TRANSITION, delay: 0.05 }}
+      />
     </motion.div>
   );
 }
