@@ -1,39 +1,36 @@
 "use client";
 
-import React from "react";
 import { motion } from "framer-motion";
 import { CircleCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 type ProgressIndicatorProps = {
   step: number;
   canContinue?: boolean;
   onContinue: () => void;
   onBack: () => void;
-  mode?: "full" | "dots" | "buttons";
+  mode?: "dots" | "buttons";
 };
 
-const ProgressIndicator = ({
+export default function ProgressIndicator({
   step,
   canContinue = true,
   onContinue,
   onBack,
-  mode = "full",
-}: ProgressIndicatorProps) => {
-  const isExpanded = step === 1;
+  mode = "dots",
+}: ProgressIndicatorProps) {
+  const isFirstStep = step === 1;
 
   return (
     <div className="flex flex-col items-center justify-center gap-8">
-      {mode !== "buttons" && (
+      {mode === "dots" && (
         <div className="px-7 py-4">
           <div className="relative flex items-center gap-6">
             {[1, 2, 3].map((dot) => (
               <div
                 key={dot}
-                className={cn(
-                  "relative z-10 h-2.5 w-2.5 rounded-full border border-white/70",
+                className={`relative z-10 h-2.5 w-2.5 rounded-full border border-white/70 ${
                   dot <= step ? "bg-white" : "bg-slate-300"
-                )}
+                }`}
               />
             ))}
 
@@ -56,70 +53,55 @@ const ProgressIndicator = ({
         </div>
       )}
 
-      {mode !== "dots" && (
-      <div className="w-full max-w-sm">
-        <motion.div
-          className="flex items-center gap-1"
-          animate={{
-            justifyContent: isExpanded ? "stretch" : "space-between",
-          }}
-        >
-          {!isExpanded && (
+      {mode === "buttons" && (
+        <div className="w-full max-w-sm">
+          <motion.div
+            className="flex items-center gap-2"
+            animate={{ justifyContent: isFirstStep ? "stretch" : "space-between" }}
+          >
+            {!isFirstStep && (
+              <motion.button
+                initial={{ opacity: 0, width: 0, scale: 0.8 }}
+                animate={{ opacity: 1, width: "64px", scale: 1 }}
+                onClick={onBack}
+                className="flex h-12 items-center justify-center rounded-xl bg-gray-100 px-4 text-sm font-semibold text-black"
+                type="button"
+              >
+                Back
+              </motion.button>
+            )}
+
             <motion.button
-              initial={{ opacity: 0, width: 0, scale: 0.8 }}
-              animate={{ opacity: 1, width: "64px", scale: 1 }}
-              transition={{
-                type: "spring",
-                stiffness: 400,
-                damping: 15,
-                mass: 0.8,
-                bounce: 0.25,
-                duration: 0.6,
-                opacity: { duration: 0.2 },
-              }}
-              onClick={onBack}
-              className="flex h-12 w-16 flex-1 items-center justify-center rounded-xl bg-gray-100 px-4 py-3 text-sm font-semibold text-black transition-colors hover:border hover:bg-gray-50"
+              onClick={onContinue}
+              disabled={!canContinue}
+              animate={{ flex: isFirstStep ? 1 : "inherit" }}
+              className={`h-12 rounded-xl bg-[#006cff] px-4 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+                isFirstStep ? "w-full" : "w-44"
+              }`}
               type="button"
             >
-              Back
+              <div className="flex items-center justify-center gap-2 text-sm font-semibold">
+                {step === 3 && canContinue && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 15,
+                      mass: 0.5,
+                      bounce: 0.4,
+                    }}
+                  >
+                    <CircleCheck size={16} />
+                  </motion.div>
+                )}
+                {step === 3 ? "Finish" : "Continue"}
+              </div>
             </motion.button>
-          )}
-          <motion.button
-            onClick={onContinue}
-            disabled={!canContinue}
-            animate={{
-              flex: isExpanded ? 1 : "inherit",
-            }}
-            className={cn(
-              "h-12 w-56 flex-1 rounded-xl bg-[#006cff] px-4 py-3 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50",
-              !isExpanded && "w-44"
-            )}
-            type="button"
-          >
-            <div className="flex items-center justify-center gap-2 text-sm font-[600]">
-              {step === 3 && canContinue && (
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 500,
-                    damping: 15,
-                    mass: 0.5,
-                    bounce: 0.4,
-                  }}
-                >
-                  <CircleCheck size={16} />
-                </motion.div>
-              )}
-              {step === 3 ? "Finish" : "Continue"}
-            </div>
-          </motion.button>
-        </motion.div>
-      </div>
+          </motion.div>
+        </div>
       )}
     </div>
   );
-};
-
-export default ProgressIndicator;
+}
