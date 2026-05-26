@@ -21,18 +21,33 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "user",
-            content: `Generate exactly 5 deep, specific interview questions for a ${experience} candidate applying for a ${domain} role at a ${companyType} company.
+            content: `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for a ${domain} role at a ${companyType} company.
 
-Rules:
-- 2 questions must be technical and domain-specific (test actual knowledge, not just opinions)
-- 2 questions must be behavioral but require specific examples with measurable outcomes
-- 1 question must be a problem-solving scenario with constraints
+Question mix:
+- 2 role-specific technical questions that test real ${domain} knowledge, tradeoffs, debugging, implementation details, or architecture decisions
+- 1 practical problem-solving scenario with a clear constraint, such as time, scale, ambiguity, stakeholder pressure, limited data, or production impact
+- 1 behavioral question that requires a specific past example with actions, measurable outcomes, and reflection
+- 1 company-fit question tailored to a ${companyType} company environment
 
-For ${domain} technical questions: ask about specific concepts, tradeoffs, architecture decisions, or debugging scenarios.
-For ${companyType} companies: service = process and communication focus, product = impact and ownership focus, startup = ambiguity and speed focus.
+Difficulty calibration:
+- For Fresher candidates, test fundamentals, reasoning, projects, internships, debugging basics, and clarity under interview pressure
+- For 1-3 years, test ownership, real production decisions, tradeoffs, collaboration, and depth beyond textbook answers
+- For 3-6 years, test design decisions, incident handling, mentoring, scaling, cross-functional judgment, and business impact
+- For 6+ years, test senior judgment, architecture, leadership, ambiguity, prioritization, and long-term technical consequences
+
+Company calibration:
+- FAANG: emphasize depth, correctness, scale, structured thinking, and bar-raising examples
+- Product startup: emphasize ownership, ambiguity, speed, product impact, and practical tradeoffs
+- Consulting firm: emphasize client communication, structured problem solving, prioritization, and business context
+- PSU / Govt: emphasize reliability, compliance, process discipline, public impact, and maintainability
+- Mid-size tech: emphasize balanced execution, collaboration, ownership, and scalable systems
 
 Do NOT ask generic questions like "tell me about yourself" or "what are your strengths".
-Return a JSON array of exactly 5 strings. No preamble, no explanation, just the array.`,
+Do NOT repeat common internet interview questions unless they are made specific to ${domain}, ${experience}, and ${companyType}.
+Each question must be one clear sentence or two short sentences.
+Each question must force the candidate to explain reasoning, not just define a concept.
+
+Return a JSON array of exactly 5 strings. No preamble, no markdown, no explanation, just the array.`,
           },
         ],
         max_tokens: 1024,
