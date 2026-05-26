@@ -6,7 +6,6 @@ import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
 import { FeedbackPanel } from "@/components/interview/FeedbackPanel";
 import { TabSwitchWarning } from "@/components/interview/TabSwitchWarning";
-import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 import { Clock, ShieldCheck } from "lucide-react";
@@ -79,19 +78,18 @@ export default function InterviewPage() {
     }
   }, [shouldAutoSubmit, router, questionScores, feedback]);
 
-  const handleStart = async (profileSetup = setup) => {
-    if (!profileSetup.domain || !profileSetup.experience || !profileSetup.companyType) {
+  const handleStart = async () => {
+    if (!setup.domain || !setup.experience || !setup.companyType) {
       setError("Please fill in all fields.");
       return;
     }
-    setSetup(profileSetup);
     setError("");
     setLoading(true);
     try {
       const res = await fetch("/api/generate-questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profileSetup),
+        body: JSON.stringify(setup),
       });
       const data = await res.json();
       if (data.questions) {
@@ -192,27 +190,82 @@ export default function InterviewPage() {
             Tell us about the role so we can tailor your questions.
           </p>
 
-          <ProfileStepper
-            onComplete={(data) => {
-              console.log(data);
-              handleStart({
-                domain: data.jobRole,
-                experience: data.experienceLevel,
-                companyType: data.companyType,
-              });
-            }}
-          />
+          <div className="flex flex-col gap-6">
+            <div>
+              <label className="font-inter font-semibold text-sm text-text mb-2 block">
+                Branch / Domain
+              </label>
+              <select
+                className="w-full border border-[rgba(0,0,0,0.12)] rounded-xl px-4 py-3 font-inter text-sm text-text bg-white focus:outline-none focus:ring-2 focus:ring-[#319AFF]"
+                value={setup.domain}
+                onChange={(e) => setSetup({ ...setup, domain: e.target.value })}
+              >
+                <option value="">Select your domain</option>
+                <option value="Software Engineering (SDE)">Software Engineering (SDE)</option>
+                <option value="Data Science / ML">Data Science / ML</option>
+                <option value="Product Management">Product Management</option>
+                <option value="Frontend Development">Frontend Development</option>
+                <option value="Backend Development">Backend Development</option>
+                <option value="DevOps / Cloud">DevOps / Cloud</option>
+                <option value="Business Analyst">Business Analyst</option>
+                <option value="UI/UX Design">UI/UX Design</option>
+              </select>
+            </div>
 
-          {loading && (
-            <p className="mt-5 text-center font-inter text-sm font-semibold text-[#0084FF]">
-              Generating questions...
-            </p>
-          )}
+            <div>
+              <label className="font-inter font-semibold text-sm text-text mb-2 block">
+                Experience Level
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {["Fresher", "1-3 years", "3+ years"].map((lvl) => (
+                  <button
+                    key={lvl}
+                    onClick={() => setSetup({ ...setup, experience: lvl })}
+                    className={`py-3 rounded-xl border font-inter text-sm font-medium transition-all ${
+                      setup.experience === lvl
+                        ? "bg-[#319AFF] text-white border-[#319AFF]"
+                        : "bg-white text-text border-[rgba(0,0,0,0.12)] hover:border-[#319AFF]"
+                    }`}
+                  >
+                    {lvl}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          {error && (
-            <p className="mt-5 text-center font-inter text-sm text-red-500">{error}</p>
-          )}
+            <div>
+              <label className="font-inter font-semibold text-sm text-text mb-2 block">
+                Company Type
+              </label>
+              <div className="grid grid-cols-3 gap-3">
+                {["Service", "Product", "Startup"].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setSetup({ ...setup, companyType: type })}
+                    className={`py-3 rounded-xl border font-inter text-sm font-medium transition-all ${
+                      setup.companyType === type
+                        ? "bg-[#319AFF] text-white border-[#319AFF]"
+                        : "bg-white text-text border-[rgba(0,0,0,0.12)] hover:border-[#319AFF]"
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
 
+            {error && (
+              <p className="font-inter text-sm text-red-500">{error}</p>
+            )}
+
+            <button
+              onClick={handleStart}
+              disabled={loading}
+              className="mt-2 w-full bg-[#319AFF] hover:bg-[#0057CC] disabled:opacity-60 text-white font-inter font-semibold text-base py-4 rounded-2xl transition-all"
+            >
+              {loading ? "Generating questions…" : "Start Interview →"}
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -220,7 +273,12 @@ export default function InterviewPage() {
 
   // ── Interview / Feedback screen ───────────────────────────────
   return (
-    <div className="min-h-screen bg-white">
+    <div
+      className="min-h-screen bg-white"
+      onContextMenu={(e) => e.preventDefault()}
+      onCopy={(e) => e.preventDefault()}
+      onCut={(e) => e.preventDefault()}
+    >
       <TabSwitchWarning
         strikeCount={strikeCount}
         onDismiss={dismissWarning}
