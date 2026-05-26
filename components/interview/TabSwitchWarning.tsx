@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { AlertTriangle } from "lucide-react";
 
 interface TabSwitchWarningProps {
   strikeCount: number;
@@ -17,6 +17,13 @@ export function TabSwitchWarning({
   if (!visible) return null;
 
   const isLastWarning = strikeCount >= 2;
+  const progress = Math.min(strikeCount, 2);
+  const accent = isLastWarning ? "#FF6B3D" : "#FFBE3D";
+  const accentDark = isLastWarning ? "#CC4422" : "#996600";
+  const title = isLastWarning ? "Final Warning" : "Tab Switch Detected";
+  const message = isLastWarning
+    ? "You've switched tabs twice during this session. One more tab switch will automatically submit your session."
+    : "You left the PrepPeer tab during your interview session. This has been recorded.";
 
   return (
     <AnimatePresence>
@@ -33,13 +40,12 @@ export function TabSwitchWarning({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="relative max-w-md w-full mx-6 rounded-3xl overflow-hidden"
+            className="relative mx-6 w-full max-w-md overflow-hidden rounded-3xl"
             style={{
               background: "#fff",
               boxShadow: "0 32px 80px rgba(0,0,0,0.2)",
             }}
           >
-            {/* Top accent bar */}
             <div
               style={{
                 height: "4px",
@@ -50,105 +56,73 @@ export function TabSwitchWarning({
             />
 
             <div className="p-8">
-              {/* Icon */}
-              <div
-                className="flex items-center justify-center mx-auto mb-5"
-                style={{
-                  width: "56px",
-                  height: "56px",
-                  borderRadius: "16px",
-                  background: isLastWarning
-                    ? "rgba(255,107,61,0.1)"
-                    : "rgba(255,190,61,0.1)",
-                }}
-              >
-                <AlertTriangle
-                  size={28}
-                  strokeWidth={1.8}
-                  color={isLastWarning ? "#FF6B3D" : "#FFBE3D"}
+              <div className="mb-5 flex items-center justify-center gap-3">
+                <span
+                  className="h-px flex-1"
+                  style={{ background: `linear-gradient(90deg, transparent, ${accent})` }}
+                />
+                <AlertTriangle size={24} strokeWidth={1.8} color={accent} />
+                <span
+                  className="h-px flex-1"
+                  style={{ background: `linear-gradient(90deg, ${accent}, transparent)` }}
                 />
               </div>
 
-              {/* Title */}
               <h3
-                className="font-fustat text-center mb-3"
+                className="mb-3 text-center font-fustat"
                 style={{ fontWeight: 800, fontSize: "20px", color: "#0A0A0F" }}
               >
-                {isLastWarning ? "Final Warning" : "Tab Switch Detected"}
+                {title}
               </h3>
 
-              {/* Description */}
               <p
-                className="font-inter text-center mb-2"
+                className="mb-2 text-center font-inter"
                 style={{
                   fontSize: "15px",
                   color: "#6B7280",
                   lineHeight: 1.65,
                 }}
               >
-                {isLastWarning
-                  ? "You've switched tabs twice during this session. One more tab switch will automatically submit your session."
-                  : "You left the PrepPeer tab during your interview session. This has been recorded."}
+                {message}
               </p>
 
-              {/* Strike counter */}
-              <div className="flex items-center justify-center gap-2 my-5">
-                {[1, 2].map((s) => (
-                  <div
-                    key={s}
-                    className="flex items-center justify-center rounded-full"
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      background:
-                        s <= strikeCount
-                          ? isLastWarning
-                            ? "rgba(255,107,61,0.15)"
-                            : "rgba(255,190,61,0.15)"
-                          : "rgba(0,0,0,0.04)",
-                      border: `1.5px solid ${
-                        s <= strikeCount
-                          ? isLastWarning
-                            ? "rgba(255,107,61,0.4)"
-                            : "rgba(255,190,61,0.4)"
-                          : "rgba(0,0,0,0.08)"
-                      }`,
-                    }}
-                  >
-                    <span
-                      className="font-inter"
-                      style={{
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        color:
-                          s <= strikeCount
-                            ? isLastWarning
-                              ? "#CC4422"
-                              : "#996600"
-                            : "#C0C0C0",
-                      }}
-                    >
-                      {s}
-                    </span>
-                  </div>
-                ))}
+              <div className="my-6">
+                <div className="relative h-[3px] overflow-hidden rounded-full bg-black/10">
+                  <motion.div
+                    className="absolute inset-y-0 left-0 rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress * 50}%` }}
+                    transition={{ duration: 0.35, ease: "easeOut" }}
+                    style={{ background: accent }}
+                  />
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-4 text-center font-inter text-[12px] font-semibold">
+                  <span style={{ color: progress >= 1 ? accentDark : "#9CA3AF" }}>
+                    First switch recorded
+                  </span>
+                  <span style={{ color: progress >= 2 ? accentDark : "#9CA3AF" }}>
+                    Final warning reached
+                  </span>
+                </div>
               </div>
 
               <p
-                className="font-inter text-center"
+                className="text-center font-inter"
                 style={{
                   fontSize: "13px",
                   fontWeight: 600,
-                  color: isLastWarning ? "#CC4422" : "#996600",
+                  color: accentDark,
                 }}
               >
-                Warning: {strikeCount} of 2 strikes used
+                {isLastWarning
+                  ? "Next switch will complete the session."
+                  : "Stay on this page to keep the session active."}
               </p>
 
-              {/* Dismiss button */}
               <button
                 onClick={onDismiss}
-                className="w-full mt-6 cursor-pointer"
+                className="mt-6 w-full cursor-pointer"
                 style={{
                   padding: "14px",
                   borderRadius: "12px",
@@ -160,14 +134,14 @@ export function TabSwitchWarning({
                   border: "none",
                   transition: "transform 0.2s",
                 }}
-                onMouseOver={(e) =>
-                  (e.currentTarget.style.transform = "scale(1.02)")
-                }
-                onMouseOut={(e) =>
-                  (e.currentTarget.style.transform = "scale(1)")
-                }
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "scale(1.02)";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "scale(1)";
+                }}
               >
-                I understand — continue session
+                I understand - continue session
               </button>
             </div>
           </motion.div>
