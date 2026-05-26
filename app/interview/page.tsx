@@ -9,7 +9,7 @@ import { TabSwitchWarning } from "@/components/interview/TabSwitchWarning";
 import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
-import { Clock, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ArrowRight, Clock, LockKeyhole, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 
@@ -21,7 +21,7 @@ type SetupData = {
   companyType: string;
 };
 
-type Stage = "setup" | "interview" | "feedback";
+type Stage = "setup" | "terms" | "interview" | "feedback";
 
 export default function InterviewPage() {
   const router = useRouter();
@@ -39,6 +39,7 @@ export default function InterviewPage() {
     experience: "",
     companyType: "",
   });
+  const [pendingSetup, setPendingSetup] = useState<SetupData | null>(null);
 
   const {
     strikeCount,
@@ -180,7 +181,7 @@ export default function InterviewPage() {
   };
 
   // ── Setup screen ──────────────────────────────────────────────
-  if (stage === "setup") {
+  if (stage === "setup" || stage === "terms") {
     return (
       <div className="min-h-screen bg-white">
         <Navbar variant="inner" />
@@ -194,19 +195,18 @@ export default function InterviewPage() {
 
           <ProfileStepper
             onComplete={(data) => {
-              handleStart({
+              const nextSetup = {
                 domain: data.jobRole,
                 experience: data.experienceLevel,
                 companyType: data.companyType,
-              });
+              };
+
+              setPendingSetup(nextSetup);
+              setSetup(nextSetup);
+              setError("");
+              setStage("terms");
             }}
           />
-
-          {loading && (
-            <p className="mt-5 text-center font-inter text-sm font-semibold text-[#0084FF]">
-              Generating questions...
-            </p>
-          )}
 
           {error && (
             <p className="mt-5 text-center font-inter text-sm text-red-500">{error}</p>
@@ -214,6 +214,19 @@ export default function InterviewPage() {
 
 
         </div>
+
+        <IntegrityTermsModal
+          visible={stage === "terms"}
+          loading={loading}
+          error={error}
+          setup={pendingSetup}
+          onBack={() => {
+            if (!loading) setStage("setup");
+          }}
+          onAccept={() => {
+            if (pendingSetup) handleStart(pendingSetup);
+          }}
+        />
       </div>
     );
   }
@@ -360,5 +373,109 @@ export default function InterviewPage() {
 
       </div>
     </div>
+  );
+}
+
+function IntegrityTermsModal({
+  visible,
+  loading,
+  error,
+  setup,
+  onBack,
+  onAccept,
+}: {
+  visible: boolean;
+  loading: boolean;
+  error: string;
+  setup: SetupData | null;
+  onBack: () => void;
+  onAccept: () => void;
+}) {
+  if (!visible) return null;
+
+  const profileLabel = setup
+    ? `${setup.domain} - ${setup.experience} - ${setup.companyType}`
+    : "Selected interview profile";
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-[300] flex items-center justify-center px-5 py-8"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        style={{ background: "rgba(10,10,15,0.52)", backdropFilter: "blur(5px)" }}
+      >
+        <motion.div
+          initial={{ scale: 0.94, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.94, opacity: 0, y: 10 }}
+          transition={{ type: "spring", stiffness: 360, damping: 28 }}
+          className="w-full max-w-[640px] overflow-hidden rounded-3xl bg-white shadow-[0_32px_90px_rgba(0,0,0,0.24)]"
+        >
+          <div className="h-1 bg-gradient-to-r from-[#0084FF] via-[#00C896] to-[#FFBE3D]" />
+
+          <div className="p-7 sm:p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[rgba(0,132,255,0.1)]">
+                <LockKeyhole size={23} color="#0084FF" />
+              </div>
+              <div>
+                <h2 className="font-fustat text-2xl font-extrabold tracking-[-0.04em] text-text sm:text-3xl">
+                  Accept terms to continue
+                </h2>
+                <p className="mt-2 font-inter text-sm font-semibold text-muted">
+                  {profileLabel}
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-6 font-inter text-[15px] leading-7 text-muted">
+              To ensure honest participation and fair scoring, this interview session will run with anti-cheating controls enabled.
+            </p>
+
+            <ul className="mt-5 list-disc space-y-3 pl-5 font-inter text-sm leading-6 text-text">
+              <li>Ctrl/Cmd + C, Ctrl/Cmd + V, Ctrl/Cmd + A, copy, cut, paste, and right click are disabled in the answer box.</li>
+              <li>Switching tabs or leaving the application once or twice will give you a warning.</li>
+              <li>On the third tab or application switch, the session will be marked as completed automatically.</li>
+              <li>A session completed due to this rule will exhaust one available session.</li>
+            </ul>
+
+            <div className="mt-5 flex items-start gap-3 border-t border-[rgba(0,0,0,0.08)] pt-5">
+              <AlertTriangle className="mt-0.5 shrink-0" size={18} color="#996600" />
+              <p className="font-inter text-sm font-semibold leading-6 text-[#664400]">
+                Continue only when you are ready to stay on this page until the session ends.
+              </p>
+            </div>
+
+            {error && (
+              <p className="mt-5 font-inter text-sm font-semibold text-red-500">
+                {error}
+              </p>
+            )}
+
+            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={onBack}
+                disabled={loading}
+                className="rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white px-5 py-3 font-inter text-sm font-semibold text-text transition hover:bg-[#F8F9FC] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={onAccept}
+                disabled={loading}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#0084FF] px-5 py-3 font-inter text-sm font-semibold text-white shadow-[0_12px_30px_rgba(0,132,255,0.28)] transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:scale-100"
+              >
+                {loading ? "Generating questions..." : "Accept and Continue"}
+                {!loading && <ArrowRight size={16} />}
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
