@@ -252,32 +252,32 @@ export default function InterviewPage() {
       <div className="max-w-[800px] mx-auto px-6 py-20">
 
         {stage === "interview" && !evaluating && (
-          <div className="flex items-center justify-between mb-6">
-            <span className="flex items-center gap-1.5" style={{
-              padding: "5px 10px",
-              borderRadius: "99px",
-              background: "rgba(0,200,150,0.06)",
-              border: "1px solid rgba(0,200,150,0.15)",
-              fontSize: "11px",
-              fontWeight: 600,
-              color: "#00A07A",
-              fontFamily: "var(--font-inter)",
-            }}>
-              <ShieldCheck size={12} color="#00A07A" />
-              Session Protected
-            </span>
-            <div className="flex items-center gap-2" style={{
-              padding: "6px 14px",
-              borderRadius: "99px",
-              background: "rgba(0,0,0,0.03)",
-              border: "1px solid rgba(0,0,0,0.06)",
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#0A0A0F",
-              fontFamily: "var(--font-inter)",
-            }}>
-              <Clock size={14} color="#6B7280" />
-              {timerDisplay}
+          <div className="mb-6 border-y border-[rgba(0,0,0,0.08)] py-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <span className="h-8 w-px bg-[#00A07A]" />
+                <ShieldCheck size={18} color="#00A07A" strokeWidth={1.8} />
+                <div>
+                  <p className="font-inter text-[11px] font-bold uppercase tracking-[0.16em] text-[#00A07A]">
+                    Integrity watch
+                  </p>
+                  <p className="font-inter text-[13px] font-medium text-muted">
+                    Controls are active across this session page
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 sm:text-right">
+                <Clock size={17} color="#6B7280" strokeWidth={1.8} />
+                <div>
+                  <p className="font-inter text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
+                    Elapsed
+                  </p>
+                  <p className="font-inter text-[18px] font-extrabold tabular-nums text-text">
+                    {timerDisplay}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -355,19 +355,33 @@ export default function InterviewPage() {
         </AnimatePresence>
 
         {strikeCount > 0 && (
-          <div className="flex items-center justify-center mt-6">
-            <span style={{
-              fontSize: "12px",
-              fontWeight: 600,
-              color: strikeCount >= 2 ? "#CC4422" : "#996600",
-              padding: "4px 12px",
-              borderRadius: "99px",
-              background: strikeCount >= 2 ? "rgba(255,107,61,0.08)" : "rgba(255,190,61,0.08)",
-              border: `1px solid ${strikeCount >= 2 ? "rgba(255,107,61,0.15)" : "rgba(255,190,61,0.15)"}`,
-              fontFamily: "var(--font-inter)",
-            }}>
-              ⚠ {strikeCount} tab switch{strikeCount > 1 ? "es" : ""} detected
-            </span>
+          <div
+            className="mt-6 border-l-2 py-3 pl-4"
+            style={{
+              borderColor: strikeCount >= 2 ? "#FF6B3D" : "#FFBE3D",
+              background: strikeCount >= 2
+                ? "linear-gradient(90deg, rgba(255,107,61,0.08), transparent)"
+                : "linear-gradient(90deg, rgba(255,190,61,0.1), transparent)",
+            }}
+          >
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p
+                  className="font-inter text-[11px] font-bold uppercase tracking-[0.16em]"
+                  style={{ color: strikeCount >= 2 ? "#CC4422" : "#996600" }}
+                >
+                  Session attention record
+                </p>
+                <p className="mt-1 font-inter text-sm font-semibold text-text">
+                  {strikeCount === 1
+                    ? "One tab change has been recorded."
+                    : "Two tab changes have been recorded. The next one completes the session."}
+                </p>
+              </div>
+              <p className="font-inter text-[13px] font-bold tabular-nums text-muted">
+                {Math.min(strikeCount, 2)} / 2 warnings used
+              </p>
+            </div>
           </div>
         )}
 
@@ -435,7 +449,7 @@ function IntegrityTermsModal({
             </p>
 
             <ul className="mt-5 list-disc space-y-3 pl-5 font-inter text-sm leading-6 text-text">
-              <li>Ctrl/Cmd + C, Ctrl/Cmd + V, Ctrl/Cmd + A, copy, cut, paste, and right click are disabled in the answer box.</li>
+              <li>Ctrl/Cmd + C, Ctrl/Cmd + V, Ctrl/Cmd + A, copy, cut, paste, and right click are disabled across the interview page.</li>
               <li>Switching tabs or leaving the application once or twice will give you a warning.</li>
               <li>On the third tab or application switch, the session will be marked as completed automatically.</li>
               <li>A session completed due to this rule will exhaust one available session.</li>

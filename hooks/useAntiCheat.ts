@@ -37,6 +37,7 @@ interface UseAntiCheatReturn {
 const PASTE_CHAR_THRESHOLD = 80;
 const FAST_SUBMIT_THRESHOLD_SECONDS = 15;
 const DEBOUNCE_MS = 1000;
+const BLOCKED_KEYS = new Set(["a", "c", "v", "x"]);
 
 export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
   const [state, setState] = useState<AntiCheatState>({
@@ -52,22 +53,20 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const questionStartTime = useRef<number>(Date.now());
   const lastSwitchTime = useRef<number>(0);
+  const wasActive = useRef(false);
+
+  const blockShortcut = useCallback((e: KeyboardEvent | React.KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && BLOCKED_KEYS.has(e.key.toLowerCase())) {
+      e.preventDefault();
+    }
+  }, []);
 
   // ── Layer 1: Keyboard Disabling ─────────────────────────
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      if (
-        (e.ctrlKey || e.metaKey) &&
-        (e.key === "v" || e.key === "V" ||
-         e.key === "c" || e.key === "C" ||
-         e.key === "a" || e.key === "A" ||
-         e.key === "x" || e.key === "X")
-      ) {
-        e.preventDefault();
-        return;
-      }
+      blockShortcut(e);
     },
-    []
+    [blockShortcut]
   );
 
   // ── Layer 1: Right-Click Disabling ──────────────────────
@@ -110,6 +109,38 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
     []
   );
 
+  useEffect(() => {
+    if (!active) return;
+
+    const preventDefault = (e: Event) => e.preventDefault();
+    const handleDocumentPaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      const pastedText = e.clipboardData?.getData("text") ?? "";
+
+      if (pastedText.length >= PASTE_CHAR_THRESHOLD) {
+        setState((prev) => ({
+          ...prev,
+          pasteDetected: true,
+          pasteCharCount: prev.pasteCharCount + pastedText.length,
+        }));
+      }
+    };
+
+    document.addEventListener("keydown", blockShortcut);
+    document.addEventListener("contextmenu", preventDefault);
+    document.addEventListener("copy", preventDefault);
+    document.addEventListener("cut", preventDefault);
+    document.addEventListener("paste", handleDocumentPaste);
+
+    return () => {
+      document.removeEventListener("keydown", blockShortcut);
+      document.removeEventListener("contextmenu", preventDefault);
+      document.removeEventListener("copy", preventDefault);
+      document.removeEventListener("cut", preventDefault);
+      document.removeEventListener("paste", handleDocumentPaste);
+    };
+  }, [active, blockShortcut]);
+
   // ── Layer 3: Tab Switch Detection ───────────────────────
   const recordSwitch = useCallback(() => {
     if (!active) return;
@@ -151,6 +182,21 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
 
   // ── Layer 4: Answer Timer ───────────────────────────────
   useEffect(() => {
+    if (!active) {
+      wasActive.current = false;
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+
+    if (!wasActive.current) {
+      wasActive.current = true;
+      questionStartTime.current = Date.now();
+      setState((prev) => ({ ...prev, timeElapsed: 0 }));
+    }
+
     timerRef.current = setInterval(() => {
       setState((prev) => ({
         ...prev,
@@ -161,7 +207,7 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, []);
+  }, [active]);
 
   const resetTimer = useCallback(() => {
     questionStartTime.current = Date.now();

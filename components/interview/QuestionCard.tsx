@@ -12,6 +12,8 @@ interface QuestionCardProps {
     onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void;
     onContextMenu: (e: React.MouseEvent<HTMLTextAreaElement>) => void;
     onPaste: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
+    onCopy: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
+    onCut: (e: React.ClipboardEvent<HTMLTextAreaElement>) => void;
   };
 }
 
