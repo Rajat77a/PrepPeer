@@ -59,8 +59,10 @@ export default function InterviewPage() {
 
   const saveResults = useCallback(async (
     reviews: QuestionReview[],
-    completionReason: "completed" | "autoSubmitted"
+    completionReason: "completed" | "autoSubmitted",
+    options: { generateSummary?: boolean } = {}
   ) => {
+    const shouldGenerateSummary = options.generateSummary ?? true;
     const allReviews = Array.from({ length: TOTAL }, (_, i) => {
       const questionLabel = `Q${i + 1}`;
       const existing = reviews.find((item) => item.question === questionLabel);
@@ -135,19 +137,26 @@ export default function InterviewPage() {
       questionReviews?: QuestionReview[];
     } | null = null;
 
-    try {
-      const summaryRes = await fetch("/api/generate-summary", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completionReason, questionReviews: allReviews }),
-      });
+    if (shouldGenerateSummary) {
+      try {
+        const summaryRes = await fetch("/api/generate-summary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completionReason, questionReviews: allReviews }),
+        });
 
-      if (summaryRes.ok) {
-        aiSummary = await summaryRes.json();
+        if (summaryRes.ok) {
+          aiSummary = await summaryRes.json();
+        }
+      } catch {
+        aiSummary = null;
       }
-    } catch {
-      aiSummary = null;
     }
+
+    const fallbackSummary =
+      completionReason === "autoSubmitted"
+        ? "The session was completed automatically after repeated tab or application switches. Answered questions are preserved below; unanswered questions were marked as auto-submitted."
+        : "Your session is ready. Review the question breakdown below and focus on writing clear, specific answers with real examples.";
 
     sessionStorage.setItem(
       "preppeer_results",
@@ -158,9 +167,15 @@ export default function InterviewPage() {
         summary: {
           completionReason,
           overallSummary:
-            aiSummary?.overallSummary ?? "AI summary could not be generated right now.",
+            aiSummary?.overallSummary ?? fallbackSummary,
           needsImprovement:
-            aiSummary?.needsImprovement ?? ["Write clear, specific answers with real examples."],
+            aiSummary?.needsImprovement ?? [
+              completionReason === "autoSubmitted"
+                ? "Stay on the interview page until the session ends."
+                : "Write clear, specific answers with real examples.",
+              "Use concrete details, tradeoffs, and outcomes in each answer.",
+              "Avoid leaving questions unanswered.",
+            ],
           questionReviews: allReviews.map((item) => {
             const aiReview = aiSummary?.questionReviews?.find(
               (review) => review.question === item.question
@@ -179,7 +194,7 @@ export default function InterviewPage() {
 
   useEffect(() => {
     if (shouldAutoSubmit) {
-      saveResults(questionReviews, "autoSubmitted").then(() => {
+      saveResults(questionReviews, "autoSubmitted", { generateSummary: false }).then(() => {
         router.push("/results");
       });
     }
