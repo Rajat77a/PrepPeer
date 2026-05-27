@@ -10,6 +10,7 @@ import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
+import type { QuestionReview } from "@/lib/types";
 import { AlertTriangle, ArrowRight, Clock, LockKeyhole, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
@@ -35,6 +36,7 @@ export default function InterviewPage() {
   const [evaluating, setEvaluating] = useState(false);
   const [aiDetected, setAiDetected] = useState<{isAI: boolean, confidence: number, reason: string} | null>(null);
   const [questionScores, setQuestionScores] = useState<{question: string, score: number}[]>([]);
+  const [questionReviews, setQuestionReviews] = useState<QuestionReview[]>([]);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -52,52 +54,118 @@ export default function InterviewPage() {
     textareaProps,
   } = useAntiCheat(stage === "interview" && !evaluating);
 
-  useEffect(() => {
-    if (shouldAutoSubmit) {
-      const avgScore = questionScores.length > 0
-        ? Math.round(questionScores.reduce((sum, q) => sum + q.score, 0) / questionScores.length)
-        : 0;
+  const toPercentScore = (scoreOutOf40: number) =>
+    Math.round((Math.max(0, Math.min(40, scoreOutOf40)) / 40) * 100);
 
-      const avgDimensions = questionScores.length > 0
-        ? feedback.dimensions.map((d) => ({ ...d }))
-        : [
-            { label: "Communication", value: 0, color: "#0084FF" },
-            { label: "Problem Solving", value: 0, color: "#319AFF" },
-            { label: "Specificity", value: 0, color: "#FF6B3D" },
-            { label: "Confidence", value: 0, color: "#0084FF" },
-          ];
+  const saveResults = async (
+    reviews: QuestionReview[],
+    completionReason: "completed" | "autoSubmitted"
+  ) => {
+    const allReviews = Array.from({ length: TOTAL }, (_, i) => {
+      const questionLabel = `Q${i + 1}`;
+      const existing = reviews.find((item) => item.question === questionLabel);
 
-      const allQuestionScores = Array.from({ length: TOTAL }, (_, i) => {
-        const existing = questionScores.find((q) => q.question === `Q${i + 1}`);
-        return existing ?? { question: `Q${i + 1}`, score: 0 };
+      return existing ?? {
+        question: questionLabel,
+        prompt: questions[i] ?? "Question not available",
+        score: 0,
+        status: "autoSkipped" as const,
+        reason: "The session ended before this question was answered.",
+      };
+    });
+
+    const allQuestionScores = allReviews.map((item) => ({
+      question: item.question,
+      score: item.score,
+    }));
+
+    const validScores = allReviews
+      .filter((item) => item.status === "answered")
+      .map((item) => item.score);
+
+    const compositeScore = validScores.length
+      ? Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length)
+      : 0;
+
+    let aiSummary: {
+      overallSummary?: string;
+      needsImprovement?: string[];
+      questionReviews?: QuestionReview[];
+    } | null = null;
+
+    try {
+      const summaryRes = await fetch("/api/generate-summary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ completionReason, questionReviews: allReviews }),
       });
 
-      sessionStorage.setItem("preppeer_results", JSON.stringify({
-        compositeScore: avgScore,
-        dimensions: avgDimensions,
-        questionScores: allQuestionScores,
-      }));
-      router.push("/results");
+      if (summaryRes.ok) {
+        aiSummary = await summaryRes.json();
+      }
+    } catch {
+      aiSummary = null;
     }
-  }, [shouldAutoSubmit, router, questionScores, feedback]);
+
+    sessionStorage.setItem(
+      "preppeer_results",
+      JSON.stringify({
+        compositeScore,
+        dimensions: feedback.dimensions,
+        questionScores: allQuestionScores,
+        summary: {
+          completionReason,
+          overallSummary:
+            aiSummary?.overallSummary ?? "AI summary could not be generated right now.",
+          needsImprovement:
+            aiSummary?.needsImprovement ?? ["Write clear, specific answers with real examples."],
+          questionReviews: allReviews.map((item) => {
+            const aiReview = aiSummary?.questionReviews?.find(
+              (review) => review.question === item.question
+            );
+
+            return {
+              ...item,
+              summary: aiReview?.summary ?? item.summary,
+              improvement: aiReview?.improvement ?? item.improvement,
+            };
+          }),
+        },
+      })
+    );
+  };
+
+  useEffect(() => {
+    if (shouldAutoSubmit) {
+      saveResults(questionReviews, "autoSubmitted").then(() => {
+        router.push("/results");
+      });
+    }
+  }, [shouldAutoSubmit, router, questionReviews]);
 
   const handleStart = async (profileSetup = setup) => {
     if (!profileSetup.domain || !profileSetup.experience || !profileSetup.companyType) {
       setError("Please fill in all fields.");
       return;
     }
+
     setSetup(profileSetup);
     setError("");
     setLoading(true);
+
     try {
       const res = await fetch("/api/generate-questions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(profileSetup),
       });
+
       const data = await res.json();
+
       if (data.questions) {
         setQuestions(data.questions);
+        setQuestionScores([]);
+        setQuestionReviews([]);
         sessionStorage.removeItem("preppeer_results");
         setStage("interview");
       } else {
@@ -112,19 +180,33 @@ export default function InterviewPage() {
 
   const handleSubmit = async (answer: string) => {
     const answerQuality = evaluateAnswerQuality(answer);
+
     if (!answerQuality.valid) {
       const zeroFeedback = createZeroFeedback(answerQuality.reason);
+
       setFeedback(zeroFeedback);
       setAiDetected(null);
       setQuestionScores((prev) => [
         ...prev,
-        { question: `Q${current}`, score: zeroFeedback.compositeScore },
+        { question: `Q${current}`, score: 0 },
+      ]);
+      setQuestionReviews((prev) => [
+        ...prev,
+        {
+          question: `Q${current}`,
+          prompt: questions[current - 1],
+          answer,
+          score: 0,
+          status: "gibberish",
+          reason: answerQuality.reason,
+        },
       ]);
       setStage("feedback");
       return;
     }
 
     setEvaluating(true);
+
     try {
       const [evalRes, detectRes] = await Promise.all([
         fetch("/api/evaluate-answer", {
@@ -146,21 +228,54 @@ export default function InterviewPage() {
 
       const evalData = await evalRes.json();
       const detectData = await detectRes.json();
-
       const isAI = detectData?.isAI === true;
 
-      if (evalData.feedback) {
+      if (isAI) {
+        const aiFeedback = createZeroFeedback(
+          "AI-generated answer detected, so this question receives no interview credit."
+        );
+
+        setFeedback(aiFeedback);
+        setQuestionScores((prev) => [
+          ...prev,
+          { question: `Q${current}`, score: 0 },
+        ]);
+        setQuestionReviews((prev) => [
+          ...prev,
+          {
+            question: `Q${current}`,
+            prompt: questions[current - 1],
+            answer,
+            score: 0,
+            status: "ai",
+            reason: detectData.reason,
+          },
+        ]);
+      } else if (evalData.feedback) {
+        const score = toPercentScore(evalData.feedback.compositeScore);
+
         setFeedback(evalData.feedback);
-        if (!isAI) {
-          setQuestionScores((prev) => [
-            ...prev,
-            { question: `Q${current}`, score: evalData.feedback.compositeScore }
-          ]);
-        }
+        setQuestionScores((prev) => [
+          ...prev,
+          { question: `Q${current}`, score },
+        ]);
+        setQuestionReviews((prev) => [
+          ...prev,
+          {
+            question: `Q${current}`,
+            prompt: questions[current - 1],
+            answer,
+            score,
+            status: "answered",
+            reason:
+              evalData.feedback.dimensions
+                ?.map((d: { label: string; reason?: string }) => `${d.label}: ${d.reason}`)
+                .join(" ") ?? "",
+          },
+        ]);
       }
 
       if (detectData) setAiDetected(detectData);
-
     } catch {
       // fallback
     } finally {
@@ -171,21 +286,9 @@ export default function InterviewPage() {
 
   const handleNext = () => {
     if (current >= TOTAL) {
-      const avgScore = questionScores.length > 0
-        ? Math.round(questionScores.reduce((sum, q) => sum + q.score, 0) / questionScores.length)
-        : 0;
-
-      const allQuestionScores = Array.from({ length: TOTAL }, (_, i) => {
-        const existing = questionScores.find((q) => q.question === `Q${i + 1}`);
-        return existing ?? { question: `Q${i + 1}`, score: 0 };
+      saveResults(questionReviews, "completed").then(() => {
+        router.push("/results");
       });
-
-      sessionStorage.setItem("preppeer_results", JSON.stringify({
-        compositeScore: avgScore,
-        dimensions: feedback.dimensions,
-        questionScores: allQuestionScores,
-      }));
-      router.push("/results");
     } else {
       setCurrent((c) => c + 1);
       setAiDetected(null);
@@ -194,7 +297,6 @@ export default function InterviewPage() {
     }
   };
 
-  // Setup screen
   if (stage === "setup" || stage === "terms") {
     return (
       <div className="min-h-screen bg-white">
@@ -225,8 +327,6 @@ export default function InterviewPage() {
           {error && (
             <p className="mt-5 text-center font-inter text-sm text-red-500">{error}</p>
           )}
-
-
         </div>
 
         <IntegrityTermsModal
@@ -245,7 +345,6 @@ export default function InterviewPage() {
     );
   }
 
-  // Interview / Feedback screen
   return (
     <div
       className="min-h-screen bg-white"
@@ -258,13 +357,14 @@ export default function InterviewPage() {
         onDismiss={dismissWarning}
         visible={showWarningModal}
       />
+
       <Navbar
         variant="inner"
         sessionLabel={`${setup.domain} - ${setup.experience} - ${setup.companyType}`}
         progress={{ current, total: TOTAL }}
       />
-      <div className="max-w-[800px] mx-auto px-6 py-20">
 
+      <div className="max-w-[800px] mx-auto px-6 py-20">
         {stage === "interview" && !evaluating && (
           <div className="mb-6 border-y border-[rgba(0,0,0,0.08)] py-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -351,13 +451,13 @@ export default function InterviewPage() {
                       {aiDetected.reason}
                     </p>
                     <p className="font-inter text-sm text-red-700 font-medium">
-                      Please write your own answer to get feedback and score.
+                      This answer will receive 0 score and will be included in your final summary.
                     </p>
                     <button
-                      onClick={() => { setStage("interview"); setAiDetected(null); }}
+                      onClick={handleNext}
                       className="mt-4 bg-red-600 hover:bg-red-700 text-white font-inter font-semibold text-sm px-6 py-3 rounded-xl transition-all"
                     >
-                      Try Again
+                      Continue
                     </button>
                   </div>
                 </div>
@@ -398,7 +498,6 @@ export default function InterviewPage() {
             </div>
           </div>
         )}
-
       </div>
     </div>
   );
