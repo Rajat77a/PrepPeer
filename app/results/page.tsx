@@ -55,7 +55,7 @@ export default function ResultsPage() {
 
   const summaryPreview =
     report.summary?.overallSummary ??
-    "Open the session brief to see the final review, priority fixes, and question-by-question notes.";
+    "Review the final assessment, priority improvements, and question-by-question notes.";
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -69,7 +69,7 @@ export default function ResultsPage() {
             </h1>
 
             <p className="font-inter text-muted">
-              Your complete score card, per-question breakdown, and final session brief.
+              Your complete score card, per-question breakdown, and session review.
             </p>
           </div>
 
@@ -98,10 +98,10 @@ export default function ResultsPage() {
 
               <div className="min-w-0">
                 <p className="font-inter text-[11px] font-bold uppercase tracking-[0.22em] text-blue">
-                  Session brief is ready
+                  Session review
                 </p>
                 <h2 className="mt-2 font-fustat text-2xl font-extrabold text-text">
-                  Open the short version first.
+                  Review the key takeaways.
                 </h2>
                 <p className="mt-2 line-clamp-2 font-inter text-sm leading-6 text-muted">
                   {summaryPreview}
@@ -119,7 +119,7 @@ export default function ResultsPage() {
               </div>
 
               <div className="flex items-center justify-between rounded-2xl bg-navy px-4 py-3 text-white sm:min-w-[150px] sm:justify-center">
-                <span className="font-inter text-sm font-extrabold">Open Brief</span>
+                <span className="font-inter text-sm font-extrabold">Open Review</span>
                 <ChevronRight
                   size={18}
                   className="ml-3 transition-transform duration-300 group-hover:translate-x-1"
@@ -155,10 +155,10 @@ export default function ResultsPage() {
               <div className="flex items-start justify-between gap-4 border-b border-[rgba(0,0,0,0.08)] bg-[#FAFBFD] p-5">
                 <div>
                   <p className="font-inter text-[11px] font-bold uppercase tracking-[0.22em] text-blue">
-                    Session brief
+                    Session review
                   </p>
                   <h2 className="mt-1 font-fustat text-2xl font-extrabold text-text">
-                    What to read first
+                    Key takeaways
                   </h2>
                 </div>
                 <button
@@ -177,7 +177,7 @@ export default function ResultsPage() {
                 ) : (
                   <div className="rounded-2xl border border-[rgba(0,132,255,0.14)] bg-[rgba(0,132,255,0.05)] p-5">
                     <p className="font-inter text-sm leading-6 text-muted">
-                      The session brief will appear here after your interview results are saved.
+                      The session review will appear here after your interview results are saved.
                     </p>
                   </div>
                 )}
@@ -190,7 +190,7 @@ export default function ResultsPage() {
                   }}
                   className="mt-4 w-full rounded-2xl border border-[rgba(0,132,255,0.16)] bg-white px-4 py-3 font-inter text-sm font-bold text-blue transition hover:bg-[rgba(0,132,255,0.05)]"
                 >
-                  Go to summary section
+                  View full summary section
                 </button>
               </div>
             </motion.aside>
