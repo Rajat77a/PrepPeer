@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
@@ -34,7 +34,6 @@ export default function InterviewPage() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
   const [evaluating, setEvaluating] = useState(false);
-  const [aiDetected, setAiDetected] = useState<{ isAI: boolean; confidence: number; reason: string } | null>(null);
   const [questionScores, setQuestionScores] = useState<{ question: string; score: number }[]>([]);
   const [questionReviews, setQuestionReviews] = useState<QuestionReview[]>([]);
   const [dimensionHistory, setDimensionHistory] = useState<typeof MOCK_FEEDBACK.dimensions[]>([]);
@@ -58,7 +57,7 @@ export default function InterviewPage() {
   const toPercentScore = (scoreOutOf40: number) =>
     Math.round((Math.max(0, Math.min(40, scoreOutOf40)) / 40) * 100);
 
-  const saveResults = async (
+  const saveResults = useCallback(async (
     reviews: QuestionReview[],
     completionReason: "completed" | "autoSubmitted"
   ) => {
@@ -176,7 +175,7 @@ export default function InterviewPage() {
         },
       })
     );
-  };
+  }, [dimensionHistory, questions]);
 
   useEffect(() => {
     if (shouldAutoSubmit) {
@@ -184,7 +183,7 @@ export default function InterviewPage() {
         router.push("/results");
       });
     }
-  }, [shouldAutoSubmit, router, questionReviews, dimensionHistory]);
+  }, [shouldAutoSubmit, router, questionReviews, saveResults]);
 
   const handleStart = async (profileSetup = setup) => {
     if (!profileSetup.domain || !profileSetup.experience || !profileSetup.companyType) {
@@ -229,7 +228,6 @@ export default function InterviewPage() {
       const zeroFeedback = createZeroFeedback(answerQuality.reason);
 
       setFeedback(zeroFeedback);
-      setAiDetected(null);
       setQuestionScores((prev) => [
         ...prev,
         { question: `Q${current}`, score: 0 },
@@ -252,50 +250,20 @@ export default function InterviewPage() {
     setEvaluating(true);
 
     try {
-      const [evalRes, detectRes] = await Promise.all([
-        fetch("/api/evaluate-answer", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            question: questions[current - 1],
-            answer,
-            domain: setup.domain,
-            experience: setup.experience,
-          }),
+      const evalRes = await fetch("/api/evaluate-answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: questions[current - 1],
+          answer,
+          domain: setup.domain,
+          experience: setup.experience,
         }),
-        fetch("/api/detect-ai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answer }),
-        }),
-      ]);
+      });
 
       const evalData = await evalRes.json();
-      const detectData = await detectRes.json();
-      const isAI = detectData?.isAI === true;
 
-      if (isAI) {
-        const aiFeedback = createZeroFeedback(
-          "AI-generated answer detected, so this question receives no interview credit."
-        );
-
-        setFeedback(aiFeedback);
-        setQuestionScores((prev) => [
-          ...prev,
-          { question: `Q${current}`, score: 0 },
-        ]);
-        setQuestionReviews((prev) => [
-          ...prev,
-          {
-            question: `Q${current}`,
-            prompt: questions[current - 1],
-            answer,
-            score: 0,
-            status: "ai",
-            reason: detectData.reason,
-          },
-        ]);
-      } else if (evalData.feedback) {
+      if (evalData.feedback) {
         const score = toPercentScore(evalData.feedback.compositeScore);
 
         setFeedback(evalData.feedback);
@@ -319,8 +287,6 @@ export default function InterviewPage() {
           },
         ]);
       }
-
-      if (detectData) setAiDetected(detectData);
     } catch {
       // fallback
     } finally {
@@ -336,7 +302,6 @@ export default function InterviewPage() {
       });
     } else {
       setCurrent((c) => c + 1);
-      setAiDetected(null);
       resetTimer();
       setStage("interview");
     }
@@ -485,30 +450,11 @@ export default function InterviewPage() {
                 </p>
               </div>
 
-              {aiDetected?.isAI ? (
-                <div className="mt-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-6">
-                  <AlertTriangle className="mt-1 shrink-0" size={24} color="#ef4444" />
-                  <div>
-                    <p className="font-inter font-bold text-base text-red-700">
-                      AI-generated answer detected ({aiDetected.confidence}% confidence)
-                    </p>
-                    <p className="font-inter text-sm text-red-600 mt-1 mb-4">
-                      {aiDetected.reason}
-                    </p>
-                    <p className="font-inter text-sm text-red-700 font-medium">
-                      This answer will receive 0 score and will be included in your final summary.
-                    </p>
-                    <button
-                      onClick={handleNext}
-                      className="mt-4 bg-red-600 hover:bg-red-700 text-white font-inter font-semibold text-sm px-6 py-3 rounded-xl transition-all"
-                    >
-                      Continue
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <FeedbackPanel feedback={feedback} onNext={handleNext} />
-              )}
+              <FeedbackPanel
+                feedback={feedback}
+                onNext={handleNext}
+                isFinalQuestion={current >= TOTAL}
+              />
             </motion.div>
           )}
         </AnimatePresence>

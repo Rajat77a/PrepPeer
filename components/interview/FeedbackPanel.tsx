@@ -2,16 +2,18 @@
 
 import { Button } from "@/components/ui/Button";
 import type { FeedbackData } from "@/lib/types";
+import { ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface FeedbackPanelProps {
   feedback: FeedbackData;
   onNext: () => void;
+  isFinalQuestion?: boolean;
 }
 
 const clampScore = (value: number) => Math.min(10, Math.max(0, Number.isFinite(value) ? value : 0));
 
-export function FeedbackPanel({ feedback, onNext }: FeedbackPanelProps) {
+export function FeedbackPanel({ feedback, onNext, isFinalQuestion = false }: FeedbackPanelProps) {
   const dimensions = feedback.dimensions.map((dimension) => ({
     ...dimension,
     value: clampScore(dimension.value),
@@ -89,9 +91,31 @@ export function FeedbackPanel({ feedback, onNext }: FeedbackPanelProps) {
         </div>
 
         <div className="pt-1">
-          <Button variant="primary" fullWidth showArrow onClick={onNext}>
-            Next Question
-          </Button>
+          {isFinalQuestion ? (
+            <motion.button
+              type="button"
+              onClick={onNext}
+              className="group relative flex w-full items-center justify-center overflow-hidden rounded-2xl bg-navy px-[26px] py-4 font-inter text-base font-extrabold text-white shadow-[0_18px_42px_rgba(27,43,94,0.26)]"
+              whileHover={{
+                scale: 1.015,
+                boxShadow: "0 22px 52px rgba(0,132,255,0.32)",
+              }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+            >
+              <span className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-blue/45 to-transparent transition-transform duration-500 group-hover:translate-x-[220%]" />
+              <span className="relative flex items-center gap-3">
+                Finish Session
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/16 text-white transition-transform duration-300 group-hover:translate-x-1">
+                  <ArrowRight size={15} strokeWidth={2.5} />
+                </span>
+              </span>
+            </motion.button>
+          ) : (
+            <Button variant="primary" fullWidth showArrow onClick={onNext}>
+              Next Question
+            </Button>
+          )}
         </div>
       </div>
     </motion.section>
