@@ -17,9 +17,9 @@ const SCORE_INSIGHTS = [
 ];
 
 const RANK_MOVEMENT = [
-  { label: "Start", rank: "#67", x: "8%", y: "72%" },
-  { label: "After Q3", rank: "#52", x: "34%", y: "49%" },
-  { label: "Final", rank: "#41", x: "68%", y: "22%" },
+  { label: "Session start", rank: "#67", score: "52", color: "bg-[#C8D2E0]" },
+  { label: "After question 3", rank: "#52", score: "64", color: "bg-gold" },
+  { label: "Final position", rank: "#41", score: "72", color: "bg-blue" },
 ];
 
 export function Features() {
@@ -96,31 +96,46 @@ export function Features() {
               A quick visual trail of how one session changes your position. The
               full leaderboard below stays reserved for the real ranked board.
             </p>
-            <div className="relative mt-2 min-h-[190px] flex-1 overflow-hidden rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[#FAFBFD] p-5">
-              <div className="absolute left-8 right-8 top-[52%] h-px bg-gradient-to-r from-gold via-blue to-green" />
+            <div className="relative mt-2 flex-1 overflow-hidden rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[#FAFBFD] p-4">
+              <div className="absolute left-8 top-8 bottom-[72px] w-px bg-gradient-to-b from-[#C8D2E0] via-gold to-blue" />
               {RANK_MOVEMENT.map((point, index) => (
                 <motion.div
                   key={point.label}
-                  className="absolute"
-                  style={{ left: point.x, top: point.y }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  className="relative z-[1] mb-3 flex items-center gap-3 rounded-xl bg-white p-3 shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-transform duration-300 group-hover:translate-x-1"
+                  initial={{ opacity: 0, x: -12 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, amount: 0.4 }}
                   transition={{ duration: 0.35, delay: index * 0.12 }}
                 >
-                  <div className="transition-transform duration-300 group-hover:-translate-y-1">
+                  <span className={`h-3 w-3 shrink-0 rounded-full ${point.color}`} />
+                  <div className="min-w-0 flex-1">
                     <p className="font-inter text-[11px] font-semibold text-muted">
                       {point.label}
                     </p>
-                    <p className="font-fustat text-2xl font-extrabold text-text">
-                      {point.rank}
-                    </p>
+                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#E9EEF5]">
+                      <div
+                        className={`h-full rounded-full ${point.color}`}
+                        style={{ width: `${Number(point.score)}%` }}
+                      />
+                    </div>
                   </div>
+                  <p className="font-fustat text-2xl font-extrabold text-text">
+                    {point.rank}
+                  </p>
                 </motion.div>
               ))}
-              <div className="absolute bottom-5 left-5 right-5 rounded-xl bg-white/80 p-3 shadow-[0_12px_30px_rgba(0,0,0,0.05)]">
-                <p className="font-inter text-xs font-semibold text-text">
-                  Your rank jumps when answers become specific.
+              <div className="relative z-[1] mt-4 rounded-xl border border-[rgba(0,132,255,0.12)] bg-[rgba(0,132,255,0.06)] p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-inter text-xs font-semibold text-text">
+                    Rank lift this session
+                  </p>
+                  <p className="font-fustat text-xl font-extrabold text-blue">
+                    +26
+                  </p>
+                </div>
+                <p className="mt-1 font-inter text-[11px] leading-5 text-muted">
+                  Specific examples and stronger reasoning moved the candidate
+                  from mid-pack into the visible chase group.
                 </p>
               </div>
             </div>
