@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpenText, ChevronRight, ListChecks, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SessionScoreCard } from "@/components/results/SessionScoreCard";
@@ -13,7 +13,6 @@ import type { SessionReport } from "@/lib/types";
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
   const [briefOpen, setBriefOpen] = useState(false);
-  const summaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -49,13 +48,20 @@ export default function ResultsPage() {
     }
   };
 
-  const handleSummaryJump = () => {
-    summaryRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const summaryPreview =
     report.summary?.overallSummary ??
     "Review the final assessment, priority improvements, and question-by-question notes.";
+
+  useEffect(() => {
+    if (!briefOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [briefOpen]);
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -131,9 +137,6 @@ export default function ResultsPage() {
 
         <SessionScoreCard report={report} onShare={handleShare} />
         <QuestionBreakdownChart data={report.questionScores} />
-        <div ref={summaryRef} id="session-summary" className="scroll-mt-24">
-          <SessionSummary summary={report.summary} />
-        </div>
       </div>
 
       <AnimatePresence>
@@ -182,16 +185,6 @@ export default function ResultsPage() {
                   </div>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBriefOpen(false);
-                    window.setTimeout(handleSummaryJump, 180);
-                  }}
-                  className="mt-4 w-full rounded-2xl border border-[rgba(0,132,255,0.16)] bg-white px-4 py-3 font-inter text-sm font-bold text-blue transition hover:bg-[rgba(0,132,255,0.05)]"
-                >
-                  View full summary section
-                </button>
               </div>
             </motion.aside>
           </motion.div>
