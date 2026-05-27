@@ -17,9 +17,9 @@ const SCORE_INSIGHTS = [
 ];
 
 const RANK_MOVEMENT = [
-  { label: "Session start", rank: "#67", score: "52", color: "bg-[#C8D2E0]" },
-  { label: "After question 3", rank: "#52", score: "64", color: "bg-gold" },
-  { label: "Final position", rank: "#41", score: "72", color: "bg-blue" },
+  { label: "Session start", rank: "#67", score: 52, color: "bg-[#C8D2E0]" },
+  { label: "After question 3", rank: "#52", score: 64, color: "bg-gold" },
+  { label: "Final position", rank: "#41", score: 72, color: "bg-blue" },
 ];
 
 export function Features() {
@@ -110,13 +110,18 @@ export function Features() {
                   >
                     <span className={`h-3 w-3 shrink-0 rounded-full ${point.color}`} />
                     <div className="min-w-0 flex-1">
-                      <p className="font-inter text-[11px] font-semibold text-muted">
-                        {point.label}
-                      </p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-inter text-[11px] font-semibold text-muted">
+                          {point.label}
+                        </p>
+                        <p className="font-inter text-[10px] font-bold text-muted">
+                          {point.score}/100 score
+                        </p>
+                      </div>
                       <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#E9EEF5]">
                         <div
                           className={`h-full rounded-full ${point.color}`}
-                          style={{ width: `${Number(point.score)}%` }}
+                          style={{ width: `${point.score}%` }}
                         />
                       </div>
                     </div>
