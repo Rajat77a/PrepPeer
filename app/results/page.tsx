@@ -157,13 +157,14 @@ export default function ResultsPage() {
       <AnimatePresence>
         {briefOpen && (
           <motion.div
-            className="fixed inset-0 z-[300] overflow-hidden bg-[rgba(10,10,15,0.42)] px-4 py-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[300] overflow-y-auto overscroll-contain bg-[rgba(10,10,15,0.42)] px-4 py-6 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            style={{ WebkitOverflowScrolling: "touch" }}
           >
             <motion.aside
-              className="ml-auto flex h-full w-full max-w-[720px] flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_32px_90px_rgba(0,0,0,0.24)]"
+              className="ml-auto flex min-h-full w-full max-w-[720px] flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_32px_90px_rgba(0,0,0,0.24)]"
               initial={{ opacity: 0, x: 80, rotateY: -8 }}
               animate={{ opacity: 1, x: 0, rotateY: 0 }}
               exit={{ opacity: 0, x: 80, rotateY: -8 }}
@@ -189,7 +190,7 @@ export default function ResultsPage() {
                 </button>
               </div>
 
-              <div className="flex-1 overscroll-contain overflow-y-auto p-5">
+              <div className="p-5">
                 {report.summary ? (
                   <SessionSummary summary={report.summary} />
                 ) : (
