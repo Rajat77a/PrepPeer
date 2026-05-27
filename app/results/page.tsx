@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BookOpenText, ChevronRight } from "lucide-react";
-import { motion } from "framer-motion";
+import { BookOpenText, ChevronRight, ListChecks, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { SessionScoreCard } from "@/components/results/SessionScoreCard";
 import { QuestionBreakdownChart } from "@/components/results/QuestionBreakdownChart";
 import { SessionSummary } from "@/components/results/SessionSummary";
@@ -12,6 +12,7 @@ import type { SessionReport } from "@/lib/types";
 
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
+  const [briefOpen, setBriefOpen] = useState(false);
   const summaryRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function ResultsPage() {
       <Navbar variant="inner" />
 
       <div className="max-w-[900px] mx-auto px-6 py-20">
-        <div className="mb-8 grid gap-5 lg:grid-cols-[1fr_320px] lg:items-end">
+        <div className="mb-8">
           <div>
             <h1 className="font-fustat font-extrabold text-3xl text-text mb-2">
               Session Report
@@ -74,35 +75,56 @@ export default function ResultsPage() {
 
           <motion.button
             type="button"
-            onClick={handleSummaryJump}
-            className="group relative overflow-hidden rounded-2xl border border-[rgba(0,132,255,0.16)] bg-white p-4 text-left shadow-[0_18px_42px_rgba(0,132,255,0.09)]"
+            onClick={() => setBriefOpen(true)}
+            className="group relative mt-6 w-full overflow-hidden rounded-[24px] border border-[rgba(0,132,255,0.14)] bg-white text-left shadow-[0_22px_60px_rgba(0,132,255,0.09)]"
             whileHover={{
               y: -4,
               rotateX: 3,
-              rotateY: -4,
-              boxShadow: "0 24px 56px rgba(0,132,255,0.16)",
+              boxShadow: "0 28px 70px rgba(0,132,255,0.16)",
             }}
             whileTap={{ scale: 0.98 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
             style={{ transformStyle: "preserve-3d" }}
           >
-            <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-[rgba(0,132,255,0.16)] to-transparent transition-transform duration-500 group-hover:translate-x-4" />
-            <div className="relative flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[rgba(0,132,255,0.08)] text-blue">
-                <BookOpenText size={20} strokeWidth={2} />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-inter text-[11px] font-bold uppercase tracking-[0.18em] text-blue">
-                  Session brief
+            <div className="absolute inset-y-0 right-0 w-56 bg-gradient-to-l from-[rgba(0,132,255,0.14)] to-transparent transition-transform duration-500 group-hover:translate-x-8" />
+            <div className="relative grid gap-5 p-5 sm:grid-cols-[140px_1fr_auto] sm:items-center">
+              <div className="relative hidden h-[116px] sm:block">
+                <div className="absolute left-8 top-5 h-20 w-24 rotate-[-10deg] rounded-2xl border border-[rgba(0,132,255,0.12)] bg-[#EAF5FF]" />
+                <div className="absolute left-12 top-3 h-24 w-28 rotate-[7deg] rounded-2xl border border-[rgba(0,200,150,0.14)] bg-[#ECFFF9]" />
+                <div className="absolute left-5 top-0 flex h-28 w-28 items-center justify-center rounded-2xl border border-[rgba(0,132,255,0.16)] bg-white shadow-[0_18px_42px_rgba(0,132,255,0.12)] transition-transform duration-300 group-hover:-translate-y-1 group-hover:rotate-[-3deg]">
+                  <BookOpenText size={32} className="text-blue" strokeWidth={1.8} />
+                </div>
+              </div>
+
+              <div className="min-w-0">
+                <p className="font-inter text-[11px] font-bold uppercase tracking-[0.22em] text-blue">
+                  Session brief is ready
                 </p>
-                <p className="mt-1 line-clamp-2 font-inter text-sm leading-6 text-text">
+                <h2 className="mt-2 font-fustat text-2xl font-extrabold text-text">
+                  Open the short version first.
+                </h2>
+                <p className="mt-2 line-clamp-2 font-inter text-sm leading-6 text-muted">
                   {summaryPreview}
                 </p>
+                <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 font-inter text-xs font-semibold text-text">
+                  <span className="inline-flex items-center gap-2">
+                    <ListChecks size={14} className="text-green" />
+                    Priority fixes
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <BookOpenText size={14} className="text-blue" />
+                    Question notes
+                  </span>
+                </div>
               </div>
-              <ChevronRight
-                size={18}
-                className="mt-2 shrink-0 text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:text-blue"
-              />
+
+              <div className="flex items-center justify-between rounded-2xl bg-navy px-4 py-3 text-white sm:min-w-[150px] sm:justify-center">
+                <span className="font-inter text-sm font-extrabold">Open Brief</span>
+                <ChevronRight
+                  size={18}
+                  className="ml-3 transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </div>
             </div>
           </motion.button>
         </div>
@@ -113,6 +135,68 @@ export default function ResultsPage() {
           <SessionSummary summary={report.summary} />
         </div>
       </div>
+
+      <AnimatePresence>
+        {briefOpen && (
+          <motion.div
+            className="fixed inset-0 z-[300] bg-[rgba(10,10,15,0.42)] px-4 py-6 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.aside
+              className="ml-auto flex h-full w-full max-w-[720px] flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_32px_90px_rgba(0,0,0,0.24)]"
+              initial={{ opacity: 0, x: 80, rotateY: -8 }}
+              animate={{ opacity: 1, x: 0, rotateY: 0 }}
+              exit={{ opacity: 0, x: 80, rotateY: -8 }}
+              transition={{ type: "spring", stiffness: 320, damping: 30 }}
+              style={{ transformStyle: "preserve-3d" }}
+            >
+              <div className="flex items-start justify-between gap-4 border-b border-[rgba(0,0,0,0.08)] bg-[#FAFBFD] p-5">
+                <div>
+                  <p className="font-inter text-[11px] font-bold uppercase tracking-[0.22em] text-blue">
+                    Session brief
+                  </p>
+                  <h2 className="mt-1 font-fustat text-2xl font-extrabold text-text">
+                    What to read first
+                  </h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setBriefOpen(false)}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[rgba(0,0,0,0.08)] bg-white text-muted transition hover:text-text"
+                  aria-label="Close session brief"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-5">
+                {report.summary ? (
+                  <SessionSummary summary={report.summary} />
+                ) : (
+                  <div className="rounded-2xl border border-[rgba(0,132,255,0.14)] bg-[rgba(0,132,255,0.05)] p-5">
+                    <p className="font-inter text-sm leading-6 text-muted">
+                      The session brief will appear here after your interview results are saved.
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setBriefOpen(false);
+                    window.setTimeout(handleSummaryJump, 180);
+                  }}
+                  className="mt-4 w-full rounded-2xl border border-[rgba(0,132,255,0.16)] bg-white px-4 py-3 font-inter text-sm font-bold text-blue transition hover:bg-[rgba(0,132,255,0.05)]"
+                >
+                  Go to summary section
+                </button>
+              </div>
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
