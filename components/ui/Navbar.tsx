@@ -70,15 +70,24 @@ export function Navbar({
       <nav
         className={cn(
           "glass-nav pointer-events-auto relative",
-          "flex items-center gap-2 sm:gap-4 w-full max-w-[1100px]",
-          "px-3 sm:px-5 py-2.5 sm:py-3 rounded-full"
+          "flex w-full max-w-[1100px] items-stretch gap-2.5 sm:items-center sm:gap-4",
+          "px-4 py-3 sm:px-5 sm:py-3 rounded-[28px] sm:rounded-full"
         )}
       >
         <NavSparkles />
-        <div className="relative z-[1] flex items-center gap-2 sm:gap-4 w-full">
-          <Logo />
+        <div className="relative z-[1] flex w-full flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
+          <div className="flex items-center justify-between gap-3 sm:contents">
+            <Logo />
 
-          <div className="flex flex-1 items-center justify-center gap-2 sm:gap-4 md:gap-6 min-w-0 overflow-x-auto scrollbar-none">
+            <Link
+              href="/interview"
+              className="shrink-0 font-inter font-bold text-sm text-blue cursor-pointer relative z-[1] sm:hidden"
+            >
+              Start
+            </Link>
+          </div>
+
+          <div className="flex min-w-0 flex-wrap items-center justify-center gap-x-3 gap-y-1.5 sm:flex-1 sm:flex-nowrap sm:gap-4 sm:overflow-x-auto md:gap-6 scrollbar-none">
             {NAV_LINKS.map((link) => (
               <NavSectionLink
                 key={link.label}
@@ -94,13 +103,6 @@ export function Navbar({
               Start Free
             </Button>
           </div>
-
-          <Link
-            href="/interview"
-            className="sm:hidden shrink-0 font-inter font-semibold text-xs text-blue px-2 py-1 cursor-pointer relative z-[1]"
-          >
-            Start
-          </Link>
         </div>
       </nav>
     </motion.div>
