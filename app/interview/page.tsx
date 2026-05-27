@@ -37,6 +37,7 @@ export default function InterviewPage() {
   const [aiDetected, setAiDetected] = useState<{ isAI: boolean; confidence: number; reason: string } | null>(null);
   const [questionScores, setQuestionScores] = useState<{ question: string; score: number }[]>([]);
   const [questionReviews, setQuestionReviews] = useState<QuestionReview[]>([]);
+  const [dimensionHistory, setDimensionHistory] = useState<typeof MOCK_FEEDBACK.dimensions[]>([]);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -107,14 +108,27 @@ export default function InterviewPage() {
         reason: "No valid answer was submitted.",
       },
       {
-        label: "Confidence",
+        label: "Accuracy",
         value: 0,
         color: "#0084FF",
         reason: "No valid answer was submitted.",
       },
     ];
 
-    const resultDimensions = validScores.length > 0 ? feedback.dimensions : zeroDimensions;
+    const resultDimensions =
+      dimensionHistory.length > 0
+        ? dimensionHistory[0].map((dimension, index) => {
+            const total = dimensionHistory.reduce(
+              (sum, item) => sum + (item[index]?.value ?? 0),
+              0
+            );
+
+            return {
+              ...dimension,
+              value: Number((total / dimensionHistory.length).toFixed(1)),
+            };
+          })
+        : zeroDimensions;
 
     let aiSummary: {
       overallSummary?: string;
@@ -170,7 +184,7 @@ export default function InterviewPage() {
         router.push("/results");
       });
     }
-  }, [shouldAutoSubmit, router, questionReviews]);
+  }, [shouldAutoSubmit, router, questionReviews, dimensionHistory]);
 
   const handleStart = async (profileSetup = setup) => {
     if (!profileSetup.domain || !profileSetup.experience || !profileSetup.companyType) {
@@ -195,6 +209,7 @@ export default function InterviewPage() {
         setQuestions(data.questions);
         setQuestionScores([]);
         setQuestionReviews([]);
+        setDimensionHistory([]);
         sessionStorage.removeItem("preppeer_results");
         setStage("interview");
       } else {
@@ -284,6 +299,7 @@ export default function InterviewPage() {
         const score = toPercentScore(evalData.feedback.compositeScore);
 
         setFeedback(evalData.feedback);
+        setDimensionHistory((prev) => [...prev, evalData.feedback.dimensions]);
         setQuestionScores((prev) => [
           ...prev,
           { question: `Q${current}`, score },
