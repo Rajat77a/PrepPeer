@@ -27,10 +27,7 @@ export function CTA() {
 
       <ScrollReveal direction="none" duration={0.8}>
         <div className="relative z-10 max-w-[800px] mx-auto text-center">
-          <span className="chip mb-6 !bg-white/10 !border-white/20 !text-white/80 inline-flex">
-            Free forever plan
-          </span>
-          <h2 className="section-title text-white mt-4">Your rank is waiting.</h2>
+          <h2 className="section-title text-white">Your rank is waiting.</h2>
           <p className="font-inter text-base text-white/60 mt-4 mb-10 max-w-lg mx-auto leading-[1.65]">
             Join 12,400+ students who already know where they stand. Start your
             first free interview in 60 seconds.

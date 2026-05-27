@@ -17,14 +17,22 @@ export function LeaderboardSection() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center mt-16 max-w-6xl mx-auto">
         <ScrollReveal direction="left" duration={0.8}>
-          <HoverCard className="leaderboard-mock rounded-3xl overflow-hidden border border-[rgba(0,132,255,0.15)] shadow-[0_32px_80px_rgba(0,132,255,0.1)] bg-white">
-            <div className="bg-navy px-6 py-5 flex items-center justify-between">
-              <span className="font-fustat font-bold text-base text-white">
-                Software Engineering · Fresher
-              </span>
-              <span className="text-xs font-inter px-3 py-1 rounded-full bg-white/10 text-white/50">
-                This week
-              </span>
+          <HoverCard className="leaderboard-mock group rounded-3xl overflow-hidden border border-[rgba(0,132,255,0.15)] shadow-[0_32px_80px_rgba(0,132,255,0.1)] bg-white">
+            <div className="relative overflow-hidden bg-navy px-6 py-5">
+              <div className="absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-blue/30 to-transparent transition-transform duration-500 group-hover:translate-x-8" />
+              <div className="relative flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-inter text-[11px] font-bold uppercase tracking-[0.18em] text-white/45">
+                    Live board preview
+                  </p>
+                  <span className="font-fustat font-bold text-base text-white">
+                    Software Engineering - Fresher
+                  </span>
+                </div>
+                <span className="font-inter text-xs font-semibold text-white/65">
+                  This week
+                </span>
+              </div>
             </div>
             {LEADERBOARD_PREVIEW.map((entry) => (
               <LeaderboardRow key={entry.rank} entry={entry} compact />
@@ -34,7 +42,7 @@ export function LeaderboardSection() {
             href="/leaderboard"
             className="inline-flex mt-6 font-inter font-semibold text-sm text-blue hover:underline cursor-pointer"
           >
-            View full leaderboard →
+            View full leaderboard
           </Link>
         </ScrollReveal>
 
