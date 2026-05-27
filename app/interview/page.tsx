@@ -34,8 +34,8 @@ export default function InterviewPage() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
   const [evaluating, setEvaluating] = useState(false);
-  const [aiDetected, setAiDetected] = useState<{isAI: boolean, confidence: number, reason: string} | null>(null);
-  const [questionScores, setQuestionScores] = useState<{question: string, score: number}[]>([]);
+  const [aiDetected, setAiDetected] = useState<{ isAI: boolean; confidence: number; reason: string } | null>(null);
+  const [questionScores, setQuestionScores] = useState<{ question: string; score: number }[]>([]);
   const [questionReviews, setQuestionReviews] = useState<QuestionReview[]>([]);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
@@ -87,6 +87,35 @@ export default function InterviewPage() {
       ? Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length)
       : 0;
 
+    const zeroDimensions = [
+      {
+        label: "Communication",
+        value: 0,
+        color: "#0084FF",
+        reason: "No valid answer was submitted.",
+      },
+      {
+        label: "Problem Solving",
+        value: 0,
+        color: "#319AFF",
+        reason: "No valid answer was submitted.",
+      },
+      {
+        label: "Specificity",
+        value: 0,
+        color: "#FF6B3D",
+        reason: "No valid answer was submitted.",
+      },
+      {
+        label: "Confidence",
+        value: 0,
+        color: "#0084FF",
+        reason: "No valid answer was submitted.",
+      },
+    ];
+
+    const resultDimensions = validScores.length > 0 ? feedback.dimensions : zeroDimensions;
+
     let aiSummary: {
       overallSummary?: string;
       needsImprovement?: string[];
@@ -111,7 +140,7 @@ export default function InterviewPage() {
       "preppeer_results",
       JSON.stringify({
         compositeScore,
-        dimensions: feedback.dimensions,
+        dimensions: resultDimensions,
         questionScores: allQuestionScores,
         summary: {
           completionReason,
