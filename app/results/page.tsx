@@ -55,11 +55,26 @@ export default function ResultsPage() {
   useEffect(() => {
     if (!briefOpen) return;
 
-    const originalOverflow = document.body.style.overflow;
+    const scrollY = window.scrollY;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalBodyPosition = document.body.style.position;
+    const originalBodyTop = document.body.style.top;
+    const originalBodyWidth = document.body.style.width;
+
+    document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.body.style.overflow = originalBodyOverflow;
+      document.body.style.position = originalBodyPosition;
+      document.body.style.top = originalBodyTop;
+      document.body.style.width = originalBodyWidth;
+      window.scrollTo(0, scrollY);
     };
   }, [briefOpen]);
 
@@ -142,7 +157,7 @@ export default function ResultsPage() {
       <AnimatePresence>
         {briefOpen && (
           <motion.div
-            className="fixed inset-0 z-[300] bg-[rgba(10,10,15,0.42)] px-4 py-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[300] overflow-hidden bg-[rgba(10,10,15,0.42)] px-4 py-6 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -174,7 +189,7 @@ export default function ResultsPage() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-5">
+              <div className="flex-1 overscroll-contain overflow-y-auto p-5">
                 {report.summary ? (
                   <SessionSummary summary={report.summary} />
                 ) : (
