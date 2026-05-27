@@ -77,6 +77,30 @@ export interface QuestionScore {
   score: number;
 }
 
+export type QuestionReviewStatus =
+  | "answered"
+  | "ai"
+  | "gibberish"
+  | "autoSkipped";
+
+export interface QuestionReview {
+  question: string;
+  prompt: string;
+  answer?: string;
+  score: number;
+  status: QuestionReviewStatus;
+  summary?: string;
+  improvement?: string;
+  reason?: string;
+}
+
+export interface AISessionSummary {
+  completionReason: "completed" | "autoSubmitted";
+  overallSummary: string;
+  needsImprovement: string[];
+  questionReviews: QuestionReview[];
+}
+
 export interface SessionReport {
   name: string;
   role: string;
@@ -89,6 +113,7 @@ export interface SessionReport {
   totalCandidates: number;
   dimensions: DimensionScore[];
   questionScores: QuestionScore[];
+  summary?: AISessionSummary;
 }
 
 export interface FeedbackData {
