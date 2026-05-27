@@ -33,6 +33,7 @@ html {
   scroll-padding-top: 100px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
 }
 
 section[id] {
@@ -115,6 +116,14 @@ body {
   transform: scale(1.08);
   transform-origin: center center;
   filter: hue-rotate(-55deg) saturate(250%) brightness(1.2) contrast(1.1);
+  background: transparent;
+}
+
+@media (max-width: 767px) {
+  .orb-logo-video,
+  .orb-video {
+    display: none !important;
+  }
 }
 
 .section-padding {
@@ -292,6 +301,14 @@ body {
   mix-blend-mode: screen;
   transform: scale(1.25);
   filter: hue-rotate(-55deg) saturate(250%) brightness(1.2) contrast(1.1);
+  background: transparent;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .orb-logo-video,
+  .orb-video {
+    display: none !important;
+  }
 }
 
 /* Hero orb only — floating animation */
