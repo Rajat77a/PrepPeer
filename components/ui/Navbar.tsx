@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "./Button";
 import { NavSectionLink } from "./NavSectionLink";
@@ -81,9 +82,12 @@ export function Navbar({
 
             <Link
               href="/interview"
-              className="shrink-0 font-inter font-bold text-sm text-blue cursor-pointer relative z-[1] sm:hidden"
+              className="relative z-[1] inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[rgba(0,132,255,0.18)] bg-white/55 px-3 py-1.5 font-inter text-[12px] font-extrabold text-blue shadow-[inset_0_1px_1px_rgba(255,255,255,0.75),0_8px_20px_rgba(0,132,255,0.12)] backdrop-blur-md transition active:scale-[0.98] sm:hidden"
             >
               Start
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue text-white">
+                <ArrowRight size={12} strokeWidth={2.6} />
+              </span>
             </Link>
           </div>
 
