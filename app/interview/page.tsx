@@ -49,7 +49,7 @@ export default function InterviewPage() {
     timerDisplay,
     resetTimer,
     textareaProps,
-  } = useAntiCheat(stage === "interview" || stage === "feedback");
+  } = useAntiCheat(stage === "interview" && !evaluating);
 
   useEffect(() => {
     if (shouldAutoSubmit) {
@@ -180,7 +180,7 @@ export default function InterviewPage() {
     }
   };
 
-  // ── Setup screen ──────────────────────────────────────────────
+  // Setup screen
   if (stage === "setup" || stage === "terms") {
     return (
       <div className="min-h-screen bg-white">
@@ -231,7 +231,7 @@ export default function InterviewPage() {
     );
   }
 
-  // ── Interview / Feedback screen ───────────────────────────────
+  // Interview / Feedback screen
   return (
     <div
       className="min-h-screen bg-white"
@@ -246,7 +246,7 @@ export default function InterviewPage() {
       />
       <Navbar
         variant="inner"
-        sessionLabel={`${setup.domain} · ${setup.experience} · ${setup.companyType}`}
+        sessionLabel={`${setup.domain} - ${setup.experience} - ${setup.companyType}`}
         progress={{ current, total: TOTAL }}
       />
       <div className="max-w-[800px] mx-auto px-6 py-20">
@@ -293,7 +293,7 @@ export default function InterviewPage() {
                 className="flex flex-col items-center justify-center py-20 gap-4"
               >
                 <div className="w-10 h-10 border-4 border-[#319AFF] border-t-transparent rounded-full animate-spin" />
-                <p className="font-inter text-muted text-sm">Evaluating your answer…</p>
+                <p className="font-inter text-muted text-sm">Evaluating your answer...</p>
               </motion.div>
             ) : (
               <motion.div
@@ -322,13 +322,13 @@ export default function InterviewPage() {
             >
               <div className="rounded-3xl p-10 bg-white border border-[rgba(0,132,255,0.15)] opacity-60">
                 <p className="font-inter text-sm text-muted mb-2">
-                  Question {current} of {TOTAL} — submitted
+                  Question {current} of {TOTAL} - submitted
                 </p>
               </div>
 
               {aiDetected?.isAI ? (
                 <div className="mt-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-6">
-                  <span className="text-red-500 text-2xl">⚠️</span>
+                  <AlertTriangle className="mt-1 shrink-0" size={24} color="#ef4444" />
                   <div>
                     <p className="font-inter font-bold text-base text-red-700">
                       AI-generated answer detected ({aiDetected.confidence}% confidence)

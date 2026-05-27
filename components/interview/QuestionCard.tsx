@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { countWords } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface QuestionCardProps {
   questionNumber: number;
@@ -28,36 +30,83 @@ export function QuestionCard({
   const wordCount = countWords(answer);
   const minWords = 20;
   const canSubmit = wordCount >= minWords;
+  const wordProgress = Math.min(100, Math.round((wordCount / minWords) * 100));
 
   return (
-    <div className="rounded-3xl p-10 bg-white border border-[rgba(0,132,255,0.15)] shadow-[0_8px_40px_rgba(0,132,255,0.08)]">
-      <p className="font-inter font-medium text-[13px] text-muted">
-        Question {questionNumber} of {totalQuestions}
-      </p>
-      <h2 className="font-fustat font-bold text-[22px] text-text leading-[1.4] my-3 mb-7">
-        {question ?? "Loading question…"}
-      </h2>
-      <textarea
-        value={answer}
-        onChange={(e) => setAnswer(e.target.value)}
-        placeholder="Type your answer here... (minimum 20 words)"
-        className="w-full min-h-[180px] rounded-xl border border-[rgba(0,0,0,0.1)] p-4 font-inter text-[15px] resize-y outline-none focus:border-blue focus:shadow-[0_0_0_3px_rgba(0,132,255,0.1)] transition-shadow"
-        {...(antiCheatProps ?? {})}
-      />
-      <p className="font-inter text-[13px] text-muted text-right mt-2">
-        {wordCount} / {minWords} words minimum
-      </p>
-      <div className="mt-6">
-        <Button
-          variant="primary"
-          fullWidth
-          showArrow
-          disabled={!canSubmit}
-          onClick={() => onSubmit(answer)}
-        >
-          Submit Answer
-        </Button>
+    <motion.section
+      className="overflow-hidden border border-[rgba(0,0,0,0.08)] bg-white shadow-[0_18px_60px_rgba(10,10,15,0.08)]"
+      style={{ borderRadius: 20 }}
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
+      <div className="grid border-b border-[rgba(0,0,0,0.07)] bg-[#FAFBFD] sm:grid-cols-[132px_1fr]">
+        <div className="border-b border-[rgba(0,0,0,0.07)] p-6 sm:border-b-0 sm:border-r">
+          <p className="font-inter text-[11px] font-bold uppercase tracking-[0.18em] text-muted">
+            Question
+          </p>
+          <p className="mt-2 font-inter text-3xl font-extrabold tabular-nums text-text">
+            {questionNumber}
+            <span className="text-base font-bold text-muted">/{totalQuestions}</span>
+          </p>
+        </div>
+
+        <div className="p-6 sm:p-7">
+          <motion.h2
+            className="font-fustat text-[24px] font-extrabold leading-[1.35] text-text"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.06, ease: "easeOut" }}
+          >
+            {question ?? "Loading question..."}
+          </motion.h2>
+        </div>
       </div>
-    </div>
+
+      <div className="p-6 sm:p-7">
+        <div className="relative">
+          <textarea
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            placeholder="Write your answer here. Use examples, tradeoffs, and clear reasoning."
+            className="w-full min-h-[240px] resize-y border border-[rgba(0,0,0,0.12)] bg-white p-5 font-inter text-[15px] leading-7 text-text outline-none transition focus:border-[#0084FF] focus:shadow-[0_0_0_3px_rgba(0,132,255,0.11)]"
+            style={{ borderRadius: 16 }}
+            {...(antiCheatProps ?? {})}
+          />
+          <div className="pointer-events-none absolute bottom-4 right-4 h-10 w-10 border-b-2 border-r-2 border-[rgba(0,132,255,0.2)]" />
+        </div>
+
+        <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+          <div>
+            <div className="h-1.5 overflow-hidden bg-[#E9EEF5]" style={{ borderRadius: 2 }}>
+              <motion.div
+                className="h-full bg-[#0084FF]"
+                style={{ borderRadius: 2 }}
+                animate={{ width: `${wordProgress}%` }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+              />
+            </div>
+            <p className="mt-2 font-inter text-[13px] font-medium text-muted">
+              {wordCount} / {minWords} words minimum
+            </p>
+          </div>
+          <p className="font-inter text-[13px] font-semibold text-muted sm:text-right">
+            Structured answers score better than long answers.
+          </p>
+        </div>
+
+        <div className="mt-6">
+          <Button
+            variant="primary"
+            fullWidth
+            showArrow
+            disabled={!canSubmit}
+            onClick={() => onSubmit(answer)}
+          >
+            Submit Answer
+          </Button>
+        </div>
+      </div>
+    </motion.section>
   );
 }
