@@ -30,10 +30,15 @@ export function SessionSummary({ summary }: SessionSummaryProps) {
         <p className="font-inter text-[11px] font-bold uppercase tracking-[0.18em] text-muted">
           What needs improvement
         </p>
-        <ul className="mt-3 space-y-2">
+
+        <ul className="mt-3 space-y-3">
           {summary.needsImprovement.map((item) => (
-            <li key={item} className="font-inter text-sm text-text">
-              {item}
+            <li
+              key={item}
+              className="flex items-start gap-3 rounded-xl border border-orange-200 bg-orange-50 px-4 py-3 font-inter text-sm leading-6 text-orange-900"
+            >
+              <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-orange-500" />
+              <span>{item}</span>
             </li>
           ))}
         </ul>
@@ -41,11 +46,15 @@ export function SessionSummary({ summary }: SessionSummaryProps) {
 
       <div className="mt-6 space-y-4">
         {summary.questionReviews.map((item) => (
-          <div key={item.question} className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-[#FAFBFD] p-4">
+          <div
+            key={item.question}
+            className="rounded-xl border border-[rgba(0,0,0,0.08)] bg-[#FAFBFD] p-4"
+          >
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p className="font-inter text-sm font-bold text-text">
                 {item.question}: {statusLabel[item.status]}
               </p>
+
               <p className="font-inter text-sm font-extrabold tabular-nums text-text">
                 {item.score}/100
               </p>
