@@ -97,33 +97,35 @@ export function Features() {
               full leaderboard below stays reserved for the real ranked board.
             </p>
             <div className="relative mt-2 flex-1 overflow-hidden rounded-2xl border border-[rgba(0,0,0,0.06)] bg-[#FAFBFD] p-4">
-              <div className="absolute left-8 top-8 bottom-[72px] w-px bg-gradient-to-b from-[#C8D2E0] via-gold to-blue" />
-              {RANK_MOVEMENT.map((point, index) => (
-                <motion.div
-                  key={point.label}
-                  className="relative z-[1] mb-3 flex items-center gap-3 rounded-xl bg-white p-3 shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-transform duration-300 group-hover:translate-x-1"
-                  initial={{ opacity: 0, x: -12 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true, amount: 0.4 }}
-                  transition={{ duration: 0.35, delay: index * 0.12 }}
-                >
-                  <span className={`h-3 w-3 shrink-0 rounded-full ${point.color}`} />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-inter text-[11px] font-semibold text-muted">
-                      {point.label}
-                    </p>
-                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#E9EEF5]">
-                      <div
-                        className={`h-full rounded-full ${point.color}`}
-                        style={{ width: `${Number(point.score)}%` }}
-                      />
+              <div className="relative">
+                <div className="absolute left-4 top-4 bottom-4 w-px bg-gradient-to-b from-[#C8D2E0] via-gold to-blue" />
+                {RANK_MOVEMENT.map((point, index) => (
+                  <motion.div
+                    key={point.label}
+                    className="relative z-[1] mb-3 flex items-center gap-3 rounded-xl bg-white p-3 shadow-[0_8px_24px_rgba(0,0,0,0.04)] transition-transform duration-300 last:mb-0 group-hover:translate-x-1"
+                    initial={{ opacity: 0, x: -12 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true, amount: 0.4 }}
+                    transition={{ duration: 0.35, delay: index * 0.12 }}
+                  >
+                    <span className={`h-3 w-3 shrink-0 rounded-full ${point.color}`} />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-inter text-[11px] font-semibold text-muted">
+                        {point.label}
+                      </p>
+                      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#E9EEF5]">
+                        <div
+                          className={`h-full rounded-full ${point.color}`}
+                          style={{ width: `${Number(point.score)}%` }}
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <p className="font-fustat text-2xl font-extrabold text-text">
-                    {point.rank}
-                  </p>
-                </motion.div>
-              ))}
+                    <p className="font-fustat text-2xl font-extrabold text-text">
+                      {point.rank}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
               <div className="relative z-[1] mt-4 rounded-xl border border-[rgba(0,132,255,0.12)] bg-[rgba(0,132,255,0.06)] p-3">
                 <div className="flex items-center justify-between gap-3">
                   <p className="font-inter text-xs font-semibold text-text">
