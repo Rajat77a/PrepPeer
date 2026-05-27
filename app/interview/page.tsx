@@ -8,6 +8,7 @@ import { FeedbackPanel } from "@/components/interview/FeedbackPanel";
 import { TabSwitchWarning } from "@/components/interview/TabSwitchWarning";
 import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
+import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 import { AlertTriangle, ArrowRight, Clock, LockKeyhole, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -110,6 +111,19 @@ export default function InterviewPage() {
   };
 
   const handleSubmit = async (answer: string) => {
+    const answerQuality = evaluateAnswerQuality(answer);
+    if (!answerQuality.valid) {
+      const zeroFeedback = createZeroFeedback(answerQuality.reason);
+      setFeedback(zeroFeedback);
+      setAiDetected(null);
+      setQuestionScores((prev) => [
+        ...prev,
+        { question: `Q${current}`, score: zeroFeedback.compositeScore },
+      ]);
+      setStage("feedback");
+      return;
+    }
+
     setEvaluating(true);
     try {
       const [evalRes, detectRes] = await Promise.all([
