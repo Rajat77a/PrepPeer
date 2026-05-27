@@ -6,9 +6,146 @@ const clampDimensionScore = (value: unknown) => {
   return Math.min(10, Math.max(0, numeric));
 };
 
+const COMMON_WORDS = new Set([
+  "a",
+  "about",
+  "after",
+  "also",
+  "an",
+  "and",
+  "are",
+  "as",
+  "at",
+  "because",
+  "be",
+  "by",
+  "can",
+  "could",
+  "data",
+  "do",
+  "for",
+  "from",
+  "had",
+  "have",
+  "how",
+  "i",
+  "if",
+  "in",
+  "is",
+  "it",
+  "more",
+  "my",
+  "need",
+  "not",
+  "of",
+  "on",
+  "or",
+  "process",
+  "question",
+  "should",
+  "so",
+  "system",
+  "that",
+  "the",
+  "their",
+  "then",
+  "there",
+  "this",
+  "to",
+  "use",
+  "user",
+  "users",
+  "was",
+  "we",
+  "when",
+  "which",
+  "will",
+  "with",
+  "would",
+]);
+
+const createZeroFeedback = (reason: string) => ({
+  compositeScore: 0,
+  dimensions: [
+    { label: "Communication", value: 0, reason },
+    { label: "Problem Solving", value: 0, reason },
+    { label: "Specificity", value: 0, reason },
+    { label: "Accuracy", value: 0, reason },
+  ],
+  modelAnswer:
+    "A strong answer should directly address the question, explain the reasoning step by step, include relevant tradeoffs, and use concrete technical details or examples.",
+});
+
+const hasEnoughReadableContent = (answer: unknown) => {
+  if (typeof answer !== "string") {
+    return {
+      valid: false,
+      reason: "The answer could not be evaluated because it does not contain readable text.",
+    };
+  }
+
+  const normalized = answer.trim().toLowerCase();
+  const compact = normalized.replace(/\s+/g, "");
+  const letterTokens = normalized.match(/[a-z]+/g) ?? [];
+  const letters = letterTokens.join("");
+  const uniqueTokens = new Set(letterTokens);
+  const tokenCounts = letterTokens.reduce<Record<string, number>>((counts, token) => {
+    counts[token] = (counts[token] ?? 0) + 1;
+    return counts;
+  }, {});
+  const mostRepeatedCount = Math.max(0, ...Object.values(tokenCounts));
+  const repeatedTokenRatio = letterTokens.length ? mostRepeatedCount / letterTokens.length : 1;
+  const uniqueTokenRatio = letterTokens.length ? uniqueTokens.size / letterTokens.length : 0;
+  const commonWordRatio = letterTokens.length
+    ? letterTokens.filter((token) => COMMON_WORDS.has(token)).length / letterTokens.length
+    : 0;
+  const vowelRatio = letters.length
+    ? (letters.match(/[aeiou]/g)?.length ?? 0) / letters.length
+    : 0;
+  const keyboardPatternCount = letterTokens.filter((token) =>
+    /(asdf|qwer|zxcv|hjkl|jkl|dfgh|sdf|fgh|wer|qaz|wsx|poiuy|lkj)/.test(token)
+  ).length;
+  const repeatedCharacterCount = letterTokens.filter((token) => /(.)\1{3,}/.test(token)).length;
+  const shortNoiseRatio = letterTokens.length
+    ? letterTokens.filter((token) => token.length <= 2 && !COMMON_WORDS.has(token)).length / letterTokens.length
+    : 1;
+
+  if (compact.length < 40 || letterTokens.length < 8) {
+    return {
+      valid: false,
+      reason: "The answer is too short or lacks enough readable content to evaluate.",
+    };
+  }
+
+  const looksLikeKeyboardMash =
+    keyboardPatternCount >= 2 ||
+    repeatedCharacterCount >= 2 ||
+    shortNoiseRatio > 0.45 ||
+    vowelRatio < 0.16 ||
+    vowelRatio > 0.62;
+
+  const lacksLanguageStructure =
+    commonWordRatio < 0.16 &&
+    (uniqueTokenRatio < 0.5 || repeatedTokenRatio > 0.25 || looksLikeKeyboardMash);
+
+  if (looksLikeKeyboardMash || lacksLanguageStructure) {
+    return {
+      valid: false,
+      reason: "The answer appears to be random or nonsensical text, so it cannot receive interview credit.",
+    };
+  }
+
+  return { valid: true, reason: "" };
+};
+
 export async function POST(req: NextRequest) {
   try {
     const { question, answer, domain, experience } = await req.json();
+
+    const answerQuality = hasEnoughReadableContent(answer);
+    if (!answerQuality.valid) {
+      return NextResponse.json({ feedback: createZeroFeedback(answerQuality.reason) });
+    }
 
     const apiKey = process.env.GROQ_API_KEY;
 
@@ -27,7 +164,7 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "user",
-            content: `You are a strict technical interviewer evaluating a candidate's answer. Be harsh and accurate — do not give high scores unless the answer truly deserves it.
+            content: `You are a strict technical interviewer evaluating a candidate's answer. Be harsh and accurate - do not give high scores unless the answer truly deserves it.
 
 Question: ${question}
 Candidate Level: ${experience}
