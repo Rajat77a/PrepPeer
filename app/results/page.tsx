@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import type { TouchEvent, WheelEvent } from "react";
 import { BookOpenText, ChevronRight, ListChecks, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SessionScoreCard } from "@/components/results/SessionScoreCard";
@@ -13,6 +14,8 @@ import type { SessionReport } from "@/lib/types";
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
   const [briefOpen, setBriefOpen] = useState(false);
+  const reviewScrollRef = useRef<HTMLDivElement>(null);
+  const lastTouchYRef = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -51,6 +54,34 @@ export default function ResultsPage() {
   const summaryPreview =
     report.summary?.overallSummary ??
     "Review the final assessment, priority improvements, and question-by-question notes.";
+
+  const scrollReviewPanel = (amount: number) => {
+    const scroller = reviewScrollRef.current;
+    if (!scroller || scroller.scrollHeight <= scroller.clientHeight) return;
+
+    scroller.scrollTop += amount;
+  };
+
+  const handleReviewWheel = (event: WheelEvent<HTMLDivElement>) => {
+    const scroller = reviewScrollRef.current;
+    if (!scroller || scroller.scrollHeight <= scroller.clientHeight) return;
+
+    event.preventDefault();
+    scrollReviewPanel(event.deltaY);
+  };
+
+  const handleReviewTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    lastTouchYRef.current = event.touches[0]?.clientY ?? null;
+  };
+
+  const handleReviewTouchMove = (event: TouchEvent<HTMLDivElement>) => {
+    const currentY = event.touches[0]?.clientY;
+    if (currentY === undefined || lastTouchYRef.current === null) return;
+
+    event.preventDefault();
+    scrollReviewPanel(lastTouchYRef.current - currentY);
+    lastTouchYRef.current = currentY;
+  };
 
   useEffect(() => {
     if (!briefOpen) return;
@@ -161,9 +192,15 @@ export default function ResultsPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onWheelCapture={handleReviewWheel}
+            onTouchStart={handleReviewTouchStart}
+            onTouchMove={handleReviewTouchMove}
+            onTouchEnd={() => {
+              lastTouchYRef.current = null;
+            }}
           >
             <motion.aside
-              className="ml-auto flex h-[calc(100dvh-48px)] max-h-[calc(100dvh-48px)] min-h-0 w-full max-w-[720px] flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_32px_90px_rgba(0,0,0,0.24)]"
+              className="ml-auto flex h-[calc(100vh-48px)] max-h-[calc(100vh-48px)] min-h-0 w-full max-w-[720px] flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_32px_90px_rgba(0,0,0,0.24)]"
               initial={{ opacity: 0, x: 80, rotateY: -8 }}
               animate={{ opacity: 1, x: 0, rotateY: 0 }}
               exit={{ opacity: 0, x: 80, rotateY: -8 }}
@@ -190,8 +227,13 @@ export default function ResultsPage() {
               </div>
 
               <div
-                className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5"
-                style={{ WebkitOverflowScrolling: "touch" }}
+                ref={reviewScrollRef}
+                className="min-h-0 flex-1 overflow-y-scroll overscroll-contain p-5"
+                style={{
+                  WebkitOverflowScrolling: "touch",
+                  scrollbarGutter: "stable",
+                  touchAction: "none",
+                }}
               >
                 {report.summary ? (
                   <SessionSummary summary={report.summary} />
