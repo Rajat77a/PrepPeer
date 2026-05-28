@@ -99,19 +99,20 @@ body {
 
 .orb-logo-fallback {
   background:
-    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.92) 0 9%, transparent 22%),
-    radial-gradient(circle at 38% 35%, #7dffd9 0%, #35d9ff 22%, transparent 42%),
-    conic-gradient(from 210deg, #07195c, #009bff, #6cf5ff, #0b52d8, #160a62, #07195c);
+    radial-gradient(circle at 34% 29%, rgba(255, 255, 255, 0.96) 0 9%, transparent 24%),
+    radial-gradient(circle at 44% 40%, #72f2ff 0%, #19bfff 25%, transparent 48%),
+    radial-gradient(circle at 67% 73%, rgba(3, 15, 96, 0.76) 0%, transparent 34%),
+    conic-gradient(from 215deg, #050b48, #007dff, #7dffd9, #0652d8, #26106f, #050b48);
   box-shadow:
-    0 0 20px rgba(49, 154, 255, 0.45),
-    inset 8px 9px 16px rgba(255, 255, 255, 0.26),
-    inset -10px -12px 18px rgba(0, 18, 98, 0.46);
+    0 0 28px rgba(49, 154, 255, 0.42),
+    inset 10px 11px 18px rgba(255, 255, 255, 0.3),
+    inset -14px -16px 24px rgba(0, 18, 98, 0.55);
 }
 
 .orb-logo-video {
   object-fit: cover;
   mix-blend-mode: screen;
-  transform: scale(1.08);
+  transform: scale(1.25);
   transform-origin: center center;
   filter: hue-rotate(-55deg) saturate(250%) brightness(1.2) contrast(1.1);
   background: transparent;
@@ -328,6 +329,19 @@ body {
   pointer-events: none;
 }
 
+.orb-logo-fallback::after {
+  content: "";
+  position: absolute;
+  inset: -2%;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 205deg, rgba(1, 8, 56, 0.72), transparent 18%, rgba(255, 255, 255, 0.16) 32%, transparent 46%, rgba(1, 8, 56, 0.86) 72%, rgba(1, 8, 56, 0.72)),
+    radial-gradient(ellipse at 36% 27%, rgba(255, 255, 255, 0.48), transparent 34%);
+  mix-blend-mode: multiply;
+  opacity: 0.78;
+  pointer-events: none;
+}
+
 .orb-video {
   left: -2px;
   top: -1px;
@@ -371,6 +385,10 @@ body {
       linear-gradient(135deg, rgba(125, 255, 217, 0.36), transparent);
     animation: mobileOrbRim 11s linear infinite;
     opacity: 0.78;
+  }
+
+  .orb-logo-fallback::after {
+    animation: mobileOrbRim 11s linear infinite;
   }
 }
 
