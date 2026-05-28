@@ -98,16 +98,14 @@ body {
 }
 
 .orb-logo-fallback {
-  background: radial-gradient(
-    circle at 35% 32%,
-    #89cfff 0%,
-    #319aff 30%,
-    #0057cc 60%,
-    #001f66 100%
-  );
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.92) 0 9%, transparent 22%),
+    radial-gradient(circle at 38% 35%, #7dffd9 0%, #35d9ff 22%, transparent 42%),
+    conic-gradient(from 210deg, #07195c, #009bff, #6cf5ff, #0b52d8, #160a62, #07195c);
   box-shadow:
     0 0 20px rgba(49, 154, 255, 0.45),
-    inset 0 0 12px rgba(255, 255, 255, 0.18);
+    inset 8px 9px 16px rgba(255, 255, 255, 0.26),
+    inset -10px -12px 18px rgba(0, 18, 98, 0.46);
 }
 
 .orb-logo-video {
@@ -277,6 +275,27 @@ body {
   }
 }
 
+@keyframes mobileOrbSheen {
+  0%,
+  100% {
+    transform: translate(-2%, -1%) rotate(-8deg) scale(1);
+    opacity: 0.72;
+  }
+  50% {
+    transform: translate(4%, 3%) rotate(10deg) scale(1.04);
+    opacity: 0.96;
+  }
+}
+
+@keyframes mobileOrbRim {
+  0% {
+    transform: rotate(-20deg);
+  }
+  100% {
+    transform: rotate(340deg);
+  }
+}
+
 
 .orb-fallback:not(.orb-logo-fallback)::after {
   content: "";
@@ -292,6 +311,20 @@ body {
     transparent 100%
   );
   transform: rotate(-20deg);
+  pointer-events: none;
+}
+
+.orb-fallback:not(.orb-logo-fallback)::before,
+.orb-logo-fallback::before {
+  content: "";
+  position: absolute;
+  inset: 9%;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 34% 24%, rgba(255, 255, 255, 0.86) 0 12%, transparent 33%),
+    radial-gradient(circle at 63% 72%, rgba(0, 42, 168, 0.6) 0 13%, transparent 30%),
+    conic-gradient(from 225deg, transparent, rgba(255, 255, 255, 0.2), transparent 34%, rgba(4, 16, 88, 0.48), transparent 78%);
+  mix-blend-mode: screen;
   pointer-events: none;
 }
 
@@ -312,6 +345,35 @@ body {
 }
 
 /* Hero orb only — floating animation */
+@media (max-width: 767px) {
+  .orb-fallback:not(.orb-logo-fallback),
+  .orb-logo-fallback {
+    background:
+      radial-gradient(circle at 33% 26%, rgba(255, 255, 255, 0.95) 0 8%, transparent 22%),
+      radial-gradient(circle at 41% 36%, #8af7ff 0%, #25c9ff 24%, transparent 45%),
+      radial-gradient(circle at 70% 72%, rgba(17, 0, 122, 0.78) 0%, transparent 34%),
+      conic-gradient(from 220deg, #050b48, #007dff, #7dffd9, #0652d8, #26106f, #050b48) !important;
+    box-shadow:
+      0 18px 44px rgba(0, 132, 255, 0.24),
+      0 0 36px rgba(96, 177, 255, 0.28),
+      inset 12px 14px 24px rgba(255, 255, 255, 0.3),
+      inset -18px -20px 30px rgba(0, 17, 86, 0.56) !important;
+  }
+
+  .orb-fallback:not(.orb-logo-fallback)::before,
+  .orb-logo-fallback::before {
+    animation: mobileOrbSheen 5.2s ease-in-out infinite;
+  }
+
+  .orb-fallback:not(.orb-logo-fallback)::after {
+    background:
+      radial-gradient(ellipse, rgba(255, 255, 255, 0.62) 0%, transparent 70%),
+      linear-gradient(135deg, rgba(125, 255, 217, 0.36), transparent);
+    animation: mobileOrbRim 11s linear infinite;
+    opacity: 0.78;
+  }
+}
+
 .orb-fallback:not(.orb-logo-fallback) {
   animation: orbFloat 6s ease-in-out infinite;
 }
