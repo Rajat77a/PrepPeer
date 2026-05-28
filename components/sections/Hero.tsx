@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ArrowRight, Trophy } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 import { Button } from "@/components/ui/Button";
@@ -337,29 +338,44 @@ export function Hero() {
             variants={itemVariants}
             className="flex flex-col sm:flex-row gap-4"
           >
-            <Button href="/interview" variant="primary" showArrow>
-              Start Free Interview
+            <Button
+              href="/interview"
+              variant="primary"
+              showArrow
+              className="hero-cta-primary relative min-h-[60px] overflow-hidden px-7 text-[15px] sm:px-8"
+            >
+              Start Interview
             </Button>
-            <HashLinkButton href="#leaderboard-preview">
-              See Leaderboard
+            <HashLinkButton
+              href="#leaderboard-preview"
+              className="hero-cta-secondary group relative min-h-[60px] overflow-hidden px-7 text-[15px] sm:px-8"
+            >
+              <span className="relative z-10 inline-flex items-center gap-2.5">
+                <Trophy size={17} className="text-blue" />
+                View Rank Board
+                <ArrowRight
+                  size={16}
+                  className="text-blue transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </span>
             </HashLinkButton>
           </motion.div>
 
           <motion.div
             variants={itemVariants}
-            className="mt-10 flex flex-wrap gap-6 text-sm font-inter text-muted"
+            className="hero-proof-rail mt-8 grid max-w-[680px] grid-cols-1 gap-3 font-inter sm:grid-cols-3"
           >
-            <span>
-              <strong className="text-text font-semibold">12,400+</strong>{" "}
-              interviews
+            <span className="hero-proof-item">
+              <strong>12,400+</strong>
+              <span>mock interviews benchmarked</span>
             </span>
-            <span>
-              <strong className="text-text font-semibold">347</strong> SDE peers
-              ranked
+            <span className="hero-proof-item">
+              <strong>347</strong>
+              <span>role-matched peers in view</span>
             </span>
-            <span>
-              <strong className="text-text font-semibold">4</strong> score
-              dimensions
+            <span className="hero-proof-item">
+              <strong>4</strong>
+              <span>signals behind every rank</span>
             </span>
           </motion.div>
         </motion.div>
