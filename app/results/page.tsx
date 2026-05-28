@@ -157,21 +157,20 @@ export default function ResultsPage() {
       <AnimatePresence>
         {briefOpen && (
           <motion.div
-            className="fixed inset-0 z-[300] overflow-y-auto overscroll-contain bg-[rgba(10,10,15,0.42)] px-4 py-6 backdrop-blur-sm"
+            className="fixed inset-0 z-[300] overflow-hidden bg-[rgba(10,10,15,0.42)] px-4 py-6 backdrop-blur-sm"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            style={{ WebkitOverflowScrolling: "touch" }}
           >
             <motion.aside
-              className="ml-auto flex min-h-full w-full max-w-[720px] flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_32px_90px_rgba(0,0,0,0.24)]"
+              className="ml-auto flex h-[calc(100dvh-48px)] max-h-[calc(100dvh-48px)] min-h-0 w-full max-w-[720px] flex-col overflow-hidden rounded-[28px] bg-white shadow-[0_32px_90px_rgba(0,0,0,0.24)]"
               initial={{ opacity: 0, x: 80, rotateY: -8 }}
               animate={{ opacity: 1, x: 0, rotateY: 0 }}
               exit={{ opacity: 0, x: 80, rotateY: -8 }}
               transition={{ type: "spring", stiffness: 320, damping: 30 }}
               style={{ transformStyle: "preserve-3d" }}
             >
-              <div className="flex items-start justify-between gap-4 border-b border-[rgba(0,0,0,0.08)] bg-[#FAFBFD] p-5">
+              <div className="flex shrink-0 items-start justify-between gap-4 border-b border-[rgba(0,0,0,0.08)] bg-[#FAFBFD] p-5">
                 <div>
                   <p className="font-inter text-[11px] font-bold uppercase tracking-[0.22em] text-blue">
                     Session review
@@ -190,7 +189,10 @@ export default function ResultsPage() {
                 </button>
               </div>
 
-              <div className="p-5">
+              <div
+                className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5"
+                style={{ WebkitOverflowScrolling: "touch" }}
+              >
                 {report.summary ? (
                   <SessionSummary summary={report.summary} />
                 ) : (
