@@ -386,6 +386,7 @@ body {
 }
 
 .orb-fallback:not(.orb-logo-fallback) {
+  border-radius: 46% 54% 44% 56% / 43% 45% 55% 57%;
   animation: orbFloat 6s ease-in-out infinite;
 }
 

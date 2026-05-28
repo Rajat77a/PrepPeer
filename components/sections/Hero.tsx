@@ -156,6 +156,17 @@ interface HeroOrbProps {
 
 function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps) {
   const [videoFailed, setVideoFailed] = useState(false);
+  const [canPlayOrbVideo, setCanPlayOrbVideo] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const syncVideoMode = () => setCanPlayOrbVideo(media.matches);
+
+    syncVideoMode();
+    media.addEventListener("change", syncVideoMode);
+
+    return () => media.removeEventListener("change", syncVideoMode);
+  }, []);
 
   return (
     <motion.div variants={orbVariants} className="shrink-0 transform-gpu">
@@ -178,7 +189,7 @@ function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps
           variants={orbHoverVariants}
         >
           <div
-            className="orb-fallback absolute inset-[8%] z-[1] rounded-full"
+            className="orb-fallback absolute inset-[8%] z-[1]"
             style={{
               background:
                 "radial-gradient(circle at 35% 32%, #89CFFF 0%, #319AFF 30%, #0057CC 60%, #001F66 100%)",
@@ -186,7 +197,7 @@ function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps
                 "0 0 80px rgba(49,154,255,0.45), inset 0 0 40px rgba(255,255,255,0.15)",
             }}
           />
-          {!videoFailed && (
+          {canPlayOrbVideo && !videoFailed && (
             <video
               autoPlay
               loop
