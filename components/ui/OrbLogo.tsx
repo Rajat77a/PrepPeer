@@ -14,18 +14,18 @@ export function OrbLogo({ size = 34, className }: OrbLogoProps) {
 
   return (
     <div
-      className={cn("orb-logo relative shrink-0 rounded-full", className)}
+      className={cn("orb-logo relative shrink-0", className)}
       style={{ width: size, height: size }}
       aria-hidden
     >
-      <div className="orb-logo-fallback absolute inset-0 rounded-full" />
+      <div className="orb-logo-fallback absolute inset-0" />
       {!videoFailed && (
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="orb-logo-video absolute inset-0 w-full h-full rounded-full"
+          className="orb-logo-video absolute inset-0 h-full w-full"
           onError={() => setVideoFailed(true)}
         >
           <source
