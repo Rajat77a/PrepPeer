@@ -478,9 +478,9 @@ body {
   position: relative;
   isolation: isolate;
   contain: paint;
-  font-family: var(--font-fustat), sans-serif;
+  font-family: var(--font-inter), sans-serif;
   font-weight: 800;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
   transition:
     transform 0.28s ease,
     box-shadow 0.28s ease,
@@ -589,16 +589,25 @@ body {
 }
 
 .hero-cta-primary {
+  justify-content: center;
   background:
     radial-gradient(circle at 18% 16%, rgba(125, 255, 217, 0.28), transparent 27%),
     linear-gradient(135deg, #149fff 0%, #007bf4 43%, #005bdf 100%);
   border-color: rgba(49, 154, 255, 0.52);
-  padding-left: 38px;
-  padding-right: 72px;
+  padding-left: 34px;
+  padding-right: 34px;
   box-shadow:
     inset 0 2px 7px rgba(255, 255, 255, 0.34),
     inset 0 -12px 24px rgba(0, 45, 135, 0.22),
     0 12px 34px rgba(0, 132, 255, 0.24);
+}
+
+.hero-cta-primary .hero-cta-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -52%);
+  white-space: nowrap;
 }
 
 .hero-cta-primary > span:last-child {
