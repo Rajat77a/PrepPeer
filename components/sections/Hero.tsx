@@ -342,17 +342,16 @@ export function Hero() {
               href="/interview"
               variant="primary"
               showArrow
-              className="hero-cta-primary relative min-h-[62px] overflow-hidden px-7 text-[15px] sm:px-8"
+              className="hero-cta-primary relative min-h-[62px] min-w-[290px] overflow-hidden px-7 text-[15px] sm:px-8"
             >
-              Begin Interview
+              <span className="hero-cta-label">Start Interview</span>
             </Button>
             <HashLinkButton
               href="#leaderboard-preview"
-              className="hero-cta-secondary group relative min-h-[62px] overflow-hidden px-7 text-[15px] sm:px-8"
+              className="hero-cta-secondary group relative min-h-[62px] min-w-[230px] overflow-hidden px-7 text-[15px] sm:px-8"
             >
               <span className="relative z-10 inline-flex items-center gap-2.5">
-                <span className="hero-rank-mark">#41</span>
-                Preview Rank
+                <span className="hero-cta-label">Leaderboard</span>
                 <ArrowRight
                   size={16}
                   className="text-blue transition-transform duration-300 group-hover:translate-x-1"

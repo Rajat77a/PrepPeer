@@ -478,6 +478,9 @@ body {
   position: relative;
   isolation: isolate;
   contain: paint;
+  font-family: var(--font-fustat), sans-serif;
+  font-weight: 800;
+  letter-spacing: 0;
   transition:
     transform 0.28s ease,
     box-shadow 0.28s ease,
@@ -575,28 +578,28 @@ body {
   transform: translateX(3px);
 }
 
-.hero-rank-mark {
-  display: inline-flex;
-  min-width: 42px;
-  height: 28px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: rgba(0, 132, 255, 0.08);
-  color: var(--blue);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  transition:
-    background 0.24s ease,
-    color 0.24s ease,
-    transform 0.24s ease;
+.hero-cta-label {
+  position: relative;
+  z-index: 1;
+  line-height: 1;
+  transform: translateY(-1px);
 }
 
-.hero-cta-secondary:hover .hero-rank-mark {
-  background: var(--blue);
-  color: white;
-  transform: translateY(-1px);
+.hero-cta-primary {
+  padding-left: 34px;
+  padding-right: 58px;
+}
+
+.hero-cta-primary > span:last-child {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  z-index: 1;
+  transform: translateY(-50%);
+}
+
+.hero-cta-primary:hover > span:last-child {
+  transform: translate(3px, -50%);
 }
 
 @keyframes heroCtaGlassSweep {
