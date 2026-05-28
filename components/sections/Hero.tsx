@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Trophy } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 import { Button } from "@/components/ui/Button";
@@ -258,7 +258,7 @@ export function Hero() {
     <section
       ref={sectionRef}
       id="home"
-      className="relative overflow-visible bg-white pt-28 pb-16 md:pb-20 min-h-screen flex flex-col justify-center"
+      className="relative overflow-visible bg-white pt-24 pb-14 md:pt-28 md:pb-16 min-h-screen flex flex-col justify-center"
     >
       {/* Fixed circular bloom at orb centre — not clipped, expands evenly */}
       <AnimatePresence>
@@ -326,7 +326,7 @@ export function Hero() {
 
           <motion.p
             variants={itemVariants}
-            className="font-inter text-lg leading-[1.65] tracking-[-0.5px] text-muted max-w-[560px] mb-8"
+            className="font-inter text-lg leading-[1.55] tracking-[-0.5px] text-muted max-w-[560px] mb-5"
           >
             PrepPeer runs AI mock interviews tailored to your role and company
             type — then ranks you against thousands of real candidates.{" "}
@@ -342,17 +342,17 @@ export function Hero() {
               href="/interview"
               variant="primary"
               showArrow
-              className="hero-cta-primary relative min-h-[60px] overflow-hidden px-7 text-[15px] sm:px-8"
+              className="hero-cta-primary relative min-h-[62px] overflow-hidden px-7 text-[15px] sm:px-8"
             >
-              Start Interview
+              Begin Interview
             </Button>
             <HashLinkButton
               href="#leaderboard-preview"
-              className="hero-cta-secondary group relative min-h-[60px] overflow-hidden px-7 text-[15px] sm:px-8"
+              className="hero-cta-secondary group relative min-h-[62px] overflow-hidden px-7 text-[15px] sm:px-8"
             >
               <span className="relative z-10 inline-flex items-center gap-2.5">
-                <Trophy size={17} className="text-blue" />
-                View Rank Board
+                <span className="hero-rank-mark">#41</span>
+                Preview Rank
                 <ArrowRight
                   size={16}
                   className="text-blue transition-transform duration-300 group-hover:translate-x-1"
