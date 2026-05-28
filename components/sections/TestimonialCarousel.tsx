@@ -95,7 +95,6 @@ export default function TestimonialCarousel() {
           margin: 0 0 18px;
           font-size: 12px;
           color: #0084FF;
-          text-transform: uppercase;
           letter-spacing: 0.12em;
           font-weight: 800;
         }
