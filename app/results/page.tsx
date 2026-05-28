@@ -63,13 +63,13 @@ export default function ResultsPage() {
 
     const distance = targetScrollTopRef.current - scroller.scrollTop;
 
-    if (Math.abs(distance) < 0.5) {
+    if (Math.abs(distance) < 0.25) {
       scroller.scrollTop = targetScrollTopRef.current;
       scrollFrameRef.current = null;
       return;
     }
 
-    scroller.scrollTop += distance * 0.22;
+    scroller.scrollTop += distance * 0.095;
     scrollFrameRef.current = window.requestAnimationFrame(animateReviewScroll);
   };
 
@@ -93,7 +93,7 @@ export default function ResultsPage() {
     if (!scroller || scroller.scrollHeight <= scroller.clientHeight) return;
 
     event.preventDefault();
-    scrollReviewPanel(event.deltaY);
+    scrollReviewPanel(event.deltaY * 0.72);
   };
 
   const handleReviewTouchStart = (event: TouchEvent<HTMLDivElement>) => {
@@ -105,7 +105,7 @@ export default function ResultsPage() {
     if (currentY === undefined || lastTouchYRef.current === null) return;
 
     event.preventDefault();
-    scrollReviewPanel(lastTouchYRef.current - currentY);
+    scrollReviewPanel((lastTouchYRef.current - currentY) * 0.82);
     lastTouchYRef.current = currentY;
   };
 
