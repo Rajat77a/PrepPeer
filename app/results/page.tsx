@@ -16,6 +16,8 @@ export default function ResultsPage() {
   const [briefOpen, setBriefOpen] = useState(false);
   const reviewScrollRef = useRef<HTMLDivElement>(null);
   const lastTouchYRef = useRef<number | null>(null);
+  const targetScrollTopRef = useRef(0);
+  const scrollFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -55,11 +57,35 @@ export default function ResultsPage() {
     report.summary?.overallSummary ??
     "Review the final assessment, priority improvements, and question-by-question notes.";
 
+  const animateReviewScroll = () => {
+    const scroller = reviewScrollRef.current;
+    if (!scroller || scroller.scrollHeight <= scroller.clientHeight) return;
+
+    const distance = targetScrollTopRef.current - scroller.scrollTop;
+
+    if (Math.abs(distance) < 0.5) {
+      scroller.scrollTop = targetScrollTopRef.current;
+      scrollFrameRef.current = null;
+      return;
+    }
+
+    scroller.scrollTop += distance * 0.22;
+    scrollFrameRef.current = window.requestAnimationFrame(animateReviewScroll);
+  };
+
   const scrollReviewPanel = (amount: number) => {
     const scroller = reviewScrollRef.current;
     if (!scroller || scroller.scrollHeight <= scroller.clientHeight) return;
 
-    scroller.scrollTop += amount;
+    const maxScrollTop = scroller.scrollHeight - scroller.clientHeight;
+    targetScrollTopRef.current = Math.min(
+      maxScrollTop,
+      Math.max(0, targetScrollTopRef.current + amount)
+    );
+
+    if (scrollFrameRef.current === null) {
+      scrollFrameRef.current = window.requestAnimationFrame(animateReviewScroll);
+    }
   };
 
   const handleReviewWheel = (event: WheelEvent<HTMLDivElement>) => {
@@ -98,8 +124,14 @@ export default function ResultsPage() {
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
+    targetScrollTopRef.current = 0;
 
     return () => {
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+        scrollFrameRef.current = null;
+      }
+
       document.documentElement.style.overflow = originalHtmlOverflow;
       document.body.style.overflow = originalBodyOverflow;
       document.body.style.position = originalBodyPosition;
