@@ -355,29 +355,45 @@ body {
 @media (max-width: 767px) {
   .orb-fallback:not(.orb-logo-fallback),
   .orb-logo-fallback {
+    border-radius: 39% 61% 46% 54% / 48% 36% 64% 52% !important;
     background:
-      radial-gradient(circle at 33% 26%, rgba(255, 255, 255, 0.95) 0 8%, transparent 22%),
-      radial-gradient(circle at 41% 36%, #8af7ff 0%, #25c9ff 24%, transparent 45%),
-      radial-gradient(circle at 70% 72%, rgba(17, 0, 122, 0.78) 0%, transparent 34%),
-      conic-gradient(from 220deg, #050b48, #007dff, #7dffd9, #0652d8, #26106f, #050b48) !important;
+      radial-gradient(ellipse at 31% 25%, rgba(255, 255, 255, 0.96) 0 9%, rgba(255, 255, 255, 0.34) 17%, transparent 31%),
+      radial-gradient(ellipse at 53% 45%, #8af7ff 0%, #28d0ff 28%, #0086ff 50%, transparent 68%),
+      radial-gradient(ellipse at 84% 62%, rgba(2, 8, 58, 0.92) 0 10%, transparent 23%),
+      radial-gradient(ellipse at 24% 82%, rgba(0, 8, 72, 0.88) 0 11%, transparent 26%),
+      radial-gradient(ellipse at 73% 16%, rgba(4, 19, 95, 0.76) 0 10%, transparent 24%),
+      conic-gradient(from 228deg, #03083e, #0077ff, #7dffd9, #0575f0, #07115d, #03083e) !important;
     box-shadow:
       0 18px 44px rgba(0, 132, 255, 0.24),
       0 0 36px rgba(96, 177, 255, 0.28),
       inset 12px 14px 24px rgba(255, 255, 255, 0.3),
       inset -18px -20px 30px rgba(0, 17, 86, 0.56) !important;
+    transform: rotate(-7deg) scale(1.04);
   }
 
   .orb-fallback:not(.orb-logo-fallback)::before,
   .orb-logo-fallback::before {
+    inset: 6%;
+    border-radius: 44% 56% 40% 60% / 44% 38% 62% 56% !important;
+    background:
+      radial-gradient(ellipse at 34% 23%, rgba(255, 255, 255, 0.86) 0 13%, transparent 31%),
+      radial-gradient(ellipse at 59% 72%, rgba(0, 38, 160, 0.58) 0 13%, transparent 32%),
+      conic-gradient(from 235deg, rgba(0, 0, 0, 0.24), rgba(255, 255, 255, 0.22), transparent 34%, rgba(3, 13, 82, 0.58), transparent 80%);
     animation: mobileOrbSheen 5.2s ease-in-out infinite;
   }
 
   .orb-fallback:not(.orb-logo-fallback)::after {
+    top: 1%;
+    left: -2%;
+    width: 104%;
+    height: 104%;
+    border-radius: 37% 63% 45% 55% / 47% 35% 65% 53%;
     background:
-      radial-gradient(ellipse, rgba(255, 255, 255, 0.62) 0%, transparent 70%),
-      linear-gradient(135deg, rgba(125, 255, 217, 0.36), transparent);
+      conic-gradient(from 215deg, rgba(0, 6, 48, 0.78), transparent 14%, rgba(255, 255, 255, 0.22) 26%, transparent 45%, rgba(0, 8, 68, 0.9) 68%, rgba(0, 6, 48, 0.78)),
+      radial-gradient(ellipse at 35% 29%, rgba(255, 255, 255, 0.55), transparent 34%);
+    mix-blend-mode: soft-light;
     animation: mobileOrbRim 11s linear infinite;
-    opacity: 0.78;
+    opacity: 0.95;
   }
 
   .orb-logo-fallback::after {
