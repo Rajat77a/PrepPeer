@@ -604,7 +604,7 @@ body {
 
 .hero-cta-primary .hero-cta-label {
   position: absolute;
-  left: 50%;
+  left: calc(50% - 14px);
   top: 50%;
   transform: translate(-50%, -52%);
   white-space: nowrap;
