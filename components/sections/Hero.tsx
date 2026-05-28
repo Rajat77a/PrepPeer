@@ -160,7 +160,11 @@ function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 768px)");
-    const syncVideoMode = () => setCanPlayOrbVideo(media.matches);
+    const isIOSLike =
+      /iPad|iPhone|iPod/.test(window.navigator.userAgent) ||
+      (window.navigator.platform === "MacIntel" &&
+        window.navigator.maxTouchPoints > 1);
+    const syncVideoMode = () => setCanPlayOrbVideo(media.matches || !isIOSLike);
 
     syncVideoMode();
     media.addEventListener("change", syncVideoMode);

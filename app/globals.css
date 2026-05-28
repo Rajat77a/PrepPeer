@@ -114,7 +114,7 @@ body {
 }
 
 @media (max-width: 767px) {
-  .orb-video {
+  .orb-logo-video {
     display: none !important;
   }
 }
