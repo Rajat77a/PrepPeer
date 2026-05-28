@@ -35,8 +35,6 @@ const hoverProps = {
   primary: {
     whileHover: {
       scale: 1.03,
-      boxShadow:
-        "inset 0px 4px 4px rgba(255,255,255,0.35), 0 16px 40px rgba(0,132,255,0.5)",
     },
     whileTap: { scale: 0.98 },
   },

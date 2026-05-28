@@ -45,7 +45,7 @@ export function HashLinkButton({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.75)" }}
+      whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.97 }}
       transition={{ duration: 0.2 }}
       style={{ willChange: "transform" }}

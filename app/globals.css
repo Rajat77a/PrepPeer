@@ -477,6 +477,7 @@ body {
 .hero-cta-secondary {
   position: relative;
   isolation: isolate;
+  contain: paint;
   transition:
     transform 0.28s ease,
     box-shadow 0.28s ease,
@@ -508,6 +509,11 @@ body {
     left 0.68s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.22s ease;
   pointer-events: none;
+}
+
+.hero-cta-primary::before {
+  opacity: 1;
+  animation: heroCtaGlassSweep 3.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
 .hero-cta-primary::after,
@@ -546,18 +552,19 @@ body {
     0 18px 44px rgba(0, 132, 255, 0.13);
 }
 
-.hero-cta-primary:hover::before,
 .hero-cta-secondary:hover::before {
   opacity: 1;
   left: 104%;
 }
 
+.hero-cta-primary:hover::after,
 .hero-cta-secondary:hover::after {
   transform: scaleX(1);
 }
 
 .hero-cta-primary::after {
-  display: none;
+  background: rgba(255, 255, 255, 0.72);
+  opacity: 0.5;
 }
 
 .hero-cta-primary svg {
@@ -590,6 +597,22 @@ body {
   background: var(--blue);
   color: white;
   transform: translateY(-1px);
+}
+
+@keyframes heroCtaGlassSweep {
+  0%,
+  42% {
+    left: -52%;
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  72%,
+  100% {
+    left: 108%;
+    opacity: 0;
+  }
 }
 
 .hero-proof-item {
