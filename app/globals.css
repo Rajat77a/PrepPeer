@@ -488,18 +488,25 @@ body {
 .hero-cta-secondary::before {
   content: "";
   position: absolute;
-  inset: 8px;
-  z-index: -1;
+  top: 0;
+  bottom: 0;
+  left: -48%;
+  width: 44%;
   border-radius: 14px;
   background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.24), transparent 42%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.16), transparent 58%);
+    linear-gradient(
+      105deg,
+      transparent 0%,
+      rgba(125, 255, 217, 0.18) 26%,
+      rgba(255, 255, 255, 0.58) 50%,
+      rgba(96, 177, 255, 0.22) 72%,
+      transparent 100%
+    );
   opacity: 0;
-  transform: scaleX(0.7);
-  transform-origin: left;
+  transform: skewX(-16deg);
   transition:
-    opacity 0.3s ease,
-    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    left 0.68s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.22s ease;
   pointer-events: none;
 }
 
@@ -510,7 +517,6 @@ body {
   left: 18px;
   right: 18px;
   bottom: 10px;
-  z-index: -1;
   height: 2px;
   border-radius: 999px;
   background: currentColor;
@@ -543,12 +549,15 @@ body {
 .hero-cta-primary:hover::before,
 .hero-cta-secondary:hover::before {
   opacity: 1;
+  left: 104%;
+}
+
+.hero-cta-secondary:hover::after {
   transform: scaleX(1);
 }
 
-.hero-cta-primary:hover::after,
-.hero-cta-secondary:hover::after {
-  transform: scaleX(1);
+.hero-cta-primary::after {
+  display: none;
 }
 
 .hero-cta-primary svg {
