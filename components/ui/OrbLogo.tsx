@@ -28,14 +28,7 @@ export function OrbLogo({ size = 34, className }: OrbLogoProps) {
       style={{ width: size, height: size }}
       aria-hidden
     >
-      <div
-        className={
-          canPlayOrbVideo && !videoFailed
-            ? "orb-fallback absolute inset-[8%] z-[1]"
-            : "orb-logo-fallback absolute inset-0"
-        }
-      />
-      {canPlayOrbVideo && !videoFailed && (
+      {canPlayOrbVideo && !videoFailed ? (
         <video
           autoPlay
           loop
@@ -49,6 +42,8 @@ export function OrbLogo({ size = 34, className }: OrbLogoProps) {
             type="video/webm"
           />
         </video>
+      ) : (
+        <div className="orb-logo-fallback absolute inset-0" />
       )}
     </div>
   );
