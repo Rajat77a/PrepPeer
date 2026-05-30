@@ -241,6 +241,11 @@ export default function LoginPage() {
   const isSignUp = mode === "signup";
   const activeCopy = copy[mode];
 
+  const getAuthRedirectUrl = (nextPath: string) => {
+    const next = nextPath.startsWith("/") ? nextPath : "/dashboard";
+    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+  };
+
   const resetForMode = (nextMode: AuthMode) => {
     setMode(nextMode);
     setStep("email");
@@ -261,7 +266,7 @@ export default function LoginPage() {
     const { error: signInError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: getAuthRedirectUrl("/dashboard"),
       },
     });
     if (signInError) setError(friendlyAuthError(signInError.message));
@@ -275,6 +280,9 @@ export default function LoginPage() {
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
+        emailRedirectTo: getAuthRedirectUrl(
+          isSignUp ? "/login?auth=create-password" : "/dashboard"
+        ),
         shouldCreateUser: isSignUp,
       },
     });
@@ -329,6 +337,50 @@ export default function LoginPage() {
     void verifyOtp(otp);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [otp, step]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("error");
+
+    if (authError) {
+      setError(
+        authError === "auth_not_configured"
+          ? "Authentication is not configured yet."
+          : "We could not complete authentication. Please try again."
+      );
+      window.history.replaceState(null, "", "/login");
+      return;
+    }
+
+    if (params.get("auth") !== "create-password") return;
+
+    const syncVerifiedSignup = async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user) {
+          setMode("signup");
+          setStep("email");
+          setError("Your verification link expired. Please request a new code.");
+          return;
+        }
+
+        setMode("signup");
+        setEmail(user.email ?? "");
+        setOtp("");
+        setError("");
+        setStep("password");
+        window.history.replaceState(null, "", "/login");
+      } catch {
+        setError("We could not finish email verification. Please try again.");
+      }
+    };
+
+    void syncVerifiedSignup();
+  }, []);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-white text-[#07111f]">

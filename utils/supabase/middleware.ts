@@ -40,7 +40,11 @@ export const updateSession = async (request: NextRequest) => {
     },
   });
 
-  await supabase.auth.getUser();
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    return supabaseResponse;
+  }
 
   return supabaseResponse;
 };
