@@ -1,21 +1,12 @@
 "use client";
 
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Home,
-  Mail,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Home, ShieldCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { Logo } from "@/components/ui/Logo";
-import { CanvasRevealEffect } from "@/components/ui/sign-in-flow-1";
+import { OrbLogo } from "@/components/ui/OrbLogo";
 import { Input } from "@/components/ui/input";
 import {
   InputOTP,
@@ -27,31 +18,25 @@ import { AssistedPasswordConfirmation } from "@/components/ui/assisted-password-
 import { cn } from "@/lib/utils";
 
 type AuthMode = "signin" | "signup";
-type AuthStep = "choice" | "email" | "otp" | "password" | "success";
+type AuthStep = "email" | "otp" | "password" | "success";
 
 const panelMotion = {
-  initial: { opacity: 0, y: 22, filter: "blur(10px)" },
-  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  exit: { opacity: 0, y: -18, filter: "blur(10px)" },
-  transition: { duration: 0.38, ease: "easeOut" },
+  initial: { opacity: 0, x: 80 },
+  animate: { opacity: 1, x: 0 },
+  exit: { opacity: 0, x: -80 },
+  transition: { duration: 0.4, ease: "easeOut" },
 } as const;
 
-const modeCopy = {
+const copy = {
   signin: {
-    eyebrow: "Return to your rank room",
-    headline: "Welcome back to PrepPeer",
-    subline: "Your interviews, scores, and rank movement are waiting.",
-    title: "Sign in with OTP",
-    body: "Use a one-time code to reopen your dashboard.",
-    action: "Send sign-in code",
+    title: "Welcome to PrepPeer",
+    subtitle: "Know your rank before the real interview.",
+    emailButton: "Send sign-in code",
   },
   signup: {
-    eyebrow: "Start your rank story",
-    headline: "Build your interview base",
-    subline: "Create your account, verify the email, then lock it with a password.",
-    title: "Sign up with OTP",
-    body: "Verify your email first, then set your password with the live matching prompt.",
-    action: "Send sign-up code",
+    title: "Start with PrepPeer",
+    subtitle: "Create your account and keep every score in one place.",
+    emailButton: "Send sign-up code",
   },
 };
 
@@ -81,7 +66,7 @@ function GoogleIcon() {
   );
 }
 
-function FloatingAuthNav({
+function TopNav({
   mode,
   onModeChange,
 }: {
@@ -89,55 +74,52 @@ function FloatingAuthNav({
   onModeChange: (mode: AuthMode) => void;
 }) {
   return (
-    <header className="fixed left-0 right-0 top-0 z-30 flex items-start justify-between px-5 py-5 sm:px-8">
-      <Logo variant="light" size="md" />
-
-      <nav className="absolute left-1/2 top-5 hidden -translate-x-1/2 items-center gap-3 rounded-full border border-white/10 bg-white/[0.055] px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:flex">
+    <header className="fixed left-1/2 top-7 z-30 w-[calc(100%-2rem)] max-w-[720px] -translate-x-1/2 rounded-full border border-white/10 bg-[#111]/70 px-4 py-3 shadow-[0_24px_80px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-3">
         <Link
           href="/"
-          className="flex h-10 w-10 items-center justify-center rounded-full text-white/55 transition hover:bg-white/10 hover:text-white"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition hover:bg-white/10"
           aria-label="Home"
         >
-          <Home size={17} />
+          <Home size={17} className="text-white/70" />
         </Link>
-        <span className="h-6 w-px bg-white/10" />
-        <button
-          onClick={() => onModeChange("signin")}
-          className={cn(
-            "rounded-full px-5 py-2.5 font-inter text-sm font-bold transition",
-            mode === "signin"
-              ? "bg-[#006cff] text-white shadow-[0_12px_34px_rgba(0,108,255,0.36)]"
-              : "text-white/50 hover:bg-white/10 hover:text-white"
-          )}
-        >
-          Sign in
-        </button>
-        <button
-          onClick={() => onModeChange("signup")}
-          className={cn(
-            "rounded-full px-5 py-2.5 font-inter text-sm font-bold transition",
-            mode === "signup"
-              ? "bg-white text-black shadow-[0_0_38px_rgba(255,255,255,0.25)]"
-              : "text-white/50 hover:bg-white/10 hover:text-white"
-          )}
-        >
-          Sign up
-        </button>
-      </nav>
 
-      <div className="flex rounded-full border border-white/10 bg-white/[0.055] p-1 backdrop-blur-xl sm:hidden">
-        {(["signin", "signup"] as const).map((item) => (
+        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-7 font-inter text-sm font-medium text-white/70 sm:flex">
+          <Link href="/#how-it-works" className="transition hover:text-white">
+            How it works
+          </Link>
+          <Link href="/interview" className="transition hover:text-white">
+            Interview
+          </Link>
+          <Link href="/leaderboard" className="transition hover:text-white">
+            Leaderboard
+          </Link>
+        </nav>
+
+        <div className="flex shrink-0 items-center gap-2 rounded-full bg-white/[0.04] p-1">
           <button
-            key={item}
-            onClick={() => onModeChange(item)}
+            onClick={() => onModeChange("signin")}
             className={cn(
-              "rounded-full px-3 py-1.5 font-inter text-xs font-bold transition",
-              mode === item ? "bg-[#006cff] text-white" : "text-white/45"
+              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition",
+              mode === "signin"
+                ? "bg-[#006cff] text-white shadow-[0_10px_30px_rgba(0,108,255,0.34)]"
+                : "text-white/45 hover:text-white"
             )}
           >
-            {item === "signin" ? "Sign in" : "Sign up"}
+            Sign in
           </button>
-        ))}
+          <button
+            onClick={() => onModeChange("signup")}
+            className={cn(
+              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition",
+              mode === "signup"
+                ? "bg-white text-black shadow-[0_0_36px_rgba(255,255,255,0.28)]"
+                : "text-white/45 hover:text-white"
+            )}
+          >
+            Sign up
+          </button>
+        </div>
       </div>
     </header>
   );
@@ -145,31 +127,28 @@ function FloatingAuthNav({
 
 export default function LoginPage() {
   const router = useRouter();
-  const [step, setStep] = useState<AuthStep>("choice");
   const [mode, setMode] = useState<AuthMode>("signin");
+  const [step, setStep] = useState<AuthStep>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [reverseCanvas, setReverseCanvas] = useState(false);
 
-  const activeCopy = modeCopy[mode];
   const isSignUp = mode === "signup";
-
-  const statusText = useMemo(() => {
-    if (step === "choice") return "Google or email OTP";
-    if (step === "email") return isSignUp ? "New account code" : "Returning account code";
-    if (step === "otp") return "Six digit verification";
-    if (step === "password") return "Password match";
-    return "Dashboard unlocked";
-  }, [isSignUp, step]);
+  const activeCopy = copy[mode];
 
   const resetForMode = (nextMode: AuthMode) => {
     setMode(nextMode);
-    setStep("choice");
+    setStep("email");
     setOtp("");
     setError("");
-    setReverseCanvas(false);
+  };
+
+  const friendlyAuthError = (message: string) => {
+    if (message.toLowerCase().includes("signups not allowed")) {
+      return "Email sign-up is not enabled yet.";
+    }
+    return message;
   };
 
   const signInWithGoogle = async () => {
@@ -181,14 +160,7 @@ export default function LoginPage() {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-    if (signInError) setError(signInError.message);
-  };
-
-  const friendlyAuthError = (message: string) => {
-    if (message.toLowerCase().includes("signups not allowed")) {
-      return "Email sign-up is not enabled in Supabase yet. Turn on email signups to use this path.";
-    }
-    return message;
+    if (signInError) setError(friendlyAuthError(signInError.message));
   };
 
   const sendOtp = async () => {
@@ -214,7 +186,6 @@ export default function LoginPage() {
   const verifyOtp = async (code: string) => {
     setLoading(true);
     setError("");
-    setReverseCanvas(true);
     const supabase = createClient();
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email: email.trim(),
@@ -224,7 +195,6 @@ export default function LoginPage() {
     setLoading(false);
 
     if (verifyError) {
-      setReverseCanvas(false);
       setError(friendlyAuthError(verifyError.message));
       return;
     }
@@ -233,7 +203,6 @@ export default function LoginPage() {
       setStep("password");
       return;
     }
-
     router.push("/dashboard");
   };
 
@@ -259,114 +228,75 @@ export default function LoginPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
-      <CanvasRevealEffect reverse={reverseCanvas || step === "success"} />
-      <div className="absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_0%,rgba(0,108,255,0.2),transparent_34%),radial-gradient(circle_at_50%_62%,rgba(56,189,248,0.14),transparent_32%)]" />
-      <div className="absolute inset-0 z-[1] opacity-[0.18] [background-image:linear-gradient(rgba(255,255,255,.11)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.11)_1px,transparent_1px)] [background-size:54px_54px]" />
-      <div className="absolute inset-0 z-[2] bg-[linear-gradient(to_bottom,rgba(0,0,0,0.28),rgba(0,0,0,0.04)_28%,rgba(0,0,0,0.72)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.12),transparent_34%),linear-gradient(to_bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.82))]" />
+      <div className="absolute inset-0 opacity-[0.34] [background-image:radial-gradient(rgba(56,189,248,0.34)_1.2px,transparent_1.2px)] [background-position:center] [background-size:18px_18px]" />
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent" />
 
-      <FloatingAuthNav mode={mode} onModeChange={resetForMode} />
+      <TopNav mode={mode} onModeChange={resetForMode} />
 
-      <section className="relative z-10 flex min-h-screen items-center justify-center px-5 pb-10 pt-28 sm:px-8">
+      <section className="relative z-10 flex min-h-screen items-center justify-center px-5 pb-12 pt-32">
         <div className="w-full max-w-[620px] text-center">
-          <motion.div
-            className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-[#38bdf8]/25 bg-[#38bdf8]/10 px-4 py-2 font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#7dd3fc] shadow-[0_0_42px_rgba(56,189,248,0.12)] backdrop-blur-xl"
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
-          >
-            <Sparkles size={14} />
-            {statusText}
-          </motion.div>
-
           <AnimatePresence mode="wait">
-            {step === "choice" && (
-              <motion.div key="choice" {...panelMotion}>
-                <p className="font-inter text-sm font-bold uppercase tracking-[0.32em] text-[#38bdf8]">
-                  {activeCopy.eyebrow}
-                </p>
-                <h1 className="mx-auto mt-4 max-w-[680px] font-fustat text-[clamp(48px,7vw,86px)] font-extrabold leading-[0.92] tracking-[-0.03em] text-white">
-                  {activeCopy.headline}
+            {step === "email" && (
+              <motion.div key={`email-${mode}`} {...panelMotion}>
+                <div className="mx-auto mb-8 flex items-center justify-center">
+                  <OrbLogo size={54} />
+                </div>
+                <h1 className="font-fustat text-[clamp(46px,7vw,74px)] font-extrabold leading-none tracking-[-0.03em]">
+                  {activeCopy.title}
                 </h1>
-                <p className="mx-auto mt-5 max-w-[520px] font-inter text-lg leading-8 text-white/52">
-                  {activeCopy.subline}
+                <p className="mt-4 font-inter text-[clamp(20px,3vw,34px)] font-light leading-tight text-white/52">
+                  {activeCopy.subtitle}
                 </p>
 
-                <div className="mx-auto mt-10 max-w-[460px] space-y-4">
+                <div className="mx-auto mt-10 max-w-[460px] space-y-5">
                   <button
                     onClick={signInWithGoogle}
-                    className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-white/10 bg-white/[0.065] px-5 py-4 font-inter text-base font-bold text-white shadow-[0_22px_70px_rgba(0,0,0,0.28)] backdrop-blur-xl transition hover:border-[#38bdf8]/35 hover:bg-white/[0.09]"
+                    className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-white/10 bg-white/[0.055] px-5 py-4 font-inter text-base font-medium text-white shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl transition hover:border-[#38bdf8]/30 hover:bg-white/[0.08]"
                   >
                     <GoogleIcon />
-                    Continue with Google
-                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/24 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
+                    Sign in with Google
+                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-[#38bdf8]/22 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
                   </button>
 
-                  <div className="flex items-center gap-4 py-1">
+                  <div className="flex items-center gap-4">
                     <span className="h-px flex-1 bg-white/10" />
-                    <span className="font-inter text-sm font-bold text-white/30">or</span>
+                    <span className="font-inter text-sm font-semibold text-white/34">or</span>
                     <span className="h-px flex-1 bg-white/10" />
                   </div>
 
-                  <button
-                    onClick={() => setStep("email")}
-                    className="flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-[#06101d]/72 px-5 py-4 font-inter text-base font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl transition hover:border-[#38bdf8]/35 hover:bg-[#0a1c32]"
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void sendOtp();
+                    }}
                   >
-                    <Mail size={18} />
-                    Continue with Email
-                  </button>
+                    <div className="relative">
+                      <Input
+                        type="email"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        placeholder="you@example.com"
+                        autoComplete="email"
+                        required
+                        className="h-14 rounded-full pr-16 text-center text-base"
+                      />
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        aria-label={activeCopy.emailButton}
+                        className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition hover:bg-[#006cff] disabled:opacity-50"
+                      >
+                        <ArrowRight size={17} />
+                      </button>
+                    </div>
+                  </form>
                 </div>
 
                 {error && <p className="mt-5 font-inter text-sm text-[#f87171]">{error}</p>}
-                <p className="mx-auto mt-12 max-w-[420px] font-inter text-xs leading-5 text-white/32">
-                  Secure OTP access for PrepPeer rank history and dashboard data.
+                <p className="mx-auto mt-16 max-w-[420px] font-inter text-xs leading-5 text-white/34">
+                  By continuing, you agree to PrepPeer&apos;s terms and privacy policy.
                 </p>
-              </motion.div>
-            )}
-
-            {step === "email" && (
-              <motion.div key="email" {...panelMotion}>
-                <button
-                  onClick={() => setStep("choice")}
-                  className="mx-auto mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
-                >
-                  <ArrowLeft size={16} />
-                  Back
-                </button>
-                <p className="font-inter text-sm font-bold uppercase tracking-[0.3em] text-[#38bdf8]">
-                  {activeCopy.eyebrow}
-                </p>
-                <h1 className="mt-4 font-fustat text-[clamp(42px,6vw,70px)] font-extrabold leading-none">
-                  {activeCopy.title}
-                </h1>
-                <p className="mx-auto mt-4 max-w-[460px] font-inter text-base leading-7 text-white/52">
-                  {activeCopy.body}
-                </p>
-                <form
-                  className="mx-auto mt-9 max-w-[460px] space-y-4"
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    void sendOtp();
-                  }}
-                >
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    required
-                    className="h-14 text-center text-base"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#0ea5e9] via-[#006cff] to-[#1d4ed8] px-5 py-4 font-inter text-base font-bold text-white shadow-[0_18px_55px_rgba(0,108,255,0.32)] transition hover:shadow-[0_24px_75px_rgba(56,189,248,0.32)] disabled:opacity-50"
-                  >
-                    {loading ? "Sending..." : activeCopy.action}
-                    <ArrowRight size={18} />
-                  </button>
-                </form>
-                {error && <p className="mt-5 font-inter text-sm text-[#f87171]">{error}</p>}
               </motion.div>
             )}
 
@@ -375,24 +305,21 @@ export default function LoginPage() {
                 <button
                   onClick={() => {
                     setOtp("");
-                    setReverseCanvas(false);
                     setStep("email");
                   }}
-                  className="mx-auto mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
+                  className="mx-auto mb-8 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
-                <p className="font-inter text-sm font-bold uppercase tracking-[0.3em] text-[#38bdf8]">
-                  Verification code
-                </p>
-                <h1 className="mt-4 font-fustat text-[clamp(42px,6vw,70px)] font-extrabold leading-none">
-                  Check your inbox.
+                <h1 className="font-fustat text-[clamp(46px,7vw,74px)] font-extrabold leading-none tracking-[-0.03em]">
+                  Enter your code
                 </h1>
-                <p className="mx-auto mt-4 max-w-[460px] font-inter text-base leading-7 text-white/52">
-                  Enter the 6 digit code sent to {email}.
+                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-light leading-8 text-white/52">
+                  We sent it to {email}.
                 </p>
-                <div className="mx-auto mt-9 max-w-[460px] rounded-[28px] border border-white/10 bg-[#06101d]/56 p-5 shadow-[0_22px_70px_rgba(0,0,0,0.24)] backdrop-blur-xl">
+
+                <div className="mx-auto mt-10 max-w-[460px] rounded-full border border-white/10 bg-white/[0.035] px-5 py-4 backdrop-blur-xl">
                   <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={loading}>
                     <InputOTPGroup>
                       <InputOTPSlot index={0} />
@@ -407,18 +334,14 @@ export default function LoginPage() {
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
-                <div className="mx-auto mt-5 flex max-w-[460px] items-center justify-between gap-3">
-                  <button
-                    onClick={sendOtp}
-                    disabled={loading}
-                    className="font-inter text-sm font-bold text-[#38bdf8] transition hover:text-[#7dd3fc] disabled:opacity-50"
-                  >
-                    Resend code
-                  </button>
-                  <span className="font-inter text-xs text-white/35">
-                    Auto-checks after 6 digits
-                  </span>
-                </div>
+
+                <button
+                  onClick={sendOtp}
+                  disabled={loading}
+                  className="mt-6 font-inter text-sm font-semibold text-[#7dd3fc] transition hover:text-white disabled:opacity-50"
+                >
+                  Resend code
+                </button>
                 {error && <p className="mt-5 font-inter text-sm text-[#f87171]">{error}</p>}
               </motion.div>
             )}
@@ -438,9 +361,9 @@ export default function LoginPage() {
                   </div>
                   <div>
                     <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#38bdf8]">
-                      Final account lock
+                      Password
                     </p>
-                    <h1 className="font-fustat text-3xl font-extrabold">Create password</h1>
+                    <h1 className="font-fustat text-3xl font-extrabold">Create your password</h1>
                   </div>
                 </div>
                 <AssistedPasswordConfirmation
@@ -452,35 +375,26 @@ export default function LoginPage() {
             )}
 
             {step === "success" && (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, y: 45, filter: "blur(10px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}
-              >
+              <motion.div key="success" {...panelMotion}>
                 <motion.div
-                  className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-[#38bdf8]/30 bg-[#38bdf8]/10 text-[#7dd3fc] shadow-[0_0_70px_rgba(56,189,248,0.32)]"
-                  initial={{ scale: 0, rotate: -20 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  transition={{ type: "spring", stiffness: 260, damping: 15 }}
+                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#38bdf8]/30 bg-[#38bdf8]/10 text-[#7dd3fc]"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 280, damping: 18 }}
                 >
-                  <Check size={38} strokeWidth={2.8} />
+                  <Check size={34} strokeWidth={2.8} />
                 </motion.div>
-                <p className="mt-6 font-inter text-sm font-bold uppercase tracking-[0.24em] text-[#38bdf8]">
-                  Account ready
-                </p>
-                <h1 className="mt-3 font-fustat text-[clamp(48px,7vw,82px)] font-extrabold leading-none">
-                  You&apos;re in.
+                <h1 className="mt-7 font-fustat text-[clamp(46px,7vw,74px)] font-extrabold leading-none tracking-[-0.03em]">
+                  You&apos;re in
                 </h1>
-                <p className="mx-auto mt-4 max-w-[460px] font-inter text-base leading-7 text-white/52">
-                  Your PrepPeer dashboard is ready to collect sessions, scores, and rank movement.
+                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-light leading-8 text-white/52">
+                  Continue to your dashboard.
                 </p>
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="mt-9 w-full max-w-[460px] rounded-full bg-[#006cff] px-5 py-4 font-inter text-base font-bold text-white shadow-[0_18px_55px_rgba(0,108,255,0.32)] transition hover:bg-[#0b7cff]"
+                  className="mt-10 w-full max-w-[460px] rounded-full bg-white px-5 py-4 font-inter text-base font-semibold text-black transition hover:bg-white/90"
                 >
-                  Continue to Dashboard
+                  Continue
                 </button>
               </motion.div>
             )}
