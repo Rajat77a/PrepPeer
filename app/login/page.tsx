@@ -1,7 +1,16 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, Mail, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Home,
+  Mail,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
@@ -21,23 +30,27 @@ type AuthMode = "signin" | "signup";
 type AuthStep = "choice" | "email" | "otp" | "password" | "success";
 
 const panelMotion = {
-  initial: { opacity: 0, x: 80, filter: "blur(10px)" },
-  animate: { opacity: 1, x: 0, filter: "blur(0px)" },
-  exit: { opacity: 0, x: -60, filter: "blur(10px)" },
-  transition: { duration: 0.42, ease: "easeOut" },
+  initial: { opacity: 0, y: 22, filter: "blur(10px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  exit: { opacity: 0, y: -18, filter: "blur(10px)" },
+  transition: { duration: 0.38, ease: "easeOut" },
 } as const;
 
 const modeCopy = {
   signin: {
     eyebrow: "Return to your rank room",
+    headline: "Welcome back to PrepPeer",
+    subline: "Your interviews, scores, and rank movement are waiting.",
     title: "Sign in with OTP",
-    body: "Use your email code to reopen your PrepPeer dashboard.",
+    body: "Use a one-time code to reopen your dashboard.",
     action: "Send sign-in code",
   },
   signup: {
-    eyebrow: "Create your PrepPeer account",
+    eyebrow: "Start your rank story",
+    headline: "Build your interview base",
+    subline: "Create your account, verify the email, then lock it with a password.",
     title: "Sign up with OTP",
-    body: "Verify your email first, then set your password with the live match animation.",
+    body: "Verify your email first, then set your password with the live matching prompt.",
     action: "Send sign-up code",
   },
 };
@@ -68,83 +81,65 @@ function GoogleIcon() {
   );
 }
 
-function RankScene() {
-  const rows = [
-    { label: "Session start", rank: "#67", width: "42%", tone: "bg-white/25" },
-    { label: "After answer 3", rank: "#52", width: "64%", tone: "bg-[#38bdf8]" },
-    { label: "Final chase", rank: "#41", width: "78%", tone: "bg-[#006cff]" },
-  ];
-
+function FloatingAuthNav({
+  mode,
+  onModeChange,
+}: {
+  mode: AuthMode;
+  onModeChange: (mode: AuthMode) => void;
+}) {
   return (
-    <div className="relative hidden min-h-screen overflow-hidden lg:block">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(56,189,248,0.18),transparent_34%),radial-gradient(circle_at_72%_68%,rgba(0,108,255,0.28),transparent_38%),#03070d]" />
-      <div className="absolute inset-0 opacity-[0.14] [background-image:linear-gradient(rgba(255,255,255,.14)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.14)_1px,transparent_1px)] [background-size:54px_54px]" />
-      <div className="absolute left-10 top-10">
-        <Logo variant="light" size="md" />
-      </div>
+    <header className="fixed left-0 right-0 top-0 z-30 flex items-start justify-between px-5 py-5 sm:px-8">
+      <Logo variant="light" size="md" />
 
-      <div className="absolute left-[9%] top-[19%] w-[76%]">
-        <motion.div
-          className="rounded-[32px] border border-white/10 bg-black/35 p-8 shadow-[0_35px_120px_rgba(0,0,0,0.55)] backdrop-blur-xl"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+      <nav className="absolute left-1/2 top-5 hidden -translate-x-1/2 items-center gap-3 rounded-full border border-white/10 bg-white/[0.055] px-4 py-3 shadow-[0_22px_70px_rgba(0,0,0,0.38)] backdrop-blur-xl sm:flex">
+        <Link
+          href="/"
+          className="flex h-10 w-10 items-center justify-center rounded-full text-white/55 transition hover:bg-white/10 hover:text-white"
+          aria-label="Home"
         >
-          <p className="font-inter text-xs font-bold uppercase tracking-[0.28em] text-[#38bdf8]">
-            PrepPeer login
-          </p>
-          <h1 className="mt-7 max-w-[720px] font-fustat text-[clamp(52px,6vw,92px)] font-extrabold leading-[0.9] text-white">
-            Enter the room where your rank starts moving.
-          </h1>
-          <p className="mt-6 max-w-lg font-inter text-lg leading-8 text-white/58">
-            Sign in with a code, build your profile, and keep every interview score tied to your next jump.
-          </p>
-        </motion.div>
-      </div>
+          <Home size={17} />
+        </Link>
+        <span className="h-6 w-px bg-white/10" />
+        <button
+          onClick={() => onModeChange("signin")}
+          className={cn(
+            "rounded-full px-5 py-2.5 font-inter text-sm font-bold transition",
+            mode === "signin"
+              ? "bg-[#006cff] text-white shadow-[0_12px_34px_rgba(0,108,255,0.36)]"
+              : "text-white/50 hover:bg-white/10 hover:text-white"
+          )}
+        >
+          Sign in
+        </button>
+        <button
+          onClick={() => onModeChange("signup")}
+          className={cn(
+            "rounded-full px-5 py-2.5 font-inter text-sm font-bold transition",
+            mode === "signup"
+              ? "bg-white text-black shadow-[0_0_38px_rgba(255,255,255,0.25)]"
+              : "text-white/50 hover:bg-white/10 hover:text-white"
+          )}
+        >
+          Sign up
+        </button>
+      </nav>
 
-      <motion.div
-        className="absolute bottom-[9%] left-[14%] w-[58%] rounded-[28px] border border-white/10 bg-[#06101d]/80 p-5 shadow-[0_28px_100px_rgba(0,108,255,0.16)] backdrop-blur-xl"
-        initial={{ opacity: 0, y: 35 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.65, delay: 0.18, ease: "easeOut" }}
-      >
-        <div className="mb-5 flex items-center justify-between">
-          <span className="font-inter text-sm font-bold text-white">
-            Software Engineering · Fresher
-          </span>
-          <span className="rounded-full border border-[#38bdf8]/25 bg-[#38bdf8]/10 px-3 py-1 font-inter text-xs font-bold text-[#7dd3fc]">
-            Live preview
-          </span>
-        </div>
-        <div className="space-y-3">
-          {rows.map((row, index) => (
-            <motion.div
-              key={row.label}
-              className="grid grid-cols-[1fr_64px] items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4"
-              initial={{ opacity: 0, x: -22 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.42, delay: 0.34 + index * 0.1 }}
-            >
-              <div>
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-inter text-sm font-bold text-white/72">{row.label}</p>
-                  <p className="font-inter text-xs font-bold text-white/[0.38]">{index === 0 ? "52" : index === 1 ? "64" : "72"}/100</p>
-                </div>
-                <div className="mt-2 h-2 rounded-full bg-white/[0.08]">
-                  <motion.div
-                    className={cn("h-full rounded-full", row.tone)}
-                    initial={{ width: 0 }}
-                    animate={{ width: row.width }}
-                    transition={{ duration: 0.7, delay: 0.5 + index * 0.12, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-              <p className="font-fustat text-3xl font-extrabold text-white">{row.rank}</p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-    </div>
+      <div className="flex rounded-full border border-white/10 bg-white/[0.055] p-1 backdrop-blur-xl sm:hidden">
+        {(["signin", "signup"] as const).map((item) => (
+          <button
+            key={item}
+            onClick={() => onModeChange(item)}
+            className={cn(
+              "rounded-full px-3 py-1.5 font-inter text-xs font-bold transition",
+              mode === item ? "bg-[#006cff] text-white" : "text-white/45"
+            )}
+          >
+            {item === "signin" ? "Sign in" : "Sign up"}
+          </button>
+        ))}
+      </div>
+    </header>
   );
 }
 
@@ -162,10 +157,10 @@ export default function LoginPage() {
   const isSignUp = mode === "signup";
 
   const statusText = useMemo(() => {
-    if (step === "choice") return "Choose Google or email OTP";
-    if (step === "email") return isSignUp ? "Sign-up OTP requested next" : "Sign-in OTP requested next";
+    if (step === "choice") return "Google or email OTP";
+    if (step === "email") return isSignUp ? "New account code" : "Returning account code";
     if (step === "otp") return "Six digit verification";
-    if (step === "password") return "Password match animation";
+    if (step === "password") return "Password match";
     return "Dashboard unlocked";
   }, [isSignUp, step]);
 
@@ -189,6 +184,13 @@ export default function LoginPage() {
     if (signInError) setError(signInError.message);
   };
 
+  const friendlyAuthError = (message: string) => {
+    if (message.toLowerCase().includes("signups not allowed")) {
+      return "Email sign-up is not enabled in Supabase yet. Turn on email signups to use this path.";
+    }
+    return message;
+  };
+
   const sendOtp = async () => {
     if (!email.trim()) return;
     setLoading(true);
@@ -203,7 +205,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (otpError) {
-      setError(otpError.message);
+      setError(friendlyAuthError(otpError.message));
       return;
     }
     setStep("otp");
@@ -223,7 +225,7 @@ export default function LoginPage() {
 
     if (verifyError) {
       setReverseCanvas(false);
-      setError(verifyError.message);
+      setError(friendlyAuthError(verifyError.message));
       return;
     }
 
@@ -243,7 +245,7 @@ export default function LoginPage() {
     setLoading(false);
 
     if (passwordError) {
-      setError(passwordError.message);
+      setError(friendlyAuthError(passwordError.message));
       return;
     }
     setStep("success");
@@ -256,250 +258,235 @@ export default function LoginPage() {
   }, [otp, step]);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#02060c] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-black text-white">
       <CanvasRevealEffect reverse={reverseCanvas || step === "success"} />
-      <div className="absolute inset-0 z-[1] bg-[radial-gradient(circle_at_78%_18%,rgba(56,189,248,0.16),transparent_28%),radial-gradient(circle_at_48%_80%,rgba(0,108,255,0.12),transparent_32%)]" />
+      <div className="absolute inset-0 z-[1] bg-[radial-gradient(circle_at_50%_0%,rgba(0,108,255,0.2),transparent_34%),radial-gradient(circle_at_50%_62%,rgba(56,189,248,0.14),transparent_32%)]" />
+      <div className="absolute inset-0 z-[1] opacity-[0.18] [background-image:linear-gradient(rgba(255,255,255,.11)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.11)_1px,transparent_1px)] [background-size:54px_54px]" />
+      <div className="absolute inset-0 z-[2] bg-[linear-gradient(to_bottom,rgba(0,0,0,0.28),rgba(0,0,0,0.04)_28%,rgba(0,0,0,0.72)_100%)]" />
 
-      <div className="relative z-10 grid min-h-screen lg:grid-cols-[1.08fr_0.92fr]">
-        <RankScene />
+      <FloatingAuthNav mode={mode} onModeChange={resetForMode} />
 
-        <section className="relative flex min-h-screen items-center justify-center px-5 py-8 sm:px-8">
-          <div className="absolute left-5 top-5 lg:hidden">
-            <Logo variant="light" />
-          </div>
-
+      <section className="relative z-10 flex min-h-screen items-center justify-center px-5 pb-10 pt-28 sm:px-8">
+        <div className="w-full max-w-[620px] text-center">
           <motion.div
-            className="w-full max-w-[470px] rounded-[30px] border border-white/10 bg-[#050b14]/78 p-5 shadow-[0_34px_110px_rgba(0,0,0,0.55)] backdrop-blur-2xl sm:p-7"
-            initial={{ opacity: 0, y: 26, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.55, ease: "easeOut" }}
+            className="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-[#38bdf8]/25 bg-[#38bdf8]/10 px-4 py-2 font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#7dd3fc] shadow-[0_0_42px_rgba(56,189,248,0.12)] backdrop-blur-xl"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
           >
-            <div className="mb-6 flex items-center justify-between gap-3">
-              <div className="rounded-full border border-[#38bdf8]/20 bg-[#38bdf8]/10 px-3 py-1.5 font-inter text-[11px] font-bold uppercase tracking-[0.16em] text-[#7dd3fc]">
-                {statusText}
-              </div>
-              <div className="flex rounded-full border border-white/10 bg-white/[0.04] p-1">
-                {(["signin", "signup"] as const).map((item) => (
-                  <button
-                    key={item}
-                    onClick={() => resetForMode(item)}
-                    className={cn(
-                      "rounded-full px-3 py-1.5 font-inter text-xs font-bold transition",
-                      mode === item
-                        ? "bg-[#006cff] text-white shadow-[0_10px_24px_rgba(0,108,255,0.28)]"
-                        : "text-white/[0.42] hover:text-white"
-                    )}
-                  >
-                    {item === "signin" ? "Sign in" : "Sign up"}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <AnimatePresence mode="wait">
-              {step === "choice" && (
-                <motion.div key="choice" {...panelMotion}>
-                  <div className="mb-8">
-                    <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#38bdf8]">
-                      {activeCopy.eyebrow}
-                    </p>
-                    <h2 className="mt-3 font-fustat text-[42px] font-extrabold leading-none text-white">
-                      {isSignUp ? "Start with your email." : "Welcome back."}
-                    </h2>
-                    <p className="mt-3 font-inter text-sm leading-6 text-[#9ca3af]">
-                      {isSignUp
-                        ? "Create the account, verify the code, then set the password with the live matching prompt."
-                        : "Use Google instantly or request a one-time code for your email."}
-                    </p>
-                  </div>
-
-                  <div className="space-y-3">
-                    <button
-                      onClick={signInWithGoogle}
-                      className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-full bg-gradient-to-r from-[#0ea5e9] via-[#006cff] to-[#1d4ed8] px-5 py-3.5 font-inter text-sm font-bold text-white shadow-[0_18px_48px_rgba(0,108,255,0.34)] transition hover:shadow-[0_22px_70px_rgba(56,189,248,0.32)]"
-                    >
-                      <GoogleIcon />
-                      Continue with Google
-                      <span className="absolute inset-y-0 left-[-25%] w-[20%] skew-x-[-18deg] bg-white/28 blur-sm transition-transform duration-700 group-hover:translate-x-[620%]" />
-                    </button>
-                    <div className="flex items-center gap-3 py-3">
-                      <span className="h-px flex-1 bg-white/10" />
-                      <span className="font-inter text-xs text-white/28">or</span>
-                      <span className="h-px flex-1 bg-white/10" />
-                    </div>
-                    <button
-                      onClick={() => setStep("email")}
-                      className="flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-5 py-3.5 font-inter text-sm font-bold text-white transition hover:border-[#38bdf8]/35 hover:bg-[#38bdf8]/10"
-                    >
-                      <Mail size={17} />
-                      Continue with Email
-                    </button>
-                  </div>
-
-                  {error && <p className="mt-4 font-inter text-sm text-[#f87171]">{error}</p>}
-                  <p className="mt-8 text-center font-inter text-xs leading-5 text-white/30">
-                    Secure OTP access for PrepPeer rank history and dashboard data.
-                  </p>
-                </motion.div>
-              )}
-
-              {step === "email" && (
-                <motion.div key="email" {...panelMotion}>
-                  <button
-                    onClick={() => setStep("choice")}
-                    className="mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
-                  >
-                    <ArrowLeft size={16} />
-                    Back
-                  </button>
-                  <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#38bdf8]">
-                    {activeCopy.eyebrow}
-                  </p>
-                  <h2 className="mt-3 font-fustat text-[40px] font-extrabold leading-none">
-                    {activeCopy.title}
-                  </h2>
-                  <p className="mt-3 font-inter text-sm leading-6 text-[#9ca3af]">
-                    {activeCopy.body}
-                  </p>
-                  <form
-                    className="mt-8 space-y-4"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      void sendOtp();
-                    }}
-                  >
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      autoComplete="email"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-[#006cff] px-5 py-3.5 font-inter text-sm font-bold text-white shadow-[0_18px_45px_rgba(0,108,255,0.28)] transition hover:bg-[#0b7cff] disabled:opacity-50"
-                    >
-                      {loading ? "Sending..." : activeCopy.action}
-                      <ArrowRight size={17} />
-                    </button>
-                  </form>
-                  {error && <p className="mt-4 font-inter text-sm text-[#f87171]">{error}</p>}
-                </motion.div>
-              )}
-
-              {step === "otp" && (
-                <motion.div key="otp" {...panelMotion}>
-                  <button
-                    onClick={() => {
-                      setOtp("");
-                      setReverseCanvas(false);
-                      setStep("email");
-                    }}
-                    className="mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
-                  >
-                    <ArrowLeft size={16} />
-                    Back
-                  </button>
-                  <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#38bdf8]">
-                    Verification code
-                  </p>
-                  <h2 className="mt-3 font-fustat text-[40px] font-extrabold leading-none">
-                    Check your inbox.
-                  </h2>
-                  <p className="mt-3 font-inter text-sm leading-6 text-[#9ca3af]">
-                    Enter the 6 digit code sent to {email}.
-                  </p>
-                  <div className="mt-8 rounded-[26px] border border-white/10 bg-black/25 p-5">
-                    <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={loading}>
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                      </InputOTPGroup>
-                      <InputOTPSeparator />
-                      <InputOTPGroup>
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </div>
-                  <div className="mt-6 flex items-center justify-between gap-3">
-                    <button
-                      onClick={sendOtp}
-                      disabled={loading}
-                      className="font-inter text-sm font-bold text-[#38bdf8] transition hover:text-[#7dd3fc] disabled:opacity-50"
-                    >
-                      Resend code
-                    </button>
-                    <span className="font-inter text-xs text-white/35">
-                      Auto-checks after 6 digits
-                    </span>
-                  </div>
-                  {error && <p className="mt-4 font-inter text-sm text-[#f87171]">{error}</p>}
-                </motion.div>
-              )}
-
-              {step === "password" && (
-                <motion.div key="password" {...panelMotion}>
-                  <div className="mb-6 flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#38bdf8]/20 bg-[#38bdf8]/10 text-[#7dd3fc]">
-                      <ShieldCheck size={20} />
-                    </div>
-                    <div>
-                      <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#38bdf8]">
-                        Final account lock
-                      </p>
-                      <h2 className="font-fustat text-3xl font-extrabold">Create password</h2>
-                    </div>
-                  </div>
-                  <AssistedPasswordConfirmation
-                    onSubmit={savePassword}
-                    loading={loading}
-                    error={error}
-                  />
-                </motion.div>
-              )}
-
-              {step === "success" && (
-                <motion.div
-                  key="success"
-                  initial={{ opacity: 0, y: 45, filter: "blur(10px)" }}
-                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
-                  className="text-center"
-                >
-                  <motion.div
-                    className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-[#38bdf8]/30 bg-[#38bdf8]/10 text-[#7dd3fc] shadow-[0_0_70px_rgba(56,189,248,0.32)]"
-                    initial={{ scale: 0, rotate: -20 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    transition={{ type: "spring", stiffness: 260, damping: 15 }}
-                  >
-                    <Check size={38} strokeWidth={2.8} />
-                  </motion.div>
-                  <div className="mt-6 flex items-center justify-center gap-2 font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#38bdf8]">
-                    <Sparkles size={14} />
-                    Account ready
-                  </div>
-                  <h2 className="mt-3 font-fustat text-[42px] font-extrabold">You&apos;re in.</h2>
-                  <p className="mt-3 font-inter text-sm leading-6 text-[#9ca3af]">
-                    Your PrepPeer dashboard is ready to collect sessions, scores, and rank movement.
-                  </p>
-                  <button
-                    onClick={() => router.push("/dashboard")}
-                    className="mt-8 w-full rounded-full bg-[#006cff] px-5 py-3.5 font-inter text-sm font-bold text-white shadow-[0_18px_45px_rgba(0,108,255,0.28)] transition hover:bg-[#0b7cff]"
-                  >
-                    Continue to Dashboard
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <Sparkles size={14} />
+            {statusText}
           </motion.div>
-        </section>
-      </div>
+
+          <AnimatePresence mode="wait">
+            {step === "choice" && (
+              <motion.div key="choice" {...panelMotion}>
+                <p className="font-inter text-sm font-bold uppercase tracking-[0.32em] text-[#38bdf8]">
+                  {activeCopy.eyebrow}
+                </p>
+                <h1 className="mx-auto mt-4 max-w-[680px] font-fustat text-[clamp(48px,7vw,86px)] font-extrabold leading-[0.92] tracking-[-0.03em] text-white">
+                  {activeCopy.headline}
+                </h1>
+                <p className="mx-auto mt-5 max-w-[520px] font-inter text-lg leading-8 text-white/52">
+                  {activeCopy.subline}
+                </p>
+
+                <div className="mx-auto mt-10 max-w-[460px] space-y-4">
+                  <button
+                    onClick={signInWithGoogle}
+                    className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-white/10 bg-white/[0.065] px-5 py-4 font-inter text-base font-bold text-white shadow-[0_22px_70px_rgba(0,0,0,0.28)] backdrop-blur-xl transition hover:border-[#38bdf8]/35 hover:bg-white/[0.09]"
+                  >
+                    <GoogleIcon />
+                    Continue with Google
+                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/24 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
+                  </button>
+
+                  <div className="flex items-center gap-4 py-1">
+                    <span className="h-px flex-1 bg-white/10" />
+                    <span className="font-inter text-sm font-bold text-white/30">or</span>
+                    <span className="h-px flex-1 bg-white/10" />
+                  </div>
+
+                  <button
+                    onClick={() => setStep("email")}
+                    className="flex w-full items-center justify-center gap-3 rounded-full border border-white/10 bg-[#06101d]/72 px-5 py-4 font-inter text-base font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-xl transition hover:border-[#38bdf8]/35 hover:bg-[#0a1c32]"
+                  >
+                    <Mail size={18} />
+                    Continue with Email
+                  </button>
+                </div>
+
+                {error && <p className="mt-5 font-inter text-sm text-[#f87171]">{error}</p>}
+                <p className="mx-auto mt-12 max-w-[420px] font-inter text-xs leading-5 text-white/32">
+                  Secure OTP access for PrepPeer rank history and dashboard data.
+                </p>
+              </motion.div>
+            )}
+
+            {step === "email" && (
+              <motion.div key="email" {...panelMotion}>
+                <button
+                  onClick={() => setStep("choice")}
+                  className="mx-auto mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
+                >
+                  <ArrowLeft size={16} />
+                  Back
+                </button>
+                <p className="font-inter text-sm font-bold uppercase tracking-[0.3em] text-[#38bdf8]">
+                  {activeCopy.eyebrow}
+                </p>
+                <h1 className="mt-4 font-fustat text-[clamp(42px,6vw,70px)] font-extrabold leading-none">
+                  {activeCopy.title}
+                </h1>
+                <p className="mx-auto mt-4 max-w-[460px] font-inter text-base leading-7 text-white/52">
+                  {activeCopy.body}
+                </p>
+                <form
+                  className="mx-auto mt-9 max-w-[460px] space-y-4"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void sendOtp();
+                  }}
+                >
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    required
+                    className="h-14 text-center text-base"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-gradient-to-r from-[#0ea5e9] via-[#006cff] to-[#1d4ed8] px-5 py-4 font-inter text-base font-bold text-white shadow-[0_18px_55px_rgba(0,108,255,0.32)] transition hover:shadow-[0_24px_75px_rgba(56,189,248,0.32)] disabled:opacity-50"
+                  >
+                    {loading ? "Sending..." : activeCopy.action}
+                    <ArrowRight size={18} />
+                  </button>
+                </form>
+                {error && <p className="mt-5 font-inter text-sm text-[#f87171]">{error}</p>}
+              </motion.div>
+            )}
+
+            {step === "otp" && (
+              <motion.div key="otp" {...panelMotion}>
+                <button
+                  onClick={() => {
+                    setOtp("");
+                    setReverseCanvas(false);
+                    setStep("email");
+                  }}
+                  className="mx-auto mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
+                >
+                  <ArrowLeft size={16} />
+                  Back
+                </button>
+                <p className="font-inter text-sm font-bold uppercase tracking-[0.3em] text-[#38bdf8]">
+                  Verification code
+                </p>
+                <h1 className="mt-4 font-fustat text-[clamp(42px,6vw,70px)] font-extrabold leading-none">
+                  Check your inbox.
+                </h1>
+                <p className="mx-auto mt-4 max-w-[460px] font-inter text-base leading-7 text-white/52">
+                  Enter the 6 digit code sent to {email}.
+                </p>
+                <div className="mx-auto mt-9 max-w-[460px] rounded-[28px] border border-white/10 bg-[#06101d]/56 p-5 shadow-[0_22px_70px_rgba(0,0,0,0.24)] backdrop-blur-xl">
+                  <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={loading}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                    </InputOTPGroup>
+                    <InputOTPSeparator />
+                    <InputOTPGroup>
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+                <div className="mx-auto mt-5 flex max-w-[460px] items-center justify-between gap-3">
+                  <button
+                    onClick={sendOtp}
+                    disabled={loading}
+                    className="font-inter text-sm font-bold text-[#38bdf8] transition hover:text-[#7dd3fc] disabled:opacity-50"
+                  >
+                    Resend code
+                  </button>
+                  <span className="font-inter text-xs text-white/35">
+                    Auto-checks after 6 digits
+                  </span>
+                </div>
+                {error && <p className="mt-5 font-inter text-sm text-[#f87171]">{error}</p>}
+              </motion.div>
+            )}
+
+            {step === "password" && (
+              <motion.div key="password" {...panelMotion} className="mx-auto max-w-[500px] text-left">
+                <button
+                  onClick={() => setStep("otp")}
+                  className="mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
+                >
+                  <ArrowLeft size={16} />
+                  Back
+                </button>
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#38bdf8]/20 bg-[#38bdf8]/10 text-[#7dd3fc]">
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#38bdf8]">
+                      Final account lock
+                    </p>
+                    <h1 className="font-fustat text-3xl font-extrabold">Create password</h1>
+                  </div>
+                </div>
+                <AssistedPasswordConfirmation
+                  onSubmit={savePassword}
+                  loading={loading}
+                  error={error}
+                />
+              </motion.div>
+            )}
+
+            {step === "success" && (
+              <motion.div
+                key="success"
+                initial={{ opacity: 0, y: 45, filter: "blur(10px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+              >
+                <motion.div
+                  className="mx-auto flex h-24 w-24 items-center justify-center rounded-full border border-[#38bdf8]/30 bg-[#38bdf8]/10 text-[#7dd3fc] shadow-[0_0_70px_rgba(56,189,248,0.32)]"
+                  initial={{ scale: 0, rotate: -20 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 15 }}
+                >
+                  <Check size={38} strokeWidth={2.8} />
+                </motion.div>
+                <p className="mt-6 font-inter text-sm font-bold uppercase tracking-[0.24em] text-[#38bdf8]">
+                  Account ready
+                </p>
+                <h1 className="mt-3 font-fustat text-[clamp(48px,7vw,82px)] font-extrabold leading-none">
+                  You&apos;re in.
+                </h1>
+                <p className="mx-auto mt-4 max-w-[460px] font-inter text-base leading-7 text-white/52">
+                  Your PrepPeer dashboard is ready to collect sessions, scores, and rank movement.
+                </p>
+                <button
+                  onClick={() => router.push("/dashboard")}
+                  className="mt-9 w-full max-w-[460px] rounded-full bg-[#006cff] px-5 py-4 font-inter text-base font-bold text-white shadow-[0_18px_55px_rgba(0,108,255,0.32)] transition hover:bg-[#0b7cff]"
+                >
+                  Continue to Dashboard
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </section>
     </main>
   );
 }
