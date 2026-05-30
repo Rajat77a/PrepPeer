@@ -1,12 +1,11 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, Home, ShieldCheck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, ShieldCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { OrbLogo } from "@/components/ui/OrbLogo";
 import { Input } from "@/components/ui/input";
 import {
   InputOTP,
@@ -29,13 +28,13 @@ const panelMotion = {
 
 const copy = {
   signin: {
-    title: "Welcome to PrepPeer",
-    subtitle: "Know your rank before the real interview.",
+    title: "Welcome back",
+    subtitle: "Your next mock interview is ready.",
     emailButton: "Send sign-in code",
   },
   signup: {
-    title: "Start with PrepPeer",
-    subtitle: "Create your account and keep every score in one place.",
+    title: "Join PrepPeer",
+    subtitle: "Start with a rank you can improve.",
     emailButton: "Send sign-up code",
   },
 };
@@ -66,6 +65,74 @@ function GoogleIcon() {
   );
 }
 
+function MatrixBackground() {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.14),transparent_32%),linear-gradient(to_bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.88))]" />
+      <div
+        className="absolute left-1/2 top-1/2 grid w-[1700px] max-w-none -translate-x-1/2 -translate-y-1/2 grid-cols-[repeat(50,8px)] gap-x-[15px] gap-y-[13px] opacity-80"
+        aria-hidden="true"
+      >
+        {Array.from({ length: 1450 }).map((_, index) => {
+          const strong = index % 47 === 0 || index % 83 === 0;
+          const medium = index % 11 === 0 || index % 19 === 0;
+          const duration = 2.4 + (index % 7) * 0.28;
+          const delay = -((index * 37) % 210) / 100;
+
+          return (
+            <span
+              key={index}
+              className={cn(
+                "h-[4px] w-[4px] rounded-[1px] bg-[#006cff]/15 shadow-[0_0_0_rgba(0,108,255,0)]",
+                medium && "bg-[#168cff]/30",
+                strong && "bg-[#4db7ff]/70"
+              )}
+              style={{
+                animation: `matrixBlink ${duration}s ease-in-out ${delay}s infinite`,
+              }}
+            />
+          );
+        })}
+      </div>
+      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black to-transparent" />
+      <style jsx>{`
+        @keyframes matrixBlink {
+          0%,
+          100% {
+            opacity: 0.14;
+            transform: scale(0.82);
+            box-shadow: 0 0 0 rgba(0, 108, 255, 0);
+          }
+          42% {
+            opacity: 0.28;
+          }
+          50% {
+            opacity: 1;
+            transform: scale(1.15);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.58);
+          }
+          58% {
+            opacity: 0.22;
+          }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function MiniMark() {
+  return (
+    <span className="relative flex h-9 w-9 items-center justify-center">
+      <span className="absolute left-1/2 top-1 h-2 w-2 -translate-x-1/2 rounded-full bg-[#8bd7ff]" />
+      <span className="absolute bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#8bd7ff]" />
+      <span className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#38bdf8]" />
+      <span className="absolute right-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#38bdf8]" />
+      <span className="h-2 w-2 rounded-full bg-white/80" />
+    </span>
+  );
+}
+
 function TopNav({
   mode,
   onModeChange,
@@ -74,27 +141,15 @@ function TopNav({
   onModeChange: (mode: AuthMode) => void;
 }) {
   return (
-    <header className="fixed left-1/2 top-7 z-30 w-[calc(100%-2rem)] max-w-[720px] -translate-x-1/2 rounded-full border border-white/10 bg-[#111]/70 px-4 py-3 shadow-[0_24px_80px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-3">
+    <header className="fixed left-1/2 top-7 z-30 w-[calc(100%-2rem)] max-w-[430px] -translate-x-1/2 rounded-full border border-white/10 bg-[#111]/70 px-4 py-3 shadow-[0_24px_80px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+      <div className="flex items-center justify-between gap-5">
         <Link
           href="/"
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition hover:bg-white/10"
+          className="flex shrink-0 items-center justify-center rounded-full transition hover:opacity-80"
           aria-label="Home"
         >
-          <Home size={17} className="text-white/70" />
+          <MiniMark />
         </Link>
-
-        <nav className="hidden min-w-0 flex-1 items-center justify-center gap-7 font-inter text-sm font-medium text-white/70 sm:flex">
-          <Link href="/#how-it-works" className="transition hover:text-white">
-            How it works
-          </Link>
-          <Link href="/interview" className="transition hover:text-white">
-            Interview
-          </Link>
-          <Link href="/leaderboard" className="transition hover:text-white">
-            Leaderboard
-          </Link>
-        </nav>
 
         <div className="flex shrink-0 items-center gap-2 rounded-full bg-white/[0.04] p-1">
           <button
@@ -228,9 +283,7 @@ export default function LoginPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-black text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.12),transparent_34%),linear-gradient(to_bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.82))]" />
-      <div className="absolute inset-0 opacity-[0.34] [background-image:radial-gradient(rgba(56,189,248,0.34)_1.2px,transparent_1.2px)] [background-position:center] [background-size:18px_18px]" />
-      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black to-transparent" />
+      <MatrixBackground />
 
       <TopNav mode={mode} onModeChange={resetForMode} />
 
@@ -239,13 +292,10 @@ export default function LoginPage() {
           <AnimatePresence mode="wait">
             {step === "email" && (
               <motion.div key={`email-${mode}`} {...panelMotion}>
-                <div className="mx-auto mb-8 flex items-center justify-center">
-                  <OrbLogo size={54} />
-                </div>
-                <h1 className="font-fustat text-[clamp(46px,7vw,74px)] font-extrabold leading-none tracking-[-0.03em]">
+                <h1 className="font-inter text-[clamp(44px,6.4vw,70px)] font-black leading-none tracking-[-0.045em]">
                   {activeCopy.title}
                 </h1>
-                <p className="mt-4 font-inter text-[clamp(20px,3vw,34px)] font-light leading-tight text-white/52">
+                <p className="mt-4 font-inter text-[clamp(20px,3vw,33px)] font-light leading-tight tracking-[-0.02em] text-white/48">
                   {activeCopy.subtitle}
                 </p>
 
