@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { usePathname } from "next/navigation";
-import { ArrowRight } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ArrowRight, LayoutDashboard, LogOut } from "lucide-react";
+import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
 import { Logo } from "./Logo";
 import { Button } from "./Button";
 import { NavSectionLink } from "./NavSectionLink";
@@ -12,6 +14,7 @@ import { NAV_LINKS } from "@/lib/mockData";
 import { useScrollSpy } from "@/hooks/useScrollSpy";
 import { cn } from "@/lib/utils";
 import { EASE_OUT } from "@/lib/motion";
+import { createClient } from "@/utils/supabase/client";
 
 interface NavbarProps {
   variant?: "landing" | "inner";
@@ -25,11 +28,38 @@ export function Navbar({
   progress,
 }: NavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const isHome = pathname === "/";
   const activeSection = useScrollSpy(
     ["home", "how-it-works", "features", "leaderboard-preview", "pricing"],
     140
   );
+
+  useEffect(() => {
+    let mounted = true;
+    try {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data }) => {
+        if (mounted) setUser(data.user);
+      });
+    } catch {
+      setUser(null);
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setMenuOpen(false);
+    router.push("/");
+  };
 
   if (variant === "inner") {
     return (
@@ -103,9 +133,64 @@ export function Navbar({
           </div>
 
           <div className="shrink-0 hidden sm:block">
-            <Button href="/interview" variant="glass" showArrow>
-              Start Free
-            </Button>
+            <div className="flex items-center gap-2">
+              {user ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setMenuOpen((open) => !open)}
+                    className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-white/10"
+                    aria-label="Open account menu"
+                  >
+                    {user.user_metadata?.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={user.user_metadata.avatar_url}
+                        alt=""
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="font-inter text-sm font-bold text-text">
+                        {(user.user_metadata?.full_name ?? user.email ?? "U")
+                          .charAt(0)
+                          .toUpperCase()}
+                      </span>
+                    )}
+                  </button>
+
+                  {menuOpen && (
+                    <div className="absolute right-0 top-12 w-44 rounded-2xl border border-[rgba(0,0,0,0.08)] bg-white p-2 shadow-[0_18px_55px_rgba(0,0,0,0.14)]">
+                      <button
+                        onClick={() => {
+                          setMenuOpen(false);
+                          router.push("/dashboard");
+                        }}
+                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 font-inter text-sm font-semibold text-text transition hover:bg-[#F3F7FC]"
+                      >
+                        <LayoutDashboard size={15} />
+                        Dashboard
+                      </button>
+                      <button
+                        onClick={handleSignOut}
+                        className="flex w-full items-center gap-2 rounded-xl px-3 py-2 font-inter text-sm font-semibold text-text transition hover:bg-[#F3F7FC]"
+                      >
+                        <LogOut size={15} />
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => router.push("/login")}
+                  className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-inter text-sm font-semibold text-text transition hover:bg-white/10"
+                >
+                  Sign in
+                </button>
+              )}
+              <Button href="/interview" variant="glass" showArrow>
+                Start Free
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
