@@ -88,45 +88,69 @@ function MatrixBackground() {
         }
 
         .login-orb {
-          border-radius: 47% 53% 45% 55% / 44% 42% 58% 56%;
+          border-radius: 50%;
           background:
-            radial-gradient(ellipse at 31% 27%, rgba(255, 255, 255, 0.96) 0 13%, rgba(255, 255, 255, 0.32) 22%, transparent 34%),
-            radial-gradient(circle at 46% 42%, #8af7ff 0%, #27ccff 25%, #0087ff 48%, transparent 62%),
-            radial-gradient(circle at 78% 67%, rgba(3, 8, 67, 0.86) 0 13%, transparent 26%),
-            conic-gradient(from 218deg, #061059, #008aff, #7dffd9, #0271f0, #07165f, #061059);
+            radial-gradient(ellipse at 30% 25%, rgba(255, 255, 255, 0.98) 0 11%, rgba(255, 255, 255, 0.46) 18%, transparent 34%),
+            radial-gradient(circle at 50% 45%, #9ffaff 0%, #37dfff 24%, #008cff 49%, #0753d9 66%, transparent 72%),
+            radial-gradient(circle at 72% 73%, rgba(1, 10, 74, 0.92) 0 11%, transparent 24%),
+            radial-gradient(circle at 18% 82%, rgba(3, 9, 70, 0.92) 0 10%, transparent 23%),
+            conic-gradient(from 224deg, #050b4f, #006cff, #7dffd9, #00b7ff, #06236e, #050b4f);
           box-shadow:
-            inset 18px 18px 26px rgba(255, 255, 255, 0.38),
-            inset -20px -22px 34px rgba(0, 22, 98, 0.58),
+            inset 18px 18px 30px rgba(255, 255, 255, 0.46),
+            inset -18px -24px 36px rgba(0, 16, 92, 0.66),
+            inset 0 0 0 2px rgba(255, 255, 255, 0.18),
             0 24px 90px rgba(0, 132, 255, 0.22);
           opacity: 0.9;
           transform: translateZ(0);
           animation: loginOrbFloat 8s ease-in-out infinite;
         }
 
+        .login-orb::before,
+        .login-orb::after {
+          border-radius: inherit;
+          content: "";
+          inset: 0;
+          position: absolute;
+        }
+
+        .login-orb::before {
+          background:
+            conic-gradient(from 18deg, rgba(2, 6, 57, 0.92), transparent 16%, transparent 34%, rgba(2, 6, 57, 0.82) 42%, transparent 54%, transparent 78%, rgba(1, 6, 44, 0.88));
+          filter: blur(0.3px);
+          mix-blend-mode: multiply;
+          opacity: 0.72;
+        }
+
+        .login-orb::after {
+          background:
+            radial-gradient(ellipse at 37% 31%, rgba(255, 255, 255, 0.72) 0 11%, transparent 31%),
+            radial-gradient(circle at 58% 58%, rgba(125, 255, 217, 0.24), transparent 34%);
+          opacity: 0.9;
+        }
+
         .login-orb-one {
-          height: 210px;
-          right: 9%;
-          top: 18%;
-          width: 230px;
+          height: 220px;
+          right: 8%;
+          top: 16%;
+          width: 220px;
         }
 
         .login-orb-two {
           animation-delay: -3s;
-          filter: blur(0.2px);
-          height: 112px;
-          left: 13%;
-          opacity: 0.46;
-          top: 66%;
-          width: 122px;
+          height: 126px;
+          left: 10%;
+          opacity: 0.5;
+          top: 64%;
+          width: 126px;
         }
 
         .login-orb-three {
           animation-delay: -5.2s;
-          height: 72px;
-          opacity: 0.28;
-          right: 20%;
-          top: 74%;
-          width: 78px;
+          height: 82px;
+          opacity: 0.34;
+          right: 21%;
+          top: 73%;
+          width: 82px;
         }
 
         .login-lines {
