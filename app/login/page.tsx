@@ -109,7 +109,7 @@ function MatrixBackground() {
       <LoginOrb className="login-orb-one" />
       <LoginOrb className="login-orb-two" />
       <LoginOrb className="login-orb-three" />
-      <div className="login-lines absolute inset-0" aria-hidden="true" />
+      <div className="login-waves absolute inset-0" aria-hidden="true" />
       <div className="login-vignette absolute inset-0" aria-hidden="true" />
       <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-white to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-white to-transparent" />
@@ -153,14 +153,13 @@ function MatrixBackground() {
           width: 82px;
         }
 
-        .login-lines {
-          background-image:
-            linear-gradient(rgba(0, 132, 255, 0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0, 132, 255, 0.065) 1px, transparent 1px),
-            linear-gradient(120deg, transparent 0 43%, rgba(0, 132, 255, 0.08) 49%, transparent 57%);
-          background-size: 86px 86px, 86px 86px, 100% 100%;
-          mask-image: radial-gradient(ellipse at center, black 0 52%, transparent 82%);
-          opacity: 0.5;
+        .login-waves {
+          background:
+            radial-gradient(ellipse at 22% 78%, rgba(0, 132, 255, 0.12) 0%, transparent 34%),
+            radial-gradient(ellipse at 78% 24%, rgba(125, 255, 217, 0.1) 0%, transparent 31%),
+            linear-gradient(135deg, transparent 0 42%, rgba(0, 132, 255, 0.045) 47%, transparent 54%),
+            linear-gradient(35deg, transparent 0 38%, rgba(96, 177, 255, 0.05) 48%, transparent 59%);
+          opacity: 0.9;
         }
 
         .login-vignette {
@@ -419,18 +418,36 @@ export default function LoginPage() {
                   We sent it to {email}.
                 </p>
 
-                <div className="mx-auto mt-10 max-w-[460px] rounded-full border border-white/80 bg-white/72 px-5 py-4 shadow-[0_22px_70px_rgba(0,132,255,0.14),inset_0_1px_2px_rgba(255,255,255,0.95)] backdrop-blur-xl">
+                <div className="mx-auto mt-10 max-w-[460px] rounded-[30px] border border-[#1d3c75]/18 bg-[#0b1b3f]/92 px-5 py-4 shadow-[0_24px_72px_rgba(6,16,89,0.22),inset_0_1px_2px_rgba(255,255,255,0.14)] backdrop-blur-xl">
                   <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={loading}>
                     <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
+                      <InputOTPSlot
+                        index={0}
+                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
+                      />
+                      <InputOTPSlot
+                        index={1}
+                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
+                      />
+                      <InputOTPSlot
+                        index={2}
+                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
+                      />
                     </InputOTPGroup>
-                    <InputOTPSeparator />
+                    <InputOTPSeparator className="text-white/35" />
                     <InputOTPGroup>
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
+                      <InputOTPSlot
+                        index={3}
+                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
+                      />
+                      <InputOTPSlot
+                        index={4}
+                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
+                      />
+                      <InputOTPSlot
+                        index={5}
+                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
+                      />
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
