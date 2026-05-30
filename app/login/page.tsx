@@ -69,7 +69,7 @@ function GoogleIcon() {
 function MatrixBackground() {
   const magnetRef = useRef<HTMLDivElement | null>(null);
   const rafRef = useRef<number | null>(null);
-  const pointerRef = useRef({ x: 50, y: 50, active: 0 });
+  const pointerRef = useRef({ x: 0, y: 0, active: 0 });
   const activeCells = [
     { left: "7%", top: "31%", delay: "-0.2s" },
     { left: "12%", top: "67%", delay: "-1.4s" },
@@ -92,8 +92,7 @@ function MatrixBackground() {
       if (!magnetRef.current) return;
 
       const { x, y, active } = pointerRef.current;
-      magnetRef.current.style.setProperty("--mx", `${x}%`);
-      magnetRef.current.style.setProperty("--my", `${y}%`);
+      magnetRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
       magnetRef.current.style.setProperty("--active", `${active}`);
     };
 
@@ -105,8 +104,8 @@ function MatrixBackground() {
 
     const handlePointerMove = (event: PointerEvent) => {
       pointerRef.current = {
-        x: (event.clientX / window.innerWidth) * 100,
-        y: (event.clientY / window.innerHeight) * 100,
+        x: event.clientX,
+        y: event.clientY,
         active: 1,
       };
       schedulePaint();
@@ -132,7 +131,31 @@ function MatrixBackground() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.14),transparent_32%),linear-gradient(to_bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.88))]" />
       <div className="matrix-grid absolute inset-0 opacity-70" aria-hidden="true" />
       <div className="matrix-grid matrix-grid-offset absolute inset-0 opacity-35" aria-hidden="true" />
-      <div ref={magnetRef} className="matrix-magnet absolute inset-0" aria-hidden="true" />
+      <div ref={magnetRef} className="matrix-magnet absolute left-0 top-0" aria-hidden="true">
+        {[
+          ["-44px", "-26px", "0s", "6px"],
+          ["-24px", "-8px", "-0.18s", "5px"],
+          ["-7px", "-34px", "-0.3s", "4px"],
+          ["14px", "-18px", "-0.1s", "7px"],
+          ["34px", "-2px", "-0.26s", "5px"],
+          ["-33px", "18px", "-0.42s", "4px"],
+          ["-10px", "28px", "-0.22s", "7px"],
+          ["18px", "19px", "-0.36s", "5px"],
+          ["45px", "30px", "-0.14s", "4px"],
+        ].map(([left, top, delay, size], index) => (
+          <span
+            key={index}
+            className="matrix-magnet-cell absolute rounded-[1px] bg-[#4db7ff]"
+            style={{
+              animationDelay: delay,
+              height: size,
+              left,
+              top,
+              width: size,
+            }}
+          />
+        ))}
+      </div>
       <div className="absolute inset-0" aria-hidden="true">
         {activeCells.map((cell, index) => (
           <span
@@ -166,28 +189,24 @@ function MatrixBackground() {
         }
 
         .matrix-magnet {
-          --mx: 50%;
-          --my: 50%;
           --active: 0;
-          background-image: conic-gradient(
-            from 90deg at 7px 7px,
-            rgba(93, 204, 255, 0.9) 0 90deg,
-            transparent 0
-          );
-          background-position: center;
-          background-size: 22px 22px;
-          filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.75));
-          mask-image: radial-gradient(circle at var(--mx) var(--my), black 0 72px, transparent 158px);
-          -webkit-mask-image: radial-gradient(circle at var(--mx) var(--my), black 0 72px, transparent 158px);
+          height: 1px;
           opacity: var(--active);
+          pointer-events: none;
           transform: translateZ(0);
-          transition: opacity 220ms ease, background-size 220ms ease;
-          animation: magnetBreath 1.7s ease-in-out infinite;
+          transition: opacity 160ms ease;
+          width: 1px;
+          will-change: transform, opacity;
         }
 
         .matrix-cell {
           box-shadow: 0 0 18px rgba(56, 189, 248, 0.65);
           animation: matrixBlink 2.8s ease-in-out infinite;
+        }
+
+        .matrix-magnet-cell {
+          box-shadow: 0 0 16px rgba(56, 189, 248, 0.85);
+          animation: magnetCellPop 1.25s ease-in-out infinite;
         }
 
         @keyframes matrixGridPulse {
@@ -212,13 +231,15 @@ function MatrixBackground() {
           }
         }
 
-        @keyframes magnetBreath {
+        @keyframes magnetCellPop {
           0%,
           100% {
-            background-size: 22px 22px;
+            opacity: 0.28;
+            transform: scale(0.85);
           }
           50% {
-            background-size: 27px 27px;
+            opacity: 1;
+            transform: scale(1.45);
           }
         }
       `}</style>
