@@ -66,54 +66,83 @@ function GoogleIcon() {
 }
 
 function MatrixBackground() {
+  const activeCells = [
+    { left: "7%", top: "31%", delay: "-0.2s" },
+    { left: "12%", top: "67%", delay: "-1.4s" },
+    { left: "19%", top: "18%", delay: "-2.1s" },
+    { left: "28%", top: "56%", delay: "-0.8s" },
+    { left: "34%", top: "38%", delay: "-1.9s" },
+    { left: "42%", top: "74%", delay: "-0.5s" },
+    { left: "49%", top: "24%", delay: "-2.5s" },
+    { left: "57%", top: "61%", delay: "-1.1s" },
+    { left: "64%", top: "42%", delay: "-2.8s" },
+    { left: "72%", top: "20%", delay: "-0.9s" },
+    { left: "78%", top: "69%", delay: "-2.2s" },
+    { left: "86%", top: "35%", delay: "-1.6s" },
+    { left: "93%", top: "58%", delay: "-0.4s" },
+  ];
+
   return (
     <div className="absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.14),transparent_32%),linear-gradient(to_bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.88))]" />
-      <div
-        className="absolute left-1/2 top-1/2 grid w-[1700px] max-w-none -translate-x-1/2 -translate-y-1/2 grid-cols-[repeat(50,8px)] gap-x-[15px] gap-y-[13px] opacity-80"
-        aria-hidden="true"
-      >
-        {Array.from({ length: 1450 }).map((_, index) => {
-          const strong = index % 47 === 0 || index % 83 === 0;
-          const medium = index % 11 === 0 || index % 19 === 0;
-          const duration = 2.4 + (index % 7) * 0.28;
-          const delay = -((index * 37) % 210) / 100;
-
-          return (
-            <span
-              key={index}
-              className={cn(
-                "h-[4px] w-[4px] rounded-[1px] bg-[#006cff]/15 shadow-[0_0_0_rgba(0,108,255,0)]",
-                medium && "bg-[#168cff]/30",
-                strong && "bg-[#4db7ff]/70"
-              )}
-              style={{
-                animation: `matrixBlink ${duration}s ease-in-out ${delay}s infinite`,
-              }}
-            />
-          );
-        })}
+      <div className="matrix-grid absolute inset-0 opacity-70" aria-hidden="true" />
+      <div className="matrix-grid matrix-grid-offset absolute inset-0 opacity-35" aria-hidden="true" />
+      <div className="absolute inset-0" aria-hidden="true">
+        {activeCells.map((cell, index) => (
+          <span
+            key={index}
+            className="matrix-cell absolute h-[5px] w-[5px] rounded-[1px] bg-[#4db7ff]"
+            style={{
+              animationDelay: cell.delay,
+              left: cell.left,
+              top: cell.top,
+            }}
+          />
+        ))}
       </div>
       <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black to-transparent" />
       <style jsx>{`
+        .matrix-grid {
+          background-image: conic-gradient(
+            from 90deg at 4px 4px,
+            rgba(0, 108, 255, 0.28) 0 90deg,
+            transparent 0
+          );
+          background-size: 24px 24px;
+          mask-image: radial-gradient(circle at center, black 0 58%, transparent 78%);
+          animation: matrixGridPulse 4.6s ease-in-out infinite;
+        }
+
+        .matrix-grid-offset {
+          background-position: 12px 12px;
+          animation-delay: -2.3s;
+        }
+
+        .matrix-cell {
+          box-shadow: 0 0 18px rgba(56, 189, 248, 0.65);
+          animation: matrixBlink 2.8s ease-in-out infinite;
+        }
+
+        @keyframes matrixGridPulse {
+          0%,
+          100% {
+            opacity: 0.36;
+          }
+          50% {
+            opacity: 0.72;
+          }
+        }
+
         @keyframes matrixBlink {
           0%,
           100% {
-            opacity: 0.14;
+            opacity: 0.08;
             transform: scale(0.82);
-            box-shadow: 0 0 0 rgba(0, 108, 255, 0);
-          }
-          42% {
-            opacity: 0.28;
           }
           50% {
             opacity: 1;
-            transform: scale(1.15);
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.58);
-          }
-          58% {
-            opacity: 0.22;
+            transform: scale(1.2);
           }
         }
       `}</style>
