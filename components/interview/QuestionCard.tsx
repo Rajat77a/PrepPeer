@@ -31,6 +31,10 @@ export function QuestionCard({
   const minWords = 20;
   const canSubmit = wordCount >= minWords;
   const wordProgress = Math.min(100, Math.round((wordCount / minWords) * 100));
+  const blockPromptSelection = (e: React.MouseEvent<HTMLElement>) => {
+    e.preventDefault();
+    window.getSelection()?.removeAllRanges();
+  };
 
   return (
     <motion.section
@@ -40,7 +44,17 @@ export function QuestionCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
     >
-      <div className="grid border-b border-[rgba(0,0,0,0.07)] bg-[#FAFBFD] sm:grid-cols-[132px_1fr]">
+      <div
+        className="grid select-none border-b border-[rgba(0,0,0,0.07)] bg-[#FAFBFD] sm:grid-cols-[132px_1fr]"
+        onMouseDown={blockPromptSelection}
+        onContextMenu={blockPromptSelection}
+        onCopy={(e) => e.preventDefault()}
+        onCut={(e) => e.preventDefault()}
+        style={{
+          WebkitUserSelect: "none",
+          userSelect: "none",
+        }}
+      >
         <div className="border-b border-[rgba(0,0,0,0.07)] p-6 sm:border-b-0 sm:border-r">
           <p className="font-inter text-[11px] font-bold uppercase tracking-[0.18em] text-muted">
             Question
