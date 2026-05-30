@@ -83,12 +83,12 @@ const InputOTPSlot = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex items-center justify-center rounded-2xl border bg-[#06101d]/80 font-inter font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition-all duration-300",
+        "relative flex items-center justify-center rounded-2xl border bg-white/80 font-inter font-bold text-[#07111f] shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_12px_30px_rgba(0,132,255,0.08)] backdrop-blur-xl transition-all duration-300",
         sizes[otpSize],
-        char && "border-[#38bdf8]/45 bg-[#0a1c32] text-[#e0f2fe]",
+        char && "border-[#38bdf8]/45 bg-[#f0f9ff] text-[#006cff]",
         isActive
           ? "border-[#38bdf8] shadow-[0_0_0_3px_rgba(56,189,248,0.18),0_12px_34px_rgba(0,108,255,0.22)]"
-          : "border-white/10",
+          : "border-white/80",
         className
       )}
       {...props}
@@ -97,7 +97,7 @@ const InputOTPSlot = React.forwardRef<
       {hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <motion.div
-            className="h-5 w-px bg-[#7dd3fc]"
+            className="h-5 w-px bg-[#0084ff]"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 0] }}
             transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
@@ -128,7 +128,7 @@ const InputOTPSeparator = React.forwardRef<
   <div
     ref={ref}
     role="separator"
-    className={cn("text-sm font-semibold text-white/20", className)}
+    className={cn("text-sm font-semibold text-[#7b8da3]/45", className)}
     {...props}
   >
     -
@@ -149,13 +149,13 @@ function OtpSlot({ index, ...slot }: SlotProps & { index: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.035, type: "spring", stiffness: 260, damping: 22 }}
       className={cn(
-        "relative flex h-12 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] font-inter text-lg font-bold text-white transition",
+        "relative flex h-12 w-11 items-center justify-center rounded-xl border border-white/80 bg-white/80 font-inter text-lg font-bold text-[#07111f] shadow-[0_12px_30px_rgba(0,132,255,0.08)] transition",
         slot.isActive && "border-[#006cff] shadow-[0_0_0_3px_rgba(0,108,255,0.24)]"
       )}
     >
       {slot.char}
       {slot.hasFakeCaret && (
-        <span className="absolute h-5 w-px animate-pulse bg-white" />
+        <span className="absolute h-5 w-px animate-pulse bg-[#0084ff]" />
       )}
     </motion.div>
   );

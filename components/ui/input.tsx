@@ -59,8 +59,8 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         <input
           type={type}
           className={cn(
-            "relative z-10 flex h-12 w-full rounded-[17px] border border-white/10 bg-[#06101d]/85 px-4 py-3 font-inter text-sm text-white outline-none transition duration-300",
-            "placeholder:text-white/30 group-hover/input:shadow-[0_0_30px_rgba(56,189,248,0.18)] focus:border-[#38bdf8]/70 focus:bg-[#07182a] focus:shadow-[0_0_0_3px_rgba(56,189,248,0.18),0_0_34px_rgba(56,189,248,0.2)]",
+            "relative z-10 flex h-12 w-full rounded-[17px] border border-white/80 bg-white/82 px-4 py-3 font-inter text-sm text-[#07111f] outline-none shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_16px_40px_rgba(0,132,255,0.08)] backdrop-blur-xl transition duration-300",
+            "placeholder:text-[#7b8da3]/70 group-hover/input:shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_0_36px_rgba(56,189,248,0.22)] focus:border-[#38bdf8]/70 focus:bg-white focus:shadow-[0_0_0_3px_rgba(56,189,248,0.18),0_0_38px_rgba(56,189,248,0.24)]",
             "disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}

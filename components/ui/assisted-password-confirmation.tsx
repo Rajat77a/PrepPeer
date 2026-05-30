@@ -64,8 +64,8 @@ export function AssistedPasswordConfirmation({
         if (passwordsMatch) void onSubmit(password);
       }}
     >
-      <div className="rounded-[22px] border border-white/10 bg-[#030914]/72 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
-        <label className="mb-2 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#7dd3fc]">
+      <div className="rounded-[22px] border border-white/80 bg-white/74 p-4 shadow-[0_22px_70px_rgba(0,132,255,0.12),inset_0_1px_2px_rgba(255,255,255,0.95)] backdrop-blur-xl">
+        <label className="mb-2 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#0084ff]">
           Password
         </label>
         <Input
@@ -79,15 +79,15 @@ export function AssistedPasswordConfirmation({
           autoComplete="new-password"
         />
 
-        <div className="mt-4 rounded-2xl border border-white/10 bg-black/35 p-3">
-          <p className="mb-2 font-inter text-xs font-semibold text-white/45">
+        <div className="mt-4 rounded-2xl border border-[#d9ecff] bg-[#f6fbff]/80 p-3">
+          <p className="mb-2 font-inter text-xs font-semibold text-[#64748b]">
             Confirmation trail
           </p>
           <motion.div
-            className="relative flex min-h-12 items-center overflow-hidden rounded-xl border border-white/10 bg-[#07111f] px-3"
+            className="relative flex min-h-12 items-center overflow-hidden rounded-xl border border-[#d9ecff] bg-white px-3 shadow-[inset_0_1px_2px_rgba(255,255,255,0.95)]"
             animate={{
               x: shake ? [-9, 9, -7, 7, 0] : 0,
-              borderColor: passwordsMatch ? "rgba(22,163,74,0.85)" : "rgba(255,255,255,0.10)",
+              borderColor: passwordsMatch ? "rgba(22,163,74,0.85)" : "rgba(217,236,255,1)",
               scale: passwordsMatch ? [1, 1.015, 1] : 1,
             }}
             transition={{ duration: 0.38 }}
@@ -97,11 +97,11 @@ export function AssistedPasswordConfirmation({
                 password.split("").map((_, index) => (
                   <span
                     key={index}
-                    className="mx-[5px] h-1.5 w-1.5 rounded-full bg-white"
+                    className="mx-[5px] h-1.5 w-1.5 rounded-full bg-[#0f172a]"
                   />
                 ))
               ) : (
-                <span className="font-inter text-sm text-white/25">
+                <span className="font-inter text-sm text-[#7b8da3]">
                   Match feedback appears here
                 </span>
               )}
@@ -125,7 +125,7 @@ export function AssistedPasswordConfirmation({
           </motion.div>
         </div>
 
-        <label className="mb-2 mt-4 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#7dd3fc]">
+        <label className="mb-2 mt-4 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#0084ff]">
           Confirm password
         </label>
         <Input
@@ -138,27 +138,27 @@ export function AssistedPasswordConfirmation({
         />
       </div>
 
-      <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-3">
+      <div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/70 p-3 shadow-[0_18px_48px_rgba(0,132,255,0.1)] backdrop-blur-xl">
         <motion.div
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-full border",
             passwordsMatch
-              ? "border-[#16a34a]/40 bg-[#16a34a]/20 text-[#86efac]"
-              : "border-white/10 bg-white/[0.04] text-white/25"
+              ? "border-[#16a34a]/30 bg-[#dcfce7] text-[#16a34a]"
+              : "border-[#d9ecff] bg-[#f6fbff] text-[#94a3b8]"
           )}
           animate={{ scale: passwordsMatch ? 1 : 0.92, rotate: passwordsMatch ? 0 : -8 }}
           transition={{ type: "spring", stiffness: 360, damping: 18 }}
         >
           <Check size={18} strokeWidth={2.8} />
         </motion.div>
-        <p className="font-inter text-sm text-white/50">
+        <p className="font-inter text-sm text-[#64748b]">
           {passwordsMatch
             ? "Matched. Your account is ready to lock in."
             : "Use 8+ characters. Green marks mean the confirm password is tracking correctly."}
         </p>
       </div>
 
-      {error && <p className="font-inter text-sm text-[#f87171]">{error}</p>}
+      {error && <p className="font-inter text-sm text-[#dc2626]">{error}</p>}
 
       <button
         type="submit"
