@@ -11,8 +11,8 @@ export interface InputProps
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, glowColor = "#7dffd9", ...props }, ref) => {
-    const radius = 175;
+  ({ className, type, glowColor = "#061059", ...props }, ref) => {
+    const radius = 190;
     const containerRef = React.useRef<HTMLDivElement | null>(null);
     const gradientRef = React.useRef<HTMLDivElement | null>(null);
     const [mousePosition, setMousePosition] = React.useState({ x: 0, y: 0 });
@@ -60,7 +60,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           type={type}
           className={cn(
             "relative z-10 flex h-12 w-full rounded-full border border-white/80 bg-white/82 px-4 py-3 font-inter text-sm text-[#07111f] outline-none shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_16px_40px_rgba(0,132,255,0.08)] backdrop-blur-xl transition duration-300",
-            "placeholder:text-[#7b8da3]/70 group-hover/input:shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_0_38px_rgba(125,255,217,0.28)] focus:border-[#7dffd9]/80 focus:bg-white focus:shadow-[0_0_0_3px_rgba(125,255,217,0.24),0_0_42px_rgba(0,132,255,0.2)]",
+            "placeholder:text-[#7b8da3]/70 group-hover/input:shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_0_42px_rgba(6,16,89,0.24)] focus:border-[#006cff]/45 focus:bg-white focus:shadow-[0_0_0_3px_rgba(6,16,89,0.16),0_0_46px_rgba(0,132,255,0.22)]",
             "disabled:cursor-not-allowed disabled:opacity-50",
             className
           )}

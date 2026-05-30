@@ -66,14 +66,49 @@ function GoogleIcon() {
   );
 }
 
+function LoginOrb({ className }: { className?: string }) {
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [canPlayOrbVideo, setCanPlayOrbVideo] = useState(false);
+
+  useEffect(() => {
+    const isIOSLike =
+      /iPad|iPhone|iPod/.test(window.navigator.userAgent) ||
+      (window.navigator.platform === "MacIntel" &&
+        window.navigator.maxTouchPoints > 1);
+
+    setCanPlayOrbVideo(!isIOSLike);
+  }, []);
+
+  return (
+    <div className={cn("login-orb absolute", className)} aria-hidden="true">
+      <div className="orb-fallback absolute inset-[5%] z-[1]" />
+      {canPlayOrbVideo && !videoFailed && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="orb-video absolute inset-0 z-[2] h-full w-full object-cover"
+          onError={() => setVideoFailed(true)}
+        >
+          <source
+            src="https://future.co/images/homepage/glassy-orb/orb-purple.webm"
+            type="video/webm"
+          />
+        </video>
+      )}
+    </div>
+  );
+}
+
 function MatrixBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 bg-[#f7fbff]" />
       <div className="login-ambient absolute inset-0" aria-hidden="true" />
-      <div className="login-orb login-orb-one absolute" aria-hidden="true" />
-      <div className="login-orb login-orb-two absolute" aria-hidden="true" />
-      <div className="login-orb login-orb-three absolute" aria-hidden="true" />
+      <LoginOrb className="login-orb-one" />
+      <LoginOrb className="login-orb-two" />
+      <LoginOrb className="login-orb-three" />
       <div className="login-lines absolute inset-0" aria-hidden="true" />
       <div className="login-vignette absolute inset-0" aria-hidden="true" />
       <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-white to-transparent" />
@@ -88,44 +123,9 @@ function MatrixBackground() {
         }
 
         .login-orb {
-          border-radius: 50%;
-          background:
-            radial-gradient(ellipse at 30% 25%, rgba(255, 255, 255, 0.98) 0 11%, rgba(255, 255, 255, 0.46) 18%, transparent 34%),
-            radial-gradient(circle at 50% 45%, #9ffaff 0%, #37dfff 24%, #008cff 49%, #0753d9 66%, transparent 72%),
-            radial-gradient(circle at 72% 73%, rgba(1, 10, 74, 0.92) 0 11%, transparent 24%),
-            radial-gradient(circle at 18% 82%, rgba(3, 9, 70, 0.92) 0 10%, transparent 23%),
-            conic-gradient(from 224deg, #050b4f, #006cff, #7dffd9, #00b7ff, #06236e, #050b4f);
-          box-shadow:
-            inset 18px 18px 30px rgba(255, 255, 255, 0.46),
-            inset -18px -24px 36px rgba(0, 16, 92, 0.66),
-            inset 0 0 0 2px rgba(255, 255, 255, 0.18),
-            0 24px 90px rgba(0, 132, 255, 0.22);
-          opacity: 0.9;
-          transform: translateZ(0);
+          filter: drop-shadow(0 24px 60px rgba(0, 132, 255, 0.2));
+          pointer-events: none;
           animation: loginOrbFloat 8s ease-in-out infinite;
-        }
-
-        .login-orb::before,
-        .login-orb::after {
-          border-radius: inherit;
-          content: "";
-          inset: 0;
-          position: absolute;
-        }
-
-        .login-orb::before {
-          background:
-            conic-gradient(from 18deg, rgba(2, 6, 57, 0.92), transparent 16%, transparent 34%, rgba(2, 6, 57, 0.82) 42%, transparent 54%, transparent 78%, rgba(1, 6, 44, 0.88));
-          filter: blur(0.3px);
-          mix-blend-mode: multiply;
-          opacity: 0.72;
-        }
-
-        .login-orb::after {
-          background:
-            radial-gradient(ellipse at 37% 31%, rgba(255, 255, 255, 0.72) 0 11%, transparent 31%),
-            radial-gradient(circle at 58% 58%, rgba(125, 255, 217, 0.24), transparent 34%);
-          opacity: 0.9;
         }
 
         .login-orb-one {
