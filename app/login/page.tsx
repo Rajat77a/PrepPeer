@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight, Check, ShieldCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -67,9 +67,6 @@ function GoogleIcon() {
 }
 
 function MatrixBackground() {
-  const magnetRef = useRef<HTMLDivElement | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const pointerRef = useRef({ x: 0, y: 0, active: 0 });
   const activeCells = [
     { left: "7%", top: "31%", delay: "-0.2s" },
     { left: "12%", top: "67%", delay: "-1.4s" },
@@ -86,76 +83,11 @@ function MatrixBackground() {
     { left: "93%", top: "58%", delay: "-0.4s" },
   ];
 
-  useEffect(() => {
-    const paint = () => {
-      rafRef.current = null;
-      if (!magnetRef.current) return;
-
-      const { x, y, active } = pointerRef.current;
-      magnetRef.current.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-      magnetRef.current.style.setProperty("--active", `${active}`);
-    };
-
-    const schedulePaint = () => {
-      if (rafRef.current === null) {
-        rafRef.current = window.requestAnimationFrame(paint);
-      }
-    };
-
-    const handlePointerMove = (event: PointerEvent) => {
-      pointerRef.current = {
-        x: event.clientX,
-        y: event.clientY,
-        active: 1,
-      };
-      schedulePaint();
-    };
-
-    const handlePointerLeave = () => {
-      pointerRef.current = { ...pointerRef.current, active: 0 };
-      schedulePaint();
-    };
-
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
-    window.addEventListener("pointerleave", handlePointerLeave);
-
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerleave", handlePointerLeave);
-      if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
   return (
     <div className="absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.14),transparent_32%),linear-gradient(to_bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.88))]" />
       <div className="matrix-grid absolute inset-0 opacity-70" aria-hidden="true" />
       <div className="matrix-grid matrix-grid-offset absolute inset-0 opacity-35" aria-hidden="true" />
-      <div ref={magnetRef} className="matrix-magnet absolute left-0 top-0" aria-hidden="true">
-        {[
-          ["-44px", "-26px", "0s", "6px"],
-          ["-24px", "-8px", "-0.18s", "5px"],
-          ["-7px", "-34px", "-0.3s", "4px"],
-          ["14px", "-18px", "-0.1s", "7px"],
-          ["34px", "-2px", "-0.26s", "5px"],
-          ["-33px", "18px", "-0.42s", "4px"],
-          ["-10px", "28px", "-0.22s", "7px"],
-          ["18px", "19px", "-0.36s", "5px"],
-          ["45px", "30px", "-0.14s", "4px"],
-        ].map(([left, top, delay, size], index) => (
-          <span
-            key={index}
-            className="matrix-magnet-cell absolute rounded-[1px] bg-[#4db7ff]"
-            style={{
-              animationDelay: delay,
-              height: size,
-              left,
-              top,
-              width: size,
-            }}
-          />
-        ))}
-      </div>
       <div className="absolute inset-0" aria-hidden="true">
         {activeCells.map((cell, index) => (
           <span
@@ -188,25 +120,9 @@ function MatrixBackground() {
           animation-delay: -2.3s;
         }
 
-        .matrix-magnet {
-          --active: 0;
-          height: 1px;
-          opacity: var(--active);
-          pointer-events: none;
-          transform: translateZ(0);
-          transition: opacity 160ms ease;
-          width: 1px;
-          will-change: transform, opacity;
-        }
-
         .matrix-cell {
           box-shadow: 0 0 18px rgba(56, 189, 248, 0.65);
           animation: matrixBlink 2.8s ease-in-out infinite;
-        }
-
-        .matrix-magnet-cell {
-          box-shadow: 0 0 16px rgba(56, 189, 248, 0.85);
-          animation: magnetCellPop 1.25s ease-in-out infinite;
         }
 
         @keyframes matrixGridPulse {
@@ -231,17 +147,6 @@ function MatrixBackground() {
           }
         }
 
-        @keyframes magnetCellPop {
-          0%,
-          100% {
-            opacity: 0.28;
-            transform: scale(0.85);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.45);
-          }
-        }
       `}</style>
     </div>
   );
