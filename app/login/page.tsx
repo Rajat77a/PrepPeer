@@ -3,10 +3,11 @@
 import { ArrowLeft, ArrowRight, Check, ShieldCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Input } from "@/components/ui/input";
+import { OrbLogo } from "@/components/ui/OrbLogo";
 import {
   InputOTP,
   InputOTPGroup,
@@ -28,13 +29,13 @@ const panelMotion = {
 
 const copy = {
   signin: {
-    title: "Welcome back",
-    subtitle: "Your next mock interview is ready.",
+    title: "Know where you stand",
+    subtitle: "Run the interview. Read the rank. Improve the next answer.",
     emailButton: "Send sign-in code",
   },
   signup: {
-    title: "Join PrepPeer",
-    subtitle: "Start with a rank you can improve.",
+    title: "Start with your rank",
+    subtitle: "Create a profile for scores, progress, and every new jump.",
     emailButton: "Send sign-up code",
   },
 };
@@ -66,6 +67,9 @@ function GoogleIcon() {
 }
 
 function MatrixBackground() {
+  const magnetRef = useRef<HTMLDivElement | null>(null);
+  const rafRef = useRef<number | null>(null);
+  const pointerRef = useRef({ x: 50, y: 50, active: 0 });
   const activeCells = [
     { left: "7%", top: "31%", delay: "-0.2s" },
     { left: "12%", top: "67%", delay: "-1.4s" },
@@ -82,11 +86,53 @@ function MatrixBackground() {
     { left: "93%", top: "58%", delay: "-0.4s" },
   ];
 
+  useEffect(() => {
+    const paint = () => {
+      rafRef.current = null;
+      if (!magnetRef.current) return;
+
+      const { x, y, active } = pointerRef.current;
+      magnetRef.current.style.setProperty("--mx", `${x}%`);
+      magnetRef.current.style.setProperty("--my", `${y}%`);
+      magnetRef.current.style.setProperty("--active", `${active}`);
+    };
+
+    const schedulePaint = () => {
+      if (rafRef.current === null) {
+        rafRef.current = window.requestAnimationFrame(paint);
+      }
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      pointerRef.current = {
+        x: (event.clientX / window.innerWidth) * 100,
+        y: (event.clientY / window.innerHeight) * 100,
+        active: 1,
+      };
+      schedulePaint();
+    };
+
+    const handlePointerLeave = () => {
+      pointerRef.current = { ...pointerRef.current, active: 0 };
+      schedulePaint();
+    };
+
+    window.addEventListener("pointermove", handlePointerMove, { passive: true });
+    window.addEventListener("pointerleave", handlePointerLeave);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerleave", handlePointerLeave);
+      if (rafRef.current !== null) window.cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
   return (
     <div className="absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.14),transparent_32%),linear-gradient(to_bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.88))]" />
       <div className="matrix-grid absolute inset-0 opacity-70" aria-hidden="true" />
       <div className="matrix-grid matrix-grid-offset absolute inset-0 opacity-35" aria-hidden="true" />
+      <div ref={magnetRef} className="matrix-magnet absolute inset-0" aria-hidden="true" />
       <div className="absolute inset-0" aria-hidden="true">
         {activeCells.map((cell, index) => (
           <span
@@ -119,6 +165,26 @@ function MatrixBackground() {
           animation-delay: -2.3s;
         }
 
+        .matrix-magnet {
+          --mx: 50%;
+          --my: 50%;
+          --active: 0;
+          background-image: conic-gradient(
+            from 90deg at 7px 7px,
+            rgba(93, 204, 255, 0.9) 0 90deg,
+            transparent 0
+          );
+          background-position: center;
+          background-size: 22px 22px;
+          filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.75));
+          mask-image: radial-gradient(circle at var(--mx) var(--my), black 0 72px, transparent 158px);
+          -webkit-mask-image: radial-gradient(circle at var(--mx) var(--my), black 0 72px, transparent 158px);
+          opacity: var(--active);
+          transform: translateZ(0);
+          transition: opacity 220ms ease, background-size 220ms ease;
+          animation: magnetBreath 1.7s ease-in-out infinite;
+        }
+
         .matrix-cell {
           box-shadow: 0 0 18px rgba(56, 189, 248, 0.65);
           animation: matrixBlink 2.8s ease-in-out infinite;
@@ -145,20 +211,18 @@ function MatrixBackground() {
             transform: scale(1.2);
           }
         }
+
+        @keyframes magnetBreath {
+          0%,
+          100% {
+            background-size: 22px 22px;
+          }
+          50% {
+            background-size: 27px 27px;
+          }
+        }
       `}</style>
     </div>
-  );
-}
-
-function MiniMark() {
-  return (
-    <span className="relative flex h-9 w-9 items-center justify-center">
-      <span className="absolute left-1/2 top-1 h-2 w-2 -translate-x-1/2 rounded-full bg-[#8bd7ff]" />
-      <span className="absolute bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#8bd7ff]" />
-      <span className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#38bdf8]" />
-      <span className="absolute right-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#38bdf8]" />
-      <span className="h-2 w-2 rounded-full bg-white/80" />
-    </span>
   );
 }
 
@@ -170,14 +234,14 @@ function TopNav({
   onModeChange: (mode: AuthMode) => void;
 }) {
   return (
-    <header className="fixed left-1/2 top-7 z-30 w-[calc(100%-2rem)] max-w-[430px] -translate-x-1/2 rounded-full border border-white/10 bg-[#111]/70 px-4 py-3 shadow-[0_24px_80px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-5">
+    <header className="fixed left-1/2 top-7 z-30 w-[calc(100%-2rem)] max-w-[330px] -translate-x-1/2 rounded-full border border-white/10 bg-[#111]/70 px-3 py-2.5 shadow-[0_24px_80px_rgba(0,0,0,0.42)] backdrop-blur-xl">
+      <div className="flex items-center justify-center gap-3">
         <Link
           href="/"
           className="flex shrink-0 items-center justify-center rounded-full transition hover:opacity-80"
           aria-label="Home"
         >
-          <MiniMark />
+          <OrbLogo size={38} />
         </Link>
 
         <div className="flex shrink-0 items-center gap-2 rounded-full bg-white/[0.04] p-1">
@@ -321,10 +385,10 @@ export default function LoginPage() {
           <AnimatePresence mode="wait">
             {step === "email" && (
               <motion.div key={`email-${mode}`} {...panelMotion}>
-                <h1 className="font-inter text-[clamp(44px,6.4vw,70px)] font-black leading-none tracking-[-0.045em]">
+                <h1 className="font-inter text-[clamp(48px,7vw,82px)] font-black leading-[0.92] tracking-[-0.06em] text-[#f7fbff] drop-shadow-[0_14px_42px_rgba(0,108,255,0.42)]">
                   {activeCopy.title}
                 </h1>
-                <p className="mt-4 font-inter text-[clamp(20px,3vw,33px)] font-light leading-tight tracking-[-0.02em] text-white/48">
+                <p className="mx-auto mt-5 max-w-[620px] font-inter text-[clamp(20px,3vw,31px)] font-medium leading-tight tracking-[-0.035em] text-[#c8def4]">
                   {activeCopy.subtitle}
                 </p>
 
@@ -358,7 +422,7 @@ export default function LoginPage() {
                         placeholder="you@example.com"
                         autoComplete="email"
                         required
-                        className="h-14 rounded-full pr-16 text-center text-base"
+                        className="h-14 rounded-full px-16 text-center text-base placeholder:text-center"
                       />
                       <button
                         type="submit"
