@@ -88,6 +88,10 @@ function MatrixBackground() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.14),transparent_32%),linear-gradient(to_bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.88))]" />
       <div className="matrix-grid absolute inset-0 opacity-70" aria-hidden="true" />
       <div className="matrix-grid matrix-grid-offset absolute inset-0 opacity-35" aria-hidden="true" />
+      <div
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.78)_0%,rgba(0,0,0,0.58)_30%,rgba(0,0,0,0.22)_55%,transparent_76%)]"
+        aria-hidden="true"
+      />
       <div className="absolute inset-0" aria-hidden="true">
         {activeCells.map((cell, index) => (
           <span
