@@ -1,7 +1,12 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { getSupabaseConfig } from "@/utils/supabase/config";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+export const createClient = () => {
+  const { supabaseKey, supabaseUrl } = getSupabaseConfig();
 
-export const createClient = () =>
-  createBrowserClient(supabaseUrl!, supabaseKey!);
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase environment variables are not configured.");
+  }
+
+  return createBrowserClient(supabaseUrl, supabaseKey);
+};
