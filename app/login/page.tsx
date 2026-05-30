@@ -67,90 +67,39 @@ function GoogleIcon() {
 }
 
 function MatrixBackground() {
-  const activeCells = [
-    { left: "7%", top: "31%", delay: "-0.2s" },
-    { left: "12%", top: "67%", delay: "-1.4s" },
-    { left: "19%", top: "18%", delay: "-2.1s" },
-    { left: "28%", top: "56%", delay: "-0.8s" },
-    { left: "34%", top: "38%", delay: "-1.9s" },
-    { left: "42%", top: "74%", delay: "-0.5s" },
-    { left: "49%", top: "24%", delay: "-2.5s" },
-    { left: "57%", top: "61%", delay: "-1.1s" },
-    { left: "64%", top: "42%", delay: "-2.8s" },
-    { left: "72%", top: "20%", delay: "-0.9s" },
-    { left: "78%", top: "69%", delay: "-2.2s" },
-    { left: "86%", top: "35%", delay: "-1.6s" },
-    { left: "93%", top: "58%", delay: "-0.4s" },
-  ];
-
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.14),transparent_32%),linear-gradient(to_bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.88))]" />
-      <div className="matrix-grid absolute inset-0 opacity-70" aria-hidden="true" />
-      <div className="matrix-grid matrix-grid-offset absolute inset-0 opacity-35" aria-hidden="true" />
-      <div
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.78)_0%,rgba(0,0,0,0.58)_30%,rgba(0,0,0,0.22)_55%,transparent_76%)]"
-        aria-hidden="true"
-      />
-      <div className="absolute inset-0" aria-hidden="true">
-        {activeCells.map((cell, index) => (
-          <span
-            key={index}
-            className="matrix-cell absolute h-[5px] w-[5px] rounded-[1px] bg-[#4db7ff]"
-            style={{
-              animationDelay: cell.delay,
-              left: cell.left,
-              top: cell.top,
-            }}
-          />
-        ))}
-      </div>
+      <div className="absolute inset-0 bg-[#02050a]" />
+      <div className="login-ambient absolute inset-0" aria-hidden="true" />
+      <div className="login-lines absolute inset-0" aria-hidden="true" />
+      <div className="login-vignette absolute inset-0" aria-hidden="true" />
       <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black to-transparent" />
       <style jsx>{`
-        .matrix-grid {
-          background-image: conic-gradient(
-            from 90deg at 4px 4px,
-            rgba(0, 108, 255, 0.28) 0 90deg,
-            transparent 0
-          );
-          background-size: 24px 24px;
-          mask-image: radial-gradient(circle at center, black 0 58%, transparent 78%);
-          animation: matrixGridPulse 4.6s ease-in-out infinite;
+        .login-ambient {
+          background:
+            linear-gradient(118deg, rgba(0, 108, 255, 0.2) 0%, transparent 31%),
+            linear-gradient(244deg, rgba(56, 189, 248, 0.12) 0%, transparent 36%),
+            radial-gradient(ellipse at center, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.54) 48%, rgba(0, 0, 0, 0.9) 78%),
+            linear-gradient(180deg, #04111f 0%, #02050a 52%, #000 100%);
         }
 
-        .matrix-grid-offset {
-          background-position: 12px 12px;
-          animation-delay: -2.3s;
+        .login-lines {
+          background-image:
+            linear-gradient(rgba(96, 165, 250, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(96, 165, 250, 0.08) 1px, transparent 1px),
+            linear-gradient(120deg, transparent 0 42%, rgba(56, 189, 248, 0.09) 48%, transparent 56%),
+            linear-gradient(60deg, transparent 0 39%, rgba(0, 108, 255, 0.1) 50%, transparent 61%);
+          background-size: 92px 92px, 92px 92px, 100% 100%, 100% 100%;
+          mask-image: radial-gradient(ellipse at center, black 0 46%, transparent 78%);
+          opacity: 0.42;
         }
 
-        .matrix-cell {
-          box-shadow: 0 0 18px rgba(56, 189, 248, 0.65);
-          animation: matrixBlink 2.8s ease-in-out infinite;
+        .login-vignette {
+          background:
+            radial-gradient(ellipse at center, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.5) 34%, rgba(0, 0, 0, 0.2) 58%, transparent 76%),
+            linear-gradient(90deg, rgba(0, 0, 0, 0.56), transparent 24%, transparent 76%, rgba(0, 0, 0, 0.56));
         }
-
-        @keyframes matrixGridPulse {
-          0%,
-          100% {
-            opacity: 0.36;
-          }
-          50% {
-            opacity: 0.72;
-          }
-        }
-
-        @keyframes matrixBlink {
-          0%,
-          100% {
-            opacity: 0.08;
-            transform: scale(0.82);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-
       `}</style>
     </div>
   );
