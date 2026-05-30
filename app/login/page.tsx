@@ -1,253 +1,68 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, ShieldCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { ArrowLeft, Check } from "lucide-react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
-import { Input } from "@/components/ui/input";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-  InputOTPSeparator,
-} from "@/components/ui/input-otp";
-import { AssistedPasswordConfirmation } from "@/components/ui/assisted-password-confirmation";
-import { cn } from "@/lib/utils";
+import LoginGlow from "@/components/ui/login-glow";
 
-type AuthMode = "signin" | "signup";
-type AuthStep = "email" | "otp" | "password" | "success";
-
-const panelMotion = {
-  initial: { opacity: 0, x: 80 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -80 },
-  transition: { duration: 0.4, ease: "easeOut" },
-} as const;
-
-const copy = {
-  signin: {
-    title: "Welcome back",
-    subtitle: "Your next mock interview is ready.",
-    emailButton: "Send sign-in code",
-  },
-  signup: {
-    title: "Join PrepPeer",
-    subtitle: "Start with a rank you can improve.",
-    emailButton: "Send sign-up code",
-  },
-};
+type AuthStep = 0 | 1 | 2;
+type AuthMode = "login" | "signup";
 
 function GoogleIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
       <path
-        fill="currentColor"
-        d="M21.6 12.23c0-.72-.06-1.24-.18-1.78H12v3.24h5.52c-.11.8-.71 2.01-2.04 2.82l-.02.11 2.96 2.01.2.02c1.84-1.49 2.98-3.7 2.98-6.42Z"
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
       />
       <path
-        fill="currentColor"
-        opacity=".78"
-        d="M12 22c2.63 0 4.84-.76 6.45-2.08l-3.07-2.08c-.82.5-1.92.85-3.38.85a5.85 5.85 0 0 1-5.54-3.55l-.12.01-3.08 2.1-.04.1A9.97 9.97 0 0 0 12 22Z"
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
       />
       <path
-        fill="currentColor"
-        opacity=".54"
-        d="M6.46 15.14A5.4 5.4 0 0 1 6.15 12c0-1.09.2-2.15.31-3.14l-.01-.12-3.12-2.14-.1.04A9.35 9.35 0 0 0 2 12c0 1.92.49 3.73 1.35 5.31l3.11-2.17Z"
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
       />
       <path
-        fill="currentColor"
-        opacity=".36"
-        d="M12 5.31c1.83 0 3.06.7 3.76 1.28l2.75-2.35C16.82 2.86 14.63 2 12 2a9.97 9.97 0 0 0-8.78 5.36l3.24 2.5A5.88 5.88 0 0 1 12 5.31Z"
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
       />
     </svg>
   );
 }
 
-function MatrixBackground() {
-  const activeCells = [
-    { left: "7%", top: "31%", delay: "-0.2s" },
-    { left: "12%", top: "67%", delay: "-1.4s" },
-    { left: "19%", top: "18%", delay: "-2.1s" },
-    { left: "28%", top: "56%", delay: "-0.8s" },
-    { left: "34%", top: "38%", delay: "-1.9s" },
-    { left: "42%", top: "74%", delay: "-0.5s" },
-    { left: "49%", top: "24%", delay: "-2.5s" },
-    { left: "57%", top: "61%", delay: "-1.1s" },
-    { left: "64%", top: "42%", delay: "-2.8s" },
-    { left: "72%", top: "20%", delay: "-0.9s" },
-    { left: "78%", top: "69%", delay: "-2.2s" },
-    { left: "86%", top: "35%", delay: "-1.6s" },
-    { left: "93%", top: "58%", delay: "-0.4s" },
-  ];
-
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,108,255,0.14),transparent_32%),linear-gradient(to_bottom,rgba(0,0,0,0.08),rgba(0,0,0,0.88))]" />
-      <div className="matrix-grid absolute inset-0 opacity-70" aria-hidden="true" />
-      <div className="matrix-grid matrix-grid-offset absolute inset-0 opacity-35" aria-hidden="true" />
-      <div className="absolute inset-0" aria-hidden="true">
-        {activeCells.map((cell, index) => (
-          <span
-            key={index}
-            className="matrix-cell absolute h-[5px] w-[5px] rounded-[1px] bg-[#4db7ff]"
-            style={{
-              animationDelay: cell.delay,
-              left: cell.left,
-              top: cell.top,
-            }}
-          />
-        ))}
-      </div>
-      <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-black to-transparent" />
-      <style jsx>{`
-        .matrix-grid {
-          background-image: conic-gradient(
-            from 90deg at 4px 4px,
-            rgba(0, 108, 255, 0.28) 0 90deg,
-            transparent 0
-          );
-          background-size: 24px 24px;
-          mask-image: radial-gradient(circle at center, black 0 58%, transparent 78%);
-          animation: matrixGridPulse 4.6s ease-in-out infinite;
-        }
-
-        .matrix-grid-offset {
-          background-position: 12px 12px;
-          animation-delay: -2.3s;
-        }
-
-        .matrix-cell {
-          box-shadow: 0 0 18px rgba(56, 189, 248, 0.65);
-          animation: matrixBlink 2.8s ease-in-out infinite;
-        }
-
-        @keyframes matrixGridPulse {
-          0%,
-          100% {
-            opacity: 0.36;
-          }
-          50% {
-            opacity: 0.72;
-          }
-        }
-
-        @keyframes matrixBlink {
-          0%,
-          100% {
-            opacity: 0.08;
-            transform: scale(0.82);
-          }
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function MiniMark() {
-  return (
-    <span className="relative flex h-9 w-9 items-center justify-center">
-      <span className="absolute left-1/2 top-1 h-2 w-2 -translate-x-1/2 rounded-full bg-[#8bd7ff]" />
-      <span className="absolute bottom-1 left-1/2 h-2 w-2 -translate-x-1/2 rounded-full bg-[#8bd7ff]" />
-      <span className="absolute left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#38bdf8]" />
-      <span className="absolute right-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-[#38bdf8]" />
-      <span className="h-2 w-2 rounded-full bg-white/80" />
-    </span>
-  );
-}
-
-function TopNav({
-  mode,
-  onModeChange,
-}: {
-  mode: AuthMode;
-  onModeChange: (mode: AuthMode) => void;
-}) {
-  return (
-    <header className="fixed left-1/2 top-7 z-30 w-[calc(100%-2rem)] max-w-[430px] -translate-x-1/2 rounded-full border border-white/10 bg-[#111]/70 px-4 py-3 shadow-[0_24px_80px_rgba(0,0,0,0.42)] backdrop-blur-xl">
-      <div className="flex items-center justify-between gap-5">
-        <Link
-          href="/"
-          className="flex shrink-0 items-center justify-center rounded-full transition hover:opacity-80"
-          aria-label="Home"
-        >
-          <MiniMark />
-        </Link>
-
-        <div className="flex shrink-0 items-center gap-2 rounded-full bg-white/[0.04] p-1">
-          <button
-            onClick={() => onModeChange("signin")}
-            className={cn(
-              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition",
-              mode === "signin"
-                ? "bg-[#006cff] text-white shadow-[0_10px_30px_rgba(0,108,255,0.34)]"
-                : "text-white/45 hover:text-white"
-            )}
-          >
-            Sign in
-          </button>
-          <button
-            onClick={() => onModeChange("signup")}
-            className={cn(
-              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition",
-              mode === "signup"
-                ? "bg-white text-black shadow-[0_0_36px_rgba(255,255,255,0.28)]"
-                : "text-white/45 hover:text-white"
-            )}
-          >
-            Sign up
-          </button>
-        </div>
-      </div>
-    </header>
-  );
-}
-
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<AuthMode>("signin");
-  const [step, setStep] = useState<AuthStep>("email");
+  const otpRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const [step, setStep] = useState<AuthStep>(0);
+  const [mode, setMode] = useState<AuthMode>("login");
   const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const isSignUp = mode === "signup";
-  const activeCopy = copy[mode];
+  const isSignup = mode === "signup";
 
-  const resetForMode = (nextMode: AuthMode) => {
-    setMode(nextMode);
-    setStep("email");
-    setOtp("");
-    setError("");
-  };
-
-  const friendlyAuthError = (message: string) => {
+  const cleanError = (message: string) => {
     if (message.toLowerCase().includes("signups not allowed")) {
       return "Email sign-up is not enabled yet.";
     }
     return message;
   };
 
-  const signInWithGoogle = async () => {
+  const handleGoogleLogin = async () => {
     setError("");
     const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithOAuth({
+    const { error: googleError } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
-    if (signInError) setError(friendlyAuthError(signInError.message));
+    if (googleError) setError(cleanError(googleError.message));
   };
 
-  const sendOtp = async () => {
+  const handleEmailSubmit = async () => {
     if (!email.trim()) return;
     setLoading(true);
     setError("");
@@ -255,231 +70,264 @@ export default function LoginPage() {
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        shouldCreateUser: isSignUp,
+        shouldCreateUser: isSignup,
       },
     });
     setLoading(false);
 
     if (otpError) {
-      setError(friendlyAuthError(otpError.message));
+      setError(cleanError(otpError.message));
       return;
     }
-    setStep("otp");
+
+    setOtp(["", "", "", "", "", ""]);
+    setStep(1);
+    setTimeout(() => otpRefs.current[0]?.focus(), 120);
   };
 
-  const verifyOtp = async (code: string) => {
+  const handleOtpChange = (index: number, value: string) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const next = [...otp];
+    next[index] = digit;
+    setOtp(next);
+    if (digit && index < otp.length - 1) otpRefs.current[index + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (
+    index: number,
+    event: React.KeyboardEvent<HTMLInputElement>
+  ) => {
+    if (event.key === "Backspace" && !otp[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const token = otp.join("");
+    if (token.length !== 6) return;
     setLoading(true);
     setError("");
     const supabase = createClient();
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email: email.trim(),
-      token: code,
+      token,
       type: "email",
     });
     setLoading(false);
 
     if (verifyError) {
-      setError(friendlyAuthError(verifyError.message));
+      setError(cleanError(verifyError.message));
       return;
     }
 
-    if (isSignUp) {
-      setStep("password");
-      return;
-    }
-    router.push("/dashboard");
+    setStep(2);
   };
-
-  const savePassword = async (password: string) => {
-    setLoading(true);
-    setError("");
-    const supabase = createClient();
-    const { error: passwordError } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-
-    if (passwordError) {
-      setError(friendlyAuthError(passwordError.message));
-      return;
-    }
-    setStep("success");
-  };
-
-  useEffect(() => {
-    if (step !== "otp" || otp.length !== 6 || loading) return;
-    void verifyOtp(otp);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [otp, step]);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-black text-white">
-      <MatrixBackground />
+    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-[#080808] px-4 py-10">
+      <LoginGlow />
 
-      <TopNav mode={mode} onModeChange={resetForMode} />
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_20%,rgba(0,108,255,0.12),transparent_28%)]" />
 
-      <section className="relative z-10 flex min-h-screen items-center justify-center px-5 pb-12 pt-32">
-        <div className="w-full max-w-[620px] text-center">
+      <div className="relative z-10 w-full max-w-[480px] overflow-hidden rounded-2xl border border-[#006cff]/20 bg-gradient-to-br from-[#1a2a4a] via-[#0d1929] to-[#080808] shadow-[0_28px_90px_rgba(0,0,0,0.45)]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle,rgba(255,255,255,0.12)_1px,transparent_1px)] bg-[length:18px_18px] opacity-30" />
+
+        <div className="relative p-10">
           <AnimatePresence mode="wait">
-            {step === "email" && (
-              <motion.div key={`email-${mode}`} {...panelMotion}>
-                <h1 className="font-inter text-[clamp(44px,6.4vw,70px)] font-black leading-none tracking-[-0.045em]">
-                  {activeCopy.title}
-                </h1>
-                <p className="mt-4 font-inter text-[clamp(20px,3vw,33px)] font-light leading-tight tracking-[-0.02em] text-white/48">
-                  {activeCopy.subtitle}
+            {step === 0 && (
+              <motion.div
+                key="step0"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <p className="mb-6 font-inter text-lg font-semibold text-white">
+                  PrepPeer
                 </p>
 
-                <div className="mx-auto mt-10 max-w-[460px] space-y-5">
-                  <button
-                    onClick={signInWithGoogle}
-                    className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-white/10 bg-white/[0.055] px-5 py-4 font-inter text-base font-medium text-white shadow-[0_24px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl transition hover:border-[#38bdf8]/30 hover:bg-white/[0.08]"
-                  >
-                    <GoogleIcon />
-                    Sign in with Google
-                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-[#38bdf8]/22 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
-                  </button>
+                <h1 className="mb-8 font-inter text-3xl font-bold text-white">
+                  {isSignup ? "Create your PrepPeer account" : "Sign in to PrepPeer"}
+                </h1>
 
-                  <div className="flex items-center gap-4">
-                    <span className="h-px flex-1 bg-white/10" />
-                    <span className="font-inter text-sm font-semibold text-white/34">or</span>
-                    <span className="h-px flex-1 bg-white/10" />
-                  </div>
+                <label className="mb-2 block font-inter text-sm text-white/50">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  placeholder="name@email.com"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  className="mb-4 w-full rounded-lg border border-white/10 bg-black/40 px-4 py-3 font-inter text-white outline-none transition placeholder:text-white/20 focus:border-[#006cff]/50"
+                />
 
-                  <form
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      void sendOtp();
-                    }}
-                  >
-                    <div className="relative">
-                      <Input
-                        type="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        placeholder="you@example.com"
-                        autoComplete="email"
-                        required
-                        className="h-14 rounded-full pr-16 text-center text-base"
-                      />
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        aria-label={activeCopy.emailButton}
-                        className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-white/10 text-white transition hover:bg-[#006cff] disabled:opacity-50"
-                      >
-                        <ArrowRight size={17} />
-                      </button>
-                    </div>
-                  </form>
+                <button
+                  onClick={handleEmailSubmit}
+                  disabled={loading}
+                  className="mb-6 w-full rounded-lg py-3 font-inter font-semibold text-white transition-all disabled:opacity-50"
+                  style={{
+                    background: "linear-gradient(90deg, #006cff, #38bdf8, #006cff)",
+                    boxShadow: "0 0 24px rgba(0,108,255,0.45)",
+                  }}
+                >
+                  {loading ? "SENDING..." : isSignup ? "SIGN UP" : "LOG IN"}
+                </button>
+
+                <div className="mb-6 flex items-center gap-4">
+                  <div className="h-px flex-1 bg-white/10" />
+                  <span className="font-inter text-xs tracking-widest text-white/30">
+                    OR
+                  </span>
+                  <div className="h-px flex-1 bg-white/10" />
                 </div>
 
-                {error && <p className="mt-5 font-inter text-sm text-[#f87171]">{error}</p>}
-                <p className="mx-auto mt-16 max-w-[420px] font-inter text-xs leading-5 text-white/34">
-                  By continuing, you agree to PrepPeer&apos;s terms and privacy policy.
-                </p>
+                <button
+                  onClick={handleGoogleLogin}
+                  className="flex w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-black/40 py-3 font-inter text-white transition hover:bg-white/5"
+                >
+                  <GoogleIcon />
+                  Sign in with Google
+                </button>
+
+                {error && (
+                  <p className="mt-4 font-inter text-sm text-[#f87171]">{error}</p>
+                )}
               </motion.div>
             )}
 
-            {step === "otp" && (
-              <motion.div key="otp" {...panelMotion}>
+            {step === 1 && (
+              <motion.div
+                key="step1"
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -40 }}
+                transition={{ duration: 0.3 }}
+                className="text-center"
+              >
                 <button
-                  onClick={() => {
-                    setOtp("");
-                    setStep("email");
-                  }}
-                  className="mx-auto mb-8 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
+                  onClick={() => setStep(0)}
+                  className="mb-8 flex items-center gap-2 font-inter text-sm text-white/40 transition hover:text-white"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
-                <h1 className="font-fustat text-[clamp(46px,7vw,74px)] font-extrabold leading-none tracking-[-0.03em]">
-                  Enter your code
+
+                <h1 className="mb-2 font-inter text-3xl font-bold text-white">
+                  Check your email
                 </h1>
-                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-light leading-8 text-white/52">
-                  We sent it to {email}.
+                <p className="mb-8 font-inter text-sm text-white/40">
+                  We sent a 6-digit code to{" "}
+                  <span className="text-white/70">{email}</span>
                 </p>
 
-                <div className="mx-auto mt-10 max-w-[460px] rounded-full border border-white/10 bg-white/[0.035] px-5 py-4 backdrop-blur-xl">
-                  <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={loading}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} />
-                      <InputOTPSlot index={1} />
-                      <InputOTPSlot index={2} />
-                    </InputOTPGroup>
-                    <InputOTPSeparator />
-                    <InputOTPGroup>
-                      <InputOTPSlot index={3} />
-                      <InputOTPSlot index={4} />
-                      <InputOTPSlot index={5} />
-                    </InputOTPGroup>
-                  </InputOTP>
+                <div className="mb-6 flex justify-center gap-3">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(element) => {
+                        otpRefs.current[index] = element;
+                      }}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(event) => handleOtpChange(index, event.target.value)}
+                      onKeyDown={(event) => handleOtpKeyDown(index, event)}
+                      className="h-14 w-12 rounded-lg border border-white/10 bg-black/40 text-center font-inter text-xl font-bold text-white outline-none transition focus:border-[#006cff]"
+                      style={
+                        digit
+                          ? { boxShadow: "0 0 12px rgba(0,108,255,0.3)" }
+                          : undefined
+                      }
+                    />
+                  ))}
                 </div>
 
                 <button
-                  onClick={sendOtp}
-                  disabled={loading}
-                  className="mt-6 font-inter text-sm font-semibold text-[#7dd3fc] transition hover:text-white disabled:opacity-50"
+                  onClick={handleVerifyOtp}
+                  disabled={loading || otp.some((digit) => !digit)}
+                  className="mb-4 w-full rounded-lg py-3 font-inter font-semibold text-white transition-all disabled:opacity-40"
+                  style={{
+                    background: "linear-gradient(90deg, #006cff, #38bdf8, #006cff)",
+                    boxShadow: "0 0 24px rgba(0,108,255,0.45)",
+                  }}
+                >
+                  {loading ? "VERIFYING..." : "Verify Code"}
+                </button>
+
+                <button
+                  onClick={handleEmailSubmit}
+                  className="font-inter text-sm text-white/30 transition hover:text-white/50"
                 >
                   Resend code
                 </button>
-                {error && <p className="mt-5 font-inter text-sm text-[#f87171]">{error}</p>}
+
+                {error && (
+                  <p className="mt-4 font-inter text-sm text-[#f87171]">{error}</p>
+                )}
               </motion.div>
             )}
 
-            {step === "password" && (
-              <motion.div key="password" {...panelMotion} className="mx-auto max-w-[500px] text-left">
-                <button
-                  onClick={() => setStep("otp")}
-                  className="mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-white/48 transition hover:text-white"
-                >
-                  <ArrowLeft size={16} />
-                  Back
-                </button>
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#38bdf8]/20 bg-[#38bdf8]/10 text-[#7dd3fc]">
-                    <ShieldCheck size={20} />
-                  </div>
-                  <div>
-                    <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#38bdf8]">
-                      Password
-                    </p>
-                    <h1 className="font-fustat text-3xl font-extrabold">Create your password</h1>
-                  </div>
-                </div>
-                <AssistedPasswordConfirmation
-                  onSubmit={savePassword}
-                  loading={loading}
-                  error={error}
-                />
-              </motion.div>
-            )}
-
-            {step === "success" && (
-              <motion.div key="success" {...panelMotion}>
+            {step === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="py-8 text-center"
+              >
                 <motion.div
-                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#38bdf8]/30 bg-[#38bdf8]/10 text-[#7dd3fc]"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ type: "spring", stiffness: 280, damping: 18 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border border-[#006cff]/40 bg-[#006cff]/20 text-[#38bdf8]"
                 >
-                  <Check size={34} strokeWidth={2.8} />
+                  <Check size={28} strokeWidth={2.5} />
                 </motion.div>
-                <h1 className="mt-7 font-fustat text-[clamp(46px,7vw,74px)] font-extrabold leading-none tracking-[-0.03em]">
-                  You&apos;re in
+                <h1 className="mb-2 font-inter text-3xl font-bold text-white">
+                  You&apos;re in!
                 </h1>
-                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-light leading-8 text-white/52">
-                  Continue to your dashboard.
+                <p className="mb-8 font-inter text-white/40">
+                  Redirecting to your dashboard...
                 </p>
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="mt-10 w-full max-w-[460px] rounded-full bg-white px-5 py-4 font-inter text-base font-semibold text-black transition hover:bg-white/90"
+                  className="w-full rounded-lg py-3 font-inter font-semibold text-white"
+                  style={{
+                    background: "linear-gradient(90deg, #006cff, #38bdf8)",
+                    boxShadow: "0 0 24px rgba(0,108,255,0.45)",
+                  }}
                 >
-                  Continue
+                  Go to Dashboard
                 </button>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-      </section>
+      </div>
+
+      <p className="relative z-10 mt-6 font-inter text-sm text-white/40">
+        {isSignup ? "Already have an account?" : "Don&apos;t have an account?"}{" "}
+        <button
+          onClick={() => {
+            setMode(isSignup ? "login" : "signup");
+            setStep(0);
+            setOtp(["", "", "", "", "", ""]);
+            setError("");
+          }}
+          className="text-white/70 transition hover:text-white"
+        >
+          {isSignup ? "Log in" : "Sign up"}
+        </button>
+      </p>
+
+      <div className="relative z-10 mt-8 flex gap-6 font-inter text-xs text-white/20">
+        <a href="/privacy" className="transition hover:text-white/40">
+          Privacy policy
+        </a>
+        <a href="/terms" className="transition hover:text-white/40">
+          Terms of Use
+        </a>
+      </div>
     </main>
   );
 }
