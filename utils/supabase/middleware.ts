@@ -55,13 +55,5 @@ export const updateSession = async (request: NextRequest) => {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (request.nextUrl.pathname === "/login" && user) {
-    const next = request.nextUrl.searchParams.get("next");
-    const safeNext =
-      next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
-
-    return NextResponse.redirect(new URL(safeNext, request.url));
-  }
-
   return supabaseResponse;
 };
