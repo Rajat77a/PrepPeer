@@ -33,7 +33,7 @@ export function Navbar({
   const [menuOpen, setMenuOpen] = useState(false);
   const isHome = pathname === "/";
   const activeSection = useScrollSpy(
-    ["home", "how-it-works", "features", "leaderboard-preview", "pricing"],
+    ["home", "how-it-works", "features", "leaderboard-preview", "see-it-in-action"],
     140
   );
 

@@ -19,7 +19,11 @@ export const NAV_LINKS = [
     href: "#leaderboard-preview",
     sectionId: "leaderboard-preview",
   },
-  { label: "Pricing", href: "#pricing", sectionId: "pricing" },
+  {
+    label: "In action",
+    href: "#see-it-in-action",
+    sectionId: "see-it-in-action",
+  },
 ];
 
 export const LANDING_SECTION_IDS = [
@@ -29,7 +33,7 @@ export const LANDING_SECTION_IDS = [
   "leaderboard-preview",
   "scorecard",
   "testimonials",
-  "pricing",
+  "see-it-in-action",
 ];
 
 export const TRUSTED_LOGOS = [

@@ -5,7 +5,7 @@ const productLinks = [
   { label: "How it works", href: "/#how-it-works" },
   { label: "Features", href: "/#features" },
   { label: "Leaderboard", href: "/#leaderboard-preview" },
-  { label: "Pricing", href: "/#pricing" },
+  { label: "In action", href: "/#see-it-in-action" },
   { label: "Dashboard", href: "/dashboard" },
 ];
 

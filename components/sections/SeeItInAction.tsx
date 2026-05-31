@@ -60,7 +60,7 @@ function ScoreCard() {
   return (
     <motion.article
       ref={ref}
-      className="relative rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-8 shadow-[0_0_60px_rgba(0,108,255,0.08)]"
+      className="relative rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-8 shadow-[0_32px_90px_rgba(0,108,255,0.18)]"
       initial={{ opacity: 0, y: 34, rotateY: -8, rotateX: 2 }}
       whileInView={{ opacity: 1, y: 0, rotateY: -8, rotateX: 2 }}
       viewport={{ once: true, margin: "-120px" }}
@@ -124,14 +124,14 @@ function TickerRow({
   return (
     <div className="ticker-mask overflow-hidden">
       <div
-        className={`ticker-track flex w-max gap-8 py-3 ${
+        className={`ticker-track flex w-max gap-10 py-3 ${
           direction === "left" ? "ticker-left" : "ticker-right"
         }`}
       >
         {[...items, ...items].map((item, index) => (
           <span
             key={`${item}-${index}`}
-            className="shrink-0 font-inter text-sm text-white/50 transition-colors duration-300 hover:text-white"
+            className="shrink-0 font-inter text-[15px] font-semibold tracking-[-0.01em] text-[#41516a] transition-colors duration-300 hover:text-[#07111f]"
           >
             {item}
           </span>
@@ -150,24 +150,28 @@ function Stats() {
 
   return (
     <div ref={ref} className="mt-24">
-      <div className="grid grid-cols-1 gap-12 md:grid-cols-[1.5fr_1fr_1.2fr] md:items-end">
+      <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:items-start">
         <div>
-          <p className="font-fustat text-6xl font-bold tracking-[-0.05em] text-white">
+          <p className="font-fustat text-[clamp(48px,5vw,68px)] font-bold leading-none tracking-[-0.055em] text-[#07111f]">
             {interviews.toLocaleString()}+
           </p>
-          <p className="mt-3 font-inter text-sm text-white/40">interviews completed</p>
+          <p className="mt-4 font-inter text-sm font-semibold text-[#64748b]">
+            interviews completed
+          </p>
         </div>
-        <div className="md:translate-y-4">
-          <p className="font-fustat text-4xl font-bold tracking-[-0.04em] text-white">
+        <div>
+          <p className="font-fustat text-[clamp(48px,5vw,68px)] font-bold leading-none tracking-[-0.055em] text-[#07111f]">
             {colleges}+
           </p>
-          <p className="mt-3 font-inter text-sm text-white/40">colleges represented</p>
+          <p className="mt-4 font-inter text-sm font-semibold text-[#64748b]">
+            colleges represented
+          </p>
         </div>
-        <div className="md:-translate-y-3">
-          <p className="font-fustat text-4xl font-bold tracking-[-0.04em] text-[#006cff]">
+        <div>
+          <p className="font-fustat text-[clamp(48px,5vw,68px)] font-bold leading-none tracking-[-0.055em] text-[#006cff]">
             Top {top}%
           </p>
-          <p className="mt-3 font-inter text-sm text-white/40">
+          <p className="mt-4 font-inter text-sm font-semibold text-[#64748b]">
             performers get recruiter attention
           </p>
         </div>
@@ -175,9 +179,9 @@ function Stats() {
 
       <Link
         href="/interview"
-        className="mt-12 inline-flex rounded-full bg-[#006cff] px-6 py-3 font-inter text-sm font-medium text-white transition hover:bg-[#0057cc]"
+        className="mt-12 inline-flex rounded-full bg-[#006cff] px-6 py-3 font-inter text-sm font-semibold text-white shadow-[0_14px_34px_rgba(0,108,255,0.24)] transition hover:bg-[#0057cc]"
       >
-        See where you rank →
+        See where you rank -&gt;
       </Link>
     </div>
   );
@@ -188,8 +192,15 @@ export function SeeItInAction() {
   const secondRow = tickerData.slice(6);
 
   return (
-    <section id="pricing" className="bg-[#080808] py-32">
-      <div className="mx-auto max-w-7xl px-6 md:px-10">
+    <section
+      id="see-it-in-action"
+      className="relative overflow-hidden bg-[#f7fbff] py-32"
+    >
+      <div
+        className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(0,132,255,0.12),transparent_30%),radial-gradient(circle_at_84%_58%,rgba(96,177,255,0.14),transparent_34%),linear-gradient(180deg,#ffffff_0%,#eef7ff_52%,#ffffff_100%)]"
+        aria-hidden="true"
+      />
+      <div className="relative mx-auto max-w-7xl px-6 md:px-10">
         <div className="grid gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <motion.div
             initial={{ opacity: 0, y: 26 }}
@@ -197,15 +208,15 @@ export function SeeItInAction() {
             viewport={{ once: true, margin: "-120px" }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="font-inter text-sm font-normal text-white/40">
+            <p className="font-inter text-sm font-semibold text-[#006cff]">
               What a real interview looks like
             </p>
-            <h2 className="mt-5 max-w-[640px] font-fustat text-[clamp(44px,6vw,76px)] font-extrabold leading-[0.96] tracking-[-0.055em] text-white">
+            <h2 className="mt-5 max-w-[640px] font-fustat text-[clamp(44px,6vw,76px)] font-extrabold leading-[0.96] tracking-[-0.055em] text-[#07111f]">
               Answer. Get scored. Know your rank.
             </h2>
-            <p className="mt-6 max-w-[520px] font-inter text-lg leading-8 text-white/48">
+            <p className="mt-6 max-w-[520px] font-inter text-lg font-medium leading-8 text-[#64748b]">
               Every answer is evaluated on Clarity, Structure, Confidence and Depth
-              — not just keywords.
+              - not just keywords.
             </p>
           </motion.div>
 
@@ -213,10 +224,10 @@ export function SeeItInAction() {
         </div>
 
         <div className="mt-32">
-          <p className="mb-6 font-inter text-sm font-normal text-white/40">
+          <p className="mb-7 font-fustat text-2xl font-extrabold tracking-[-0.04em] text-[#07111f]">
             Happening right now
           </p>
-          <div className="space-y-2">
+          <div className="-mx-6 space-y-2 md:-mx-10">
             <TickerRow direction="left" items={firstRow} />
             <TickerRow direction="right" items={secondRow} />
           </div>
@@ -227,7 +238,7 @@ export function SeeItInAction() {
 
       <style jsx>{`
         .ticker-mask {
-          mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+          mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
         }
 
         .ticker-track:hover {
@@ -235,28 +246,28 @@ export function SeeItInAction() {
         }
 
         .ticker-left {
-          animation: ticker-left 38s linear infinite;
+          animation: ticker-left 34s linear infinite;
         }
 
         .ticker-right {
-          animation: ticker-right 42s linear infinite;
+          animation: ticker-right 38s linear infinite;
         }
 
         @keyframes ticker-left {
           0% {
-            transform: translateX(0);
+            transform: translateX(100vw);
           }
           100% {
-            transform: translateX(-50%);
+            transform: translateX(-100%);
           }
         }
 
         @keyframes ticker-right {
           0% {
-            transform: translateX(-50%);
+            transform: translateX(-100%);
           }
           100% {
-            transform: translateX(0);
+            transform: translateX(100vw);
           }
         }
       `}</style>
