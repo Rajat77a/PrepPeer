@@ -3,10 +3,9 @@ import { Hero } from "@/components/sections/Hero";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { Features } from "@/components/sections/Features";
 import { LeaderboardSection } from "@/components/sections/Leaderboard";
-import SquishyPricing from "@/components/ui/squishy-pricing";
+import { SeeItInAction } from "@/components/sections/SeeItInAction";
 import { CTA } from "@/components/sections/CTA";
 import { Footer } from "@/components/sections/Footer";
-import TypingText from "@/components/sections/TypingText";
 import ComparisonCards from "@/components/sections/ComparisonCards";
 import TestimonialCarousel from "@/components/sections/TestimonialCarousel";
 
@@ -21,7 +20,7 @@ export default function HomePage() {
         <Features />
         <LeaderboardSection />
         <TestimonialCarousel />
-        <SquishyPricing />
+        <SeeItInAction />
         <CTA />
         <Footer />
       </main>
