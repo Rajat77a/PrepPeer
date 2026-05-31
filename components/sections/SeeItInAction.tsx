@@ -246,28 +246,28 @@ export function SeeItInAction() {
         }
 
         .ticker-left {
-          animation: ticker-left 34s linear infinite;
+          animation: ticker-left 30s linear infinite;
         }
 
         .ticker-right {
-          animation: ticker-right 38s linear infinite;
+          animation: ticker-right 32s linear infinite;
         }
 
         @keyframes ticker-left {
           0% {
-            transform: translateX(100vw);
+            transform: translateX(0);
           }
           100% {
-            transform: translateX(-100%);
+            transform: translateX(-50%);
           }
         }
 
         @keyframes ticker-right {
           0% {
-            transform: translateX(-100%);
+            transform: translateX(-50%);
           }
           100% {
-            transform: translateX(100vw);
+            transform: translateX(0);
           }
         }
       `}</style>
