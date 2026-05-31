@@ -21,7 +21,7 @@ export type RankedSession = InterviewSessionRow & {
   previousRank: number | null;
 };
 
-const BENCHMARK_WINDOW_MS = 10 * 60 * 1000;
+const BENCHMARK_WINDOW_MS = 5 * 60 * 1000;
 
 const benchmarkProfiles = [
   ["Arjun S.", "NIT Trichy", "SDE Fresher", "Product Company"],
@@ -93,24 +93,33 @@ export const getDisplayName = (
 const getScore = (session: InterviewSessionRow) =>
   Number(session.composite_score ?? 0);
 
-const getLatestByUser = (sessions: InterviewSessionRow[]) => {
-  const latestByUser = new Map<string, InterviewSessionRow>();
+const getBestByUser = (sessions: InterviewSessionRow[]) => {
+  const bestByUser = new Map<string, InterviewSessionRow>();
 
   sessions.forEach((session) => {
-    const current = latestByUser.get(session.user_id);
+    const current = bestByUser.get(session.user_id);
     const sessionTime = new Date(session.created_at ?? 0).getTime();
     const currentTime = new Date(current?.created_at ?? 0).getTime();
+    const score = getScore(session);
+    const currentScore = current ? getScore(current) : -1;
 
-    if (!current || sessionTime > currentTime) {
-      latestByUser.set(session.user_id, session);
+    if (
+      !current ||
+      score > currentScore ||
+      (score === currentScore && sessionTime > currentTime)
+    ) {
+      bestByUser.set(session.user_id, session);
     }
   });
 
-  return Array.from(latestByUser.values());
+  return Array.from(bestByUser.values());
 };
 
-const withBenchmarkSessions = (sessions: InterviewSessionRow[]) => [
-  ...getBenchmarkSessions(),
+const withBenchmarkSessions = (
+  sessions: InterviewSessionRow[],
+  windowId = getBenchmarkWindow()
+) => [
+  ...getBenchmarkSessions(windowId),
   ...sessions,
 ];
 
@@ -133,29 +142,47 @@ const rankSessions = (sessions: InterviewSessionRow[]) =>
 const getPreviousRank = (
   allSessions: InterviewSessionRow[],
   userId: string,
-  latestSessionId: string
+  currentBestSessionId: string
 ) => {
-  const userSessions = allSessions
-    .filter((session) => session.user_id === userId && session.id !== latestSessionId)
+  if (userId.startsWith("benchmark-")) {
+    const previousBenchmarked = withBenchmarkSessions(
+      allSessions.filter((session) => !session.user_id.startsWith("benchmark-")),
+      getBenchmarkWindow() - 1
+    );
+
+    return (
+      rankSessions(getBestByUser(previousBenchmarked)).find(
+        (session) => session.user_id === userId
+      )?.rank ?? null
+    );
+  }
+
+  const realSessions = allSessions.filter(
+    (session) => !session.user_id.startsWith("benchmark-")
+  );
+  const userSessions = realSessions
+    .filter((session) => session.user_id === userId)
     .sort(
       (a, b) =>
         new Date(b.created_at ?? 0).getTime() -
         new Date(a.created_at ?? 0).getTime()
     );
 
-  const previousUserSession = userSessions[0];
-  if (!previousUserSession) return null;
+  if (userSessions.length <= 1) return null;
 
-  const replacementSessions = getLatestByUser(
-    allSessions.map((session) =>
-      session.user_id === userId && session.id === latestSessionId
-        ? previousUserSession
-        : session
-    )
+  const currentBestIsLatestAttempt = userSessions[0]?.id === currentBestSessionId;
+  const previousRealSessions = currentBestIsLatestAttempt
+    ? realSessions.filter((session) => session.id !== currentBestSessionId)
+    : realSessions;
+  const previousBenchmarked = withBenchmarkSessions(
+    previousRealSessions,
+    getBenchmarkWindow() - 1
   );
 
   return (
-    rankSessions(replacementSessions).find((session) => session.user_id === userId)
+    rankSessions(getBestByUser(previousBenchmarked)).find(
+      (session) => session.user_id === userId
+    )
       ?.rank ?? null
   );
 };
@@ -176,8 +203,8 @@ export const getRankSummary = (
   userId?: string
 ): RankedSession | null => {
   const benchmarkedSessions = withBenchmarkSessions(allSessions);
-  const latestRanked = rankSessions(getLatestByUser(benchmarkedSessions));
-  const current = latestRanked.find((session) => session.user_id === userId);
+  const rankedSessions = rankSessions(getBestByUser(benchmarkedSessions));
+  const current = rankedSessions.find((session) => session.user_id === userId);
 
   if (!current || !userId) return null;
 
@@ -185,7 +212,7 @@ export const getRankSummary = (
 
   return {
     ...current,
-    totalCandidates: latestRanked.length,
+    totalCandidates: rankedSessions.length,
     previousRank,
     rankChange: getRankChangeLabel(current.rank, previousRank),
   };
@@ -206,9 +233,9 @@ export const toLeaderboardEntries = (
   currentUserCollege?: string
 ): LeaderboardEntry[] => {
   const benchmarkedSessions = withBenchmarkSessions(allSessions);
-  const latestRanked = rankSessions(getLatestByUser(benchmarkedSessions));
+  const rankedSessions = rankSessions(getBestByUser(benchmarkedSessions));
 
-  const entries: LeaderboardEntry[] = latestRanked.map((session) => {
+  const entries: LeaderboardEntry[] = rankedSessions.map((session) => {
     const previousRank = getPreviousRank(benchmarkedSessions, session.user_id, session.id);
     const benchmarkProfile = session.user_id.startsWith("benchmark-")
       ? getBenchmarkProfile(session)
