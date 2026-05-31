@@ -90,9 +90,6 @@ function NewUserDashboard({ firstName }: { firstName: string }) {
               Start Interview
               <ArrowRight className="h-4 w-4" />
             </Link>
-            <span className="font-inter text-sm font-semibold text-white/20">
-              Free. No card needed.
-            </span>
           </div>
         </div>
       </motion.div>
