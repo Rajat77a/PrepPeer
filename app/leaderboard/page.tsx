@@ -79,7 +79,8 @@ const mergeDemoAndRealEntries = (
 };
 
 export default async function LeaderboardPage() {
-  const supabase = createClient(cookies());
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
 
   const { data: userData } = await supabase.auth.getUser();
 
