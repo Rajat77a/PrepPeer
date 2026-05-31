@@ -28,7 +28,15 @@ export default function ResultsPage() {
 
         setReport((prev) => ({
           ...prev,
+          name: realData.name ?? prev.name,
+          role: realData.role ?? prev.role,
+          companyType: realData.companyType ?? prev.companyType,
           compositeScore: realData.compositeScore ?? prev.compositeScore,
+          percentile: realData.percentile ?? "Not ranked",
+          rankDelta: realData.rankDelta ?? "No ranked session yet",
+          previousRank: realData.previousRank ?? 0,
+          currentRank: realData.currentRank ?? 0,
+          totalCandidates: realData.totalCandidates ?? 0,
           dimensions: realData.dimensions ?? prev.dimensions,
           questionScores: realData.questionScores ?? prev.questionScores,
           summary: realData.summary ?? prev.summary,

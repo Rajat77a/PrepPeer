@@ -10,6 +10,12 @@ import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
+import {
+  getDisplayName,
+  getRankPercentileLabel,
+  getRankSummary,
+  type InterviewSessionRow,
+} from "@/lib/ranking";
 import { createClient } from "@/utils/supabase/client";
 import type { QuestionReview } from "@/lib/types";
 import { AlertTriangle, ArrowRight, Clock, LockKeyhole, ShieldCheck } from "lucide-react";
@@ -170,20 +176,22 @@ export default function InterviewPage() {
       }),
     };
 
-    sessionStorage.setItem(
-      "preppeer_results",
-      JSON.stringify({
-        compositeScore,
-        dimensions: resultDimensions,
-        questionScores: allQuestionScores,
-        summary,
-      })
-    );
-
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
+    let rankSummary = null;
+    let reportIdentity = {
+      name: "Guest",
+      role: setup.domain || "Interview",
+      companyType: setup.companyType || "General",
+    };
 
     if (data.user) {
+      reportIdentity = {
+        name: getDisplayName(data.user.user_metadata, data.user.email),
+        role: setup.domain || "Interview",
+        companyType: setup.companyType || "General",
+      };
+
       await supabase.from("interview_sessions").insert({
         user_id: data.user.id,
         role: setup.domain,
@@ -194,7 +202,42 @@ export default function InterviewPage() {
         question_scores: allQuestionScores,
         summary,
       });
+
+      const { data: sessionRows } = await supabase
+        .from("interview_sessions")
+        .select(
+          "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
+        )
+        .order("created_at", { ascending: false })
+        .limit(1000);
+
+      rankSummary = getRankSummary(
+        ((sessionRows ?? []) as InterviewSessionRow[]),
+        data.user.id
+      );
     }
+
+    sessionStorage.setItem(
+      "preppeer_results",
+      JSON.stringify({
+        name: reportIdentity.name,
+        role: reportIdentity.role,
+        companyType: reportIdentity.companyType,
+        compositeScore,
+        percentile: rankSummary
+          ? getRankPercentileLabel(rankSummary.rank, rankSummary.totalCandidates)
+          : "Not ranked",
+        rankDelta: rankSummary
+          ? rankSummary.rankChange
+          : "Sign in to join the leaderboard",
+        previousRank: rankSummary?.previousRank ?? 0,
+        currentRank: rankSummary?.rank ?? 0,
+        totalCandidates: rankSummary?.totalCandidates ?? 0,
+        dimensions: resultDimensions,
+        questionScores: allQuestionScores,
+        summary,
+      })
+    );
   };
 
   useEffect(() => {

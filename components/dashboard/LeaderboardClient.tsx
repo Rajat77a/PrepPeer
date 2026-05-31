@@ -2,8 +2,8 @@
 
 import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
-import { leaderboardEntries } from "@/components/dashboard/DashboardData";
 import { cn } from "@/lib/utils";
+import type { LeaderboardEntry } from "@/lib/types";
 
 const tabs = ["All Roles", "SDE", "PM", "Operations", "MBA"];
 
@@ -15,7 +15,11 @@ const roleMatches: Record<string, string[]> = {
   MBA: ["MBA"],
 };
 
-export function LeaderboardClient() {
+export function LeaderboardClient({
+  entries: initialEntries,
+}: {
+  entries: LeaderboardEntry[];
+}) {
   const [activeTab, setActiveTab] = useState("All Roles");
   const [query, setQuery] = useState("");
 
@@ -23,18 +27,18 @@ export function LeaderboardClient() {
     const allowedRoles = roleMatches[activeTab] ?? [];
     const normalizedQuery = query.trim().toLowerCase();
 
-    return leaderboardEntries.filter((entry) => {
+    return initialEntries.filter((entry) => {
+      const searchableText = `${entry.name} ${entry.subtitle ?? ""}`;
       const roleAllowed =
-        allowedRoles.length === 0 || allowedRoles.includes(entry.role);
+        allowedRoles.length === 0 ||
+        allowedRoles.some((role) => searchableText.includes(role));
       const textAllowed =
         normalizedQuery.length === 0 ||
-        `${entry.name} ${entry.college} ${entry.role}`
-          .toLowerCase()
-          .includes(normalizedQuery);
+        searchableText.toLowerCase().includes(normalizedQuery);
 
       return roleAllowed && textAllowed;
     });
-  }, [activeTab, query]);
+  }, [activeTab, initialEntries, query]);
 
   return (
     <div className="mx-auto max-w-7xl p-5 sm:p-8">
@@ -83,8 +87,8 @@ export function LeaderboardClient() {
         <div className="sticky top-0 z-10 hidden grid-cols-[0.7fr_1.2fr_1.4fr_1fr_0.8fr_0.8fr_0.8fr] gap-4 rounded-t-2xl border-b border-white/[0.08] bg-[#0d0d0d]/95 px-5 py-4 font-inter text-xs font-bold uppercase tracking-[0.16em] text-white/30 backdrop-blur-xl lg:grid">
           <span>Rank</span>
           <span>Name</span>
-          <span>College</span>
-          <span>Role</span>
+          <span>Context</span>
+          <span>Status</span>
           <span>Score</span>
           <span>Sessions</span>
           <span>Rank change</span>
@@ -96,14 +100,14 @@ export function LeaderboardClient() {
               key={`${entry.rank}-${entry.name}`}
               className={cn(
                 "grid gap-3 px-5 py-4 transition hover:bg-white/[0.025] lg:grid-cols-[0.7fr_1.2fr_1.4fr_1fr_0.8fr_0.8fr_0.8fr] lg:items-center lg:gap-4",
-                entry.isUser &&
+                entry.isYou &&
                   "border-y border-[#006cff]/20 bg-[#006cff]/10 hover:bg-[#006cff]/12"
               )}
             >
               <span
                 className={cn(
                   "font-inter text-sm font-black",
-                  entry.isUser ? "text-[#006cff]" : "text-white/35"
+                  entry.isYou ? "text-[#006cff]" : "text-white/35"
                 )}
               >
                 #{entry.rank}
@@ -112,10 +116,10 @@ export function LeaderboardClient() {
                 {entry.name}
               </span>
               <span className="font-inter text-sm font-semibold text-white/45">
-                {entry.college}
+                {entry.subtitle ?? "-"}
               </span>
               <span className="font-inter text-sm font-semibold text-white/45">
-                {entry.role}
+                {entry.sessions ? `${entry.sessions} sessions` : "No sessions yet"}
               </span>
               <span className="font-inter text-sm font-bold text-white">
                 {entry.score}
@@ -126,10 +130,14 @@ export function LeaderboardClient() {
               <span
                 className={cn(
                   "font-inter text-sm font-bold",
-                  entry.delta.startsWith("+") ? "text-green-400" : "text-red-400"
+                  entry.deltaType === "up"
+                    ? "text-green-400"
+                    : entry.deltaType === "down"
+                      ? "text-red-400"
+                      : "text-white/35"
                 )}
               >
-                {entry.delta}
+                {entry.delta ?? "No rank change"}
               </span>
             </div>
           ))}

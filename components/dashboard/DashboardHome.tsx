@@ -3,28 +3,70 @@
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import {
-  leaderboardEntries,
-  recentSessions,
-  scoreDimensions,
-} from "@/components/dashboard/DashboardData";
+import { scoreDimensions } from "@/components/dashboard/DashboardData";
+import type { DimensionScore, LeaderboardEntry } from "@/lib/types";
 
 type DashboardHomeProps = {
   firstName: string;
-  hasSessions?: boolean;
+  sessions: DashboardSession[];
+  leaderboardEntries: LeaderboardEntry[];
+  rankSummary: DashboardRankSummary | null;
 };
 
-export function DashboardHome({ firstName, hasSessions = false }: DashboardHomeProps) {
-  if (!hasSessions) {
-    return <NewUserDashboard firstName={firstName} />;
+export type DashboardSession = {
+  id: string;
+  date: string;
+  role: string;
+  experience: string;
+  company: string;
+  score: number;
+  rank?: number;
+  delta?: string;
+};
+
+export type DashboardRankSummary = {
+  rank: number;
+  totalCandidates: number;
+  score: number;
+  percentile: string;
+  rankChange: string;
+  role: string;
+  companyType: string;
+  dimensions?: DimensionScore[];
+};
+
+export function DashboardHome({
+  firstName,
+  sessions,
+  leaderboardEntries,
+  rankSummary,
+}: DashboardHomeProps) {
+  if (sessions.length === 0 || !rankSummary) {
+    return (
+      <NewUserDashboard
+        firstName={firstName}
+        topEntries={leaderboardEntries.slice(0, 3)}
+      />
+    );
   }
 
-  return <ReturningDashboard firstName={firstName} />;
+  return (
+    <ReturningDashboard
+      firstName={firstName}
+      sessions={sessions}
+      leaderboardEntries={leaderboardEntries}
+      rankSummary={rankSummary}
+    />
+  );
 }
 
-function NewUserDashboard({ firstName }: { firstName: string }) {
-  const topEntries = leaderboardEntries.slice(0, 3);
-
+function NewUserDashboard({
+  firstName,
+  topEntries,
+}: {
+  firstName: string;
+  topEntries: LeaderboardEntry[];
+}) {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-6 sm:p-8">
       <div className="pointer-events-none fixed inset-0">
@@ -126,7 +168,7 @@ function NewUserDashboard({ firstName }: { firstName: string }) {
                     {entry.name}
                   </span>
                   <span className="ml-2 font-inter text-xs text-white/30">
-                    {entry.college}
+                    {entry.subtitle}
                   </span>
                 </div>
               </div>
@@ -149,8 +191,28 @@ function NewUserDashboard({ firstName }: { firstName: string }) {
   );
 }
 
-function ReturningDashboard({ firstName }: { firstName: string }) {
-  const nearby = leaderboardEntries.slice(38, 43);
+function ReturningDashboard({
+  firstName,
+  sessions,
+  leaderboardEntries,
+  rankSummary,
+}: {
+  firstName: string;
+  sessions: DashboardSession[];
+  leaderboardEntries: LeaderboardEntry[];
+  rankSummary: DashboardRankSummary;
+}) {
+  const userIndex = leaderboardEntries.findIndex((entry) => entry.isYou);
+  const nearby =
+    userIndex >= 0
+      ? leaderboardEntries.slice(Math.max(0, userIndex - 2), userIndex + 3)
+      : leaderboardEntries.slice(0, 5);
+  const dimensions: DimensionScore[] = rankSummary.dimensions?.length
+    ? rankSummary.dimensions
+    : scoreDimensions.map((dimension) => ({
+        label: dimension.label,
+        value: dimension.score,
+      }));
 
   return (
     <div className="mx-auto max-w-6xl p-5 sm:p-8">
@@ -193,23 +255,25 @@ function ReturningDashboard({ firstName }: { firstName: string }) {
               </p>
               <div className="mb-3 flex items-end gap-3">
                 <span className="font-inter text-7xl font-black leading-none tracking-[-0.05em] text-white sm:text-8xl">
-                  #41
+                  #{rankSummary.rank}
                 </span>
                 <span className="mb-3 font-inter text-xl font-bold text-white/30">
-                  of 347
+                  of {rankSummary.totalCandidates}
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-3 font-inter text-sm">
-                <span className="font-bold text-[#006cff]">+26 this session</span>
+                <span className="font-bold text-[#006cff]">
+                  {rankSummary.rankChange}
+                </span>
                 <span className="text-white/20">/</span>
-                <span className="text-white/40">Top 23%</span>
+                <span className="text-white/40">{rankSummary.percentile}</span>
                 <span className="text-white/20">/</span>
-                <span className="text-white/40">SDE Fresher</span>
+                <span className="text-white/40">{rankSummary.role}</span>
                 <span className="text-white/20">/</span>
-                <span className="text-white/40">Product Startup</span>
+                <span className="text-white/40">{rankSummary.companyType}</span>
               </div>
             </div>
-            <PercentileRing />
+            <PercentileRing value={rankSummary.score} />
           </div>
           <div className="relative z-10 mt-6">
             <button className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 font-inter text-xs font-bold text-white/30 transition hover:border-white/30 hover:text-white">
@@ -224,20 +288,20 @@ function ReturningDashboard({ firstName }: { firstName: string }) {
             Score breakdown
           </p>
           <div className="flex-1 space-y-4">
-            {scoreDimensions.map((dim) => (
+            {dimensions.map((dim) => (
               <div key={dim.label}>
                 <div className="mb-1.5 flex justify-between">
                   <span className="font-inter text-xs font-semibold text-white/50">
                     {dim.label}
                   </span>
                   <span className="font-inter text-xs font-bold text-white">
-                    {dim.score}
+                    {dim.value}
                   </span>
                 </div>
                 <div className="h-1 overflow-hidden rounded-full bg-white/[0.05]">
                   <motion.div
                     initial={{ width: 0 }}
-                    animate={{ width: `${dim.score}%` }}
+                    animate={{ width: `${dim.value}%` }}
                     transition={{ duration: 1, delay: 0.3 }}
                     className="h-full rounded-full bg-[#006cff]"
                   />
@@ -255,7 +319,7 @@ function ReturningDashboard({ firstName }: { firstName: string }) {
 
       <div className="grid gap-4 xl:grid-cols-2">
         <Panel title="Recent sessions" href="/dashboard/sessions">
-          {recentSessions.slice(0, 3).map((session) => (
+          {sessions.slice(0, 3).map((session) => (
             <Link
               key={session.id}
               href={`/dashboard/sessions/${session.id}`}
@@ -269,15 +333,17 @@ function ReturningDashboard({ firstName }: { firstName: string }) {
               </div>
               <div className="flex items-center gap-4 font-inter text-sm">
                 <span className="text-white/60">Score: {session.score}</span>
-                <span className="text-white/40">#{session.rank}</span>
+                <span className="text-white/40">
+                  {session.rank ? `#${session.rank}` : "Not ranked"}
+                </span>
                 <span
                   className={
-                    session.delta.startsWith("+")
+                    session.delta?.startsWith("Up")
                       ? "text-xs font-bold text-green-400"
                       : "text-xs font-bold text-red-400"
                   }
                 >
-                  {session.delta}
+                  {session.delta ?? "First session"}
                 </span>
               </div>
             </Link>
@@ -289,7 +355,7 @@ function ReturningDashboard({ firstName }: { firstName: string }) {
             <div
               key={entry.rank}
               className={
-                entry.isUser
+                entry.isYou
                   ? "flex items-center justify-between rounded-lg border border-[#006cff]/20 bg-[#006cff]/10 px-2 py-3 transition"
                   : "flex items-center justify-between rounded-lg border-b border-white/[0.05] px-2 py-3 transition hover:bg-white/[0.02]"
               }
@@ -297,7 +363,7 @@ function ReturningDashboard({ firstName }: { firstName: string }) {
               <div className="flex items-center gap-3">
                 <span
                   className={
-                    entry.isUser
+                    entry.isYou
                       ? "w-8 font-inter text-sm font-bold text-[#006cff]"
                       : "w-8 font-inter text-sm font-bold text-white/20"
                   }
@@ -306,7 +372,7 @@ function ReturningDashboard({ firstName }: { firstName: string }) {
                 </span>
                 <span
                   className={
-                    entry.isUser
+                    entry.isYou
                       ? "font-inter text-sm font-bold text-white"
                       : "font-inter text-sm font-semibold text-white/60"
                   }
@@ -316,7 +382,7 @@ function ReturningDashboard({ firstName }: { firstName: string }) {
               </div>
               <span
                 className={
-                  entry.isUser
+                  entry.isYou
                     ? "font-inter text-sm font-bold text-white"
                     : "font-inter text-sm font-semibold text-white/40"
                 }
@@ -331,7 +397,9 @@ function ReturningDashboard({ firstName }: { firstName: string }) {
   );
 }
 
-function PercentileRing() {
+function PercentileRing({ value }: { value: number }) {
+  const circumference = 2 * Math.PI * 38;
+
   return (
     <div className="relative h-28 w-28 shrink-0">
       <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
@@ -350,14 +418,14 @@ function PercentileRing() {
           fill="none"
           stroke="#006cff"
           strokeWidth="8"
-          strokeDasharray={`${77 * 2.39} ${100 * 2.39}`}
+          strokeDasharray={`${(value / 100) * circumference} ${circumference}`}
           strokeLinecap="round"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-inter text-xl font-black text-white">77%</span>
+        <span className="font-inter text-xl font-black text-white">{value}</span>
         <span className="font-inter text-xs font-semibold text-white/30">
-          percentile
+          score
         </span>
       </div>
     </div>
