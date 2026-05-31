@@ -25,6 +25,7 @@ import { EASE_OUT } from "@/lib/motion";
 
 const TOTAL = 5;
 const DEMO_COMPLETED_KEY = "preppeer_demo_interview_completed_at";
+const DEMO_RESULTS_KEY = "preppeer_pending_demo_results";
 
 type SetupData = {
   domain: string;
@@ -222,31 +223,33 @@ export default function InterviewPage() {
       );
     }
 
-    sessionStorage.setItem(
-      "preppeer_results",
-      JSON.stringify({
-        name: reportIdentity.name,
-        role: reportIdentity.role,
-        companyType: reportIdentity.companyType,
-        compositeScore,
-        percentile: rankSummary
-          ? getRankPercentileLabel(rankSummary.rank, rankSummary.totalCandidates)
-          : "Not ranked",
-        rankDelta: rankSummary
-          ? rankSummary.rankChange
-          : "Sign in to join the leaderboard",
-        previousRank: rankSummary?.previousRank ?? 0,
-        currentRank: rankSummary?.rank ?? 0,
-        totalCandidates: rankSummary?.totalCandidates ?? 0,
-        dimensions: resultDimensions,
-        questionScores: allQuestionScores,
-        summary,
-        source: isAccountInterview ? "account" : "demo",
-      })
-    );
+    const resultPayload = {
+      name: reportIdentity.name,
+      role: reportIdentity.role,
+      companyType: reportIdentity.companyType,
+      compositeScore,
+      percentile: rankSummary
+        ? getRankPercentileLabel(rankSummary.rank, rankSummary.totalCandidates)
+        : "Not ranked",
+      rankDelta: rankSummary
+        ? rankSummary.rankChange
+        : "Sign in to join the leaderboard",
+      previousRank: rankSummary?.previousRank ?? 0,
+      currentRank: rankSummary?.rank ?? 0,
+      totalCandidates: rankSummary?.totalCandidates ?? 0,
+      dimensions: resultDimensions,
+      questionScores: allQuestionScores,
+      summary,
+      source: isAccountInterview ? "account" : "demo",
+    };
+
+    sessionStorage.setItem("preppeer_results", JSON.stringify(resultPayload));
 
     if (!isAccountInterview) {
+      localStorage.setItem(DEMO_RESULTS_KEY, JSON.stringify(resultPayload));
       localStorage.setItem(DEMO_COMPLETED_KEY, new Date().toISOString());
+    } else {
+      localStorage.removeItem(DEMO_RESULTS_KEY);
     }
   };
 
@@ -316,6 +319,7 @@ export default function InterviewPage() {
         setQuestionReviews([]);
         setDimensionHistory([]);
         sessionStorage.removeItem("preppeer_results");
+        if (isAccountInterview) localStorage.removeItem(DEMO_RESULTS_KEY);
         setStage("interview");
       } else {
         setError("Failed to generate questions. Try again.");
@@ -360,12 +364,16 @@ export default function InterviewPage() {
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 <Link
                   href="/login?next=%2Finterview%3Fmode%3Daccount"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="rounded-[14px] bg-blue px-5 py-3.5 font-inter text-sm font-extrabold text-white shadow-[0_18px_44px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:bg-[#006cff]"
                 >
                   Sign in to continue
                 </Link>
                 <Link
                   href="/login?next=%2Finterview%3Fmode%3Daccount&mode=signup"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="rounded-[14px] border border-[rgba(0,132,255,0.18)] bg-[#F7FBFF] px-5 py-3.5 font-inter text-sm font-extrabold text-text transition hover:-translate-y-0.5 hover:border-blue/40"
                 >
                   Create account

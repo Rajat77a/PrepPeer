@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "./Button";
@@ -25,7 +25,6 @@ export function Navbar({
   progress,
 }: NavbarProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const isHome = pathname === "/";
   const activeSection = useScrollSpy(
     ["home", "how-it-works", "features", "leaderboard-preview", "see-it-in-action"],
@@ -105,12 +104,14 @@ export function Navbar({
 
           <div className="shrink-0 hidden sm:block">
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => router.push("/login")}
+              <Link
+                href="/login"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-inter text-sm font-semibold text-text transition hover:bg-white/10"
               >
                 Sign in
-              </button>
+              </Link>
               <Button href="/interview" variant="glass" showArrow>
                 Start Free
               </Button>

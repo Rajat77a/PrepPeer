@@ -23,6 +23,9 @@ type StoredResult = Partial<SessionReport> & {
   unlockedSessionId?: string;
 };
 
+const DEMO_RESULTS_KEY = "preppeer_pending_demo_results";
+const RESULTS_KEY = "preppeer_results";
+
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
   const [rankLocked, setRankLocked] = useState(false);
@@ -35,9 +38,11 @@ export default function ResultsPage() {
 
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem("preppeer_results");
+      const stored =
+        sessionStorage.getItem(RESULTS_KEY) ?? localStorage.getItem(DEMO_RESULTS_KEY);
 
       if (stored) {
+        sessionStorage.setItem(RESULTS_KEY, stored);
         const realData = JSON.parse(stored) as StoredResult;
         const shouldLockRank =
           (realData.source === "demo" && !realData.unlockedUserId) ||
@@ -78,7 +83,8 @@ export default function ResultsPage() {
       unlockInFlightRef.current = true;
 
       try {
-        const stored = sessionStorage.getItem("preppeer_results");
+        const stored =
+          sessionStorage.getItem(RESULTS_KEY) ?? localStorage.getItem(DEMO_RESULTS_KEY);
         if (!stored) return;
 
         const storedResult = JSON.parse(stored) as StoredResult;
@@ -135,7 +141,8 @@ export default function ResultsPage() {
           totalCandidates: rankSummary.totalCandidates,
         };
 
-        sessionStorage.setItem("preppeer_results", JSON.stringify(unlockedResult));
+        sessionStorage.setItem(RESULTS_KEY, JSON.stringify(unlockedResult));
+        localStorage.removeItem(DEMO_RESULTS_KEY);
         setReport((prev) => ({
           ...prev,
           percentile: unlockedResult.percentile ?? prev.percentile,

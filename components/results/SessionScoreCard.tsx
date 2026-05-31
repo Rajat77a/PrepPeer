@@ -103,6 +103,8 @@ export function SessionScoreCard({
           </Link>
           <Link
             href={rankLocked ? "/login?next=%2Fresults%3FunlockRank%3D1" : "/leaderboard"}
+            target={rankLocked ? "_blank" : undefined}
+            rel={rankLocked ? "noopener noreferrer" : undefined}
             className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.08)] font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
           >
             {rankLocked ? "Sign in to unlock" : "View Leaderboard"}
@@ -110,6 +112,8 @@ export function SessionScoreCard({
           {rankLocked ? (
             <Link
               href="/login?next=%2Fresults%3FunlockRank%3D1&mode=signup"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,132,255,0.18)] bg-[rgba(0,132,255,0.06)] font-inter font-semibold text-[13px] text-blue hover:scale-[1.02] transition-transform cursor-pointer"
             >
               Create account
