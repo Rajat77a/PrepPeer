@@ -40,10 +40,23 @@ export const updateSession = async (request: NextRequest) => {
     },
   });
 
+  let user = null;
+
   try {
-    await supabase.auth.getUser();
+    const {
+      data: { user: authUser },
+    } = await supabase.auth.getUser();
+    user = authUser;
   } catch {
     return supabaseResponse;
+  }
+
+  if (request.nextUrl.pathname.startsWith("/dashboard") && !user) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  if (request.nextUrl.pathname === "/login" && user) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return supabaseResponse;

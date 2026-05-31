@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { DashboardHome } from "@/components/dashboard/DashboardHome";
+import { ProfileForm } from "@/components/dashboard/ProfileForm";
 import { createClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
-  description: "Track your interview sessions, scores, and rank improvement over time.",
+  title: "Profile",
 };
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams?: { view?: string };
-}) {
+export default async function DashboardProfilePage() {
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
   const {
@@ -27,12 +22,14 @@ export default async function DashboardPage({
     user.user_metadata?.name ??
     user.email?.split("@")[0] ??
     "PrepPeer user";
-  const firstName = name.split(" ")[0] ?? "there";
 
   return (
-    <DashboardHome
-      firstName={firstName}
-      hasSessions={searchParams?.view === "returning"}
+    <ProfileForm
+      user={{
+        name,
+        email: user.email ?? "",
+        avatarUrl: user.user_metadata?.avatar_url,
+      }}
     />
   );
 }
