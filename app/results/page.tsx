@@ -10,11 +10,24 @@ import { SessionSummary } from "@/components/results/SessionSummary";
 import { Navbar } from "@/components/ui/Navbar";
 import { SESSION_REPORT } from "@/lib/mockData";
 import type { SessionReport } from "@/lib/types";
+import {
+  getRankPercentileLabel,
+  getRankSummary,
+  type InterviewSessionRow,
+} from "@/lib/ranking";
+import { createClient } from "@/utils/supabase/client";
+
+type StoredResult = Partial<SessionReport> & {
+  unlockedUserId?: string;
+  unlockedSessionId?: string;
+};
 
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
+  const [rankLocked, setRankLocked] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const reviewScrollRef = useRef<HTMLDivElement>(null);
+  const unlockInFlightRef = useRef(false);
   const lastTouchYRef = useRef<number | null>(null);
   const targetScrollTopRef = useRef(0);
   const scrollFrameRef = useRef<number | null>(null);
@@ -24,7 +37,10 @@ export default function ResultsPage() {
       const stored = sessionStorage.getItem("preppeer_results");
 
       if (stored) {
-        const realData = JSON.parse(stored);
+        const realData = JSON.parse(stored) as StoredResult;
+        const shouldLockRank =
+          !realData.unlockedUserId &&
+          (!realData.currentRank || !realData.totalCandidates);
 
         setReport((prev) => ({
           ...prev,
@@ -41,11 +57,97 @@ export default function ResultsPage() {
           questionScores: realData.questionScores ?? prev.questionScores,
           summary: realData.summary ?? prev.summary,
         }));
+        setRankLocked(shouldLockRank);
       }
     } catch {
       // fallback to mock
     }
   }, []);
+
+  useEffect(() => {
+    if (!rankLocked) return;
+
+    const unlockStoredRank = async () => {
+      if (unlockInFlightRef.current) return;
+      unlockInFlightRef.current = true;
+
+      try {
+        const stored = sessionStorage.getItem("preppeer_results");
+        if (!stored) return;
+
+        const storedResult = JSON.parse(stored) as StoredResult;
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (!user || storedResult.unlockedUserId === user.id) return;
+
+        const { data: insertedSession, error: insertError } = await supabase
+          .from("interview_sessions")
+          .insert({
+            user_id: user.id,
+            role: storedResult.role ?? "Interview",
+            experience: null,
+            company_type: storedResult.companyType ?? "General",
+            composite_score: storedResult.compositeScore ?? 0,
+            dimensions: storedResult.dimensions ?? [],
+            question_scores: storedResult.questionScores ?? [],
+            summary: storedResult.summary ?? null,
+          })
+          .select("id")
+          .single();
+
+        if (insertError) return;
+
+        const { data: sessionRows } = await supabase
+          .from("interview_sessions")
+          .select(
+            "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
+          )
+          .order("created_at", { ascending: false })
+          .limit(1000);
+
+        const rankSummary = getRankSummary(
+          (sessionRows ?? []) as InterviewSessionRow[],
+          user.id
+        );
+
+        if (!rankSummary) return;
+
+        const unlockedResult: StoredResult = {
+          ...storedResult,
+          unlockedUserId: user.id,
+          unlockedSessionId: insertedSession?.id,
+          percentile: getRankPercentileLabel(
+            rankSummary.rank,
+            rankSummary.totalCandidates
+          ),
+          rankDelta: rankSummary.rankChange,
+          previousRank: rankSummary.previousRank ?? 0,
+          currentRank: rankSummary.rank,
+          totalCandidates: rankSummary.totalCandidates,
+        };
+
+        sessionStorage.setItem("preppeer_results", JSON.stringify(unlockedResult));
+        setReport((prev) => ({
+          ...prev,
+          percentile: unlockedResult.percentile ?? prev.percentile,
+          rankDelta: unlockedResult.rankDelta ?? prev.rankDelta,
+          previousRank: unlockedResult.previousRank ?? prev.previousRank,
+          currentRank: unlockedResult.currentRank ?? prev.currentRank,
+          totalCandidates: unlockedResult.totalCandidates ?? prev.totalCandidates,
+        }));
+        setRankLocked(false);
+      } catch {
+        // Keep the rank locked if the unlock attempt cannot complete.
+      } finally {
+        unlockInFlightRef.current = false;
+      }
+    };
+
+    void unlockStoredRank();
+  }, [rankLocked]);
 
   const handleShare = async () => {
     const url =
@@ -221,7 +323,11 @@ export default function ResultsPage() {
           </motion.button>
         </div>
 
-        <SessionScoreCard report={report} onShare={handleShare} />
+        <SessionScoreCard
+          report={report}
+          onShare={handleShare}
+          rankLocked={rankLocked}
+        />
         <QuestionBreakdownChart data={report.questionScores} />
       </div>
 

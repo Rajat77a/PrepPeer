@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LockKeyhole } from "lucide-react";
 import { ScoreBar } from "@/components/ui/ScoreBar";
 import { DeltaText } from "@/components/ui/DeltaText";
 import type { SessionReport } from "@/lib/types";
@@ -8,9 +9,14 @@ import type { SessionReport } from "@/lib/types";
 interface SessionScoreCardProps {
   report: SessionReport;
   onShare?: () => void;
+  rankLocked?: boolean;
 }
 
-export function SessionScoreCard({ report, onShare }: SessionScoreCardProps) {
+export function SessionScoreCard({
+  report,
+  onShare,
+  rankLocked = false,
+}: SessionScoreCardProps) {
   return (
     <div className="rounded-3xl overflow-hidden border border-[rgba(0,132,255,0.15)] shadow-[0_32px_80px_rgba(0,0,0,0.08)] bg-white">
       <div
@@ -41,17 +47,39 @@ export function SessionScoreCard({ report, onShare }: SessionScoreCardProps) {
             </div>
           </div>
           <div>
-            <p className="font-fustat font-extrabold text-[28px] text-white">
-              {report.percentile}
-            </p>
-            <p className="font-inter text-[13px] text-white/65">
-              of {report.totalCandidates} SDE freshers
-            </p>
-            <p className="mt-2">
-              <DeltaText size="xs" type="light">
-                {report.rankDelta}
-              </DeltaText>
-            </p>
+            {rankLocked ? (
+              <div className="select-none">
+                <div
+                  className="relative mb-3 h-[34px] w-[186px] overflow-hidden rounded-full border border-white/18 bg-white/10"
+                  aria-hidden="true"
+                >
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08),rgba(255,255,255,0.28),rgba(255,255,255,0.08))] blur-[6px]" />
+                  <div className="absolute left-4 top-1/2 h-3 w-24 -translate-y-1/2 rounded-full bg-white/35 blur-[3px]" />
+                  <div className="absolute right-4 top-1/2 h-3 w-9 -translate-y-1/2 rounded-full bg-[#7DFFD9]/45 blur-[3px]" />
+                </div>
+                <p className="flex items-center gap-2 font-inter text-[13px] font-bold text-white/78">
+                  <LockKeyhole size={14} />
+                  Rank locked for demo mode
+                </p>
+                <p className="mt-2 max-w-[260px] font-inter text-[12px] leading-5 text-white/58">
+                  Sign in to place this score on the live board.
+                </p>
+              </div>
+            ) : (
+              <>
+                <p className="font-fustat font-extrabold text-[28px] text-white">
+                  {report.percentile}
+                </p>
+                <p className="font-inter text-[13px] text-white/65">
+                  of {report.totalCandidates} SDE freshers
+                </p>
+                <p className="mt-2">
+                  <DeltaText size="xs" type="light">
+                    {report.rankDelta}
+                  </DeltaText>
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -74,18 +102,27 @@ export function SessionScoreCard({ report, onShare }: SessionScoreCardProps) {
             Practice Again
           </Link>
           <Link
-            href="/leaderboard"
+            href={rankLocked ? "/login?next=/results" : "/leaderboard"}
             className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.08)] font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
           >
-            View Leaderboard
+            {rankLocked ? "Unlock Rank" : "View Leaderboard"}
           </Link>
-          <button
-            type="button"
-            onClick={onShare}
-            className="flex-1 py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.08)] font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
-          >
-            Share Score
-          </button>
+          {rankLocked ? (
+            <Link
+              href="/login?next=/results&mode=signup"
+              className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,132,255,0.18)] bg-[rgba(0,132,255,0.06)] font-inter font-semibold text-[13px] text-blue hover:scale-[1.02] transition-transform cursor-pointer"
+            >
+              Create Account
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={onShare}
+              className="flex-1 py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.08)] font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
+            >
+              Share Score
+            </button>
+          )}
         </div>
       </div>
     </div>

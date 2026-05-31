@@ -48,7 +48,11 @@ export function OnboardingForm({
       return;
     }
 
-    router.replace("/dashboard/profile");
+    const nextPath =
+      sessionStorage.getItem("preppeer_post_onboarding_next") ?? "/dashboard/profile";
+    sessionStorage.removeItem("preppeer_post_onboarding_next");
+
+    router.replace(nextPath);
     router.refresh();
   };
 

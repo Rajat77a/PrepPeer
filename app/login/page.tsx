@@ -248,6 +248,13 @@ export default function LoginPage() {
     return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
   };
 
+  const getPostAuthPath = () => {
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get("next");
+
+    return next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  };
+
   const resetForMode = (nextMode: AuthMode) => {
     setMode(nextMode);
     setStep("email");
@@ -268,7 +275,7 @@ export default function LoginPage() {
     const { error: signInError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: "https://prep-peer.vercel.app/auth/callback",
+        redirectTo: getAuthRedirectUrl(getPostAuthPath()),
       },
     });
     if (signInError) setError(friendlyAuthError(signInError.message));
@@ -310,7 +317,14 @@ export default function LoginPage() {
       return;
     }
 
-    router.push(isSignUp ? "/onboarding" : "/dashboard");
+    const nextPath = getPostAuthPath();
+    if (isSignUp) {
+      sessionStorage.setItem("preppeer_post_onboarding_next", nextPath);
+      router.push("/onboarding");
+      return;
+    }
+
+    router.push(nextPath);
   };
 
   const savePassword = async (password: string) => {
@@ -336,6 +350,11 @@ export default function LoginPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const authError = params.get("error");
+    const requestedMode = params.get("mode");
+
+    if (requestedMode === "signup" || requestedMode === "signin") {
+      setMode(requestedMode);
+    }
 
     if (authError) {
       setError(

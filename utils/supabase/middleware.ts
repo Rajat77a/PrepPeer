@@ -56,7 +56,11 @@ export const updateSession = async (request: NextRequest) => {
   }
 
   if (request.nextUrl.pathname === "/login" && user) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
+    const next = request.nextUrl.searchParams.get("next");
+    const safeNext =
+      next && next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+
+    return NextResponse.redirect(new URL(safeNext, request.url));
   }
 
   return supabaseResponse;
