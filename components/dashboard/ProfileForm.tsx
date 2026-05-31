@@ -1,27 +1,61 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
+import { createClient } from "@/utils/supabase/client";
 
 type ProfileFormProps = {
   user: {
     name: string;
     email: string;
     avatarUrl?: string;
+    college?: string;
+    role?: string;
+    experience?: string;
+    company?: string;
   };
 };
 
-const fields = [
-  { id: "college", label: "College/University", value: "NIT Trichy" },
-  { id: "role", label: "Target role", value: "SDE Fresher" },
-  { id: "experience", label: "Experience level", value: "0-1 years" },
-  { id: "company", label: "Target company type", value: "Product startup" },
-];
-
 export function ProfileForm({ user }: ProfileFormProps) {
-  const [values, setValues] = useState(
-    Object.fromEntries(fields.map((field) => [field.id, field.value]))
-  );
+  const [values, setValues] = useState({
+    fullName: user.name,
+    college: user.college ?? "",
+    role: user.role ?? "SDE Fresher",
+    experience: user.experience ?? "0-1 years",
+    company: user.company ?? "Product startup",
+  });
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const fields = [
+    { id: "fullName", label: "Full name" },
+    { id: "college", label: "College/University" },
+    { id: "role", label: "Target role" },
+    { id: "experience", label: "Experience level" },
+    { id: "company", label: "Target company type" },
+  ] as const;
+
+  const saveProfile = async () => {
+    setSaving(true);
+    setMessage("");
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        full_name: values.fullName.trim(),
+        name: values.fullName.trim(),
+        college: values.college.trim(),
+        target_role: values.role.trim(),
+        experience_level: values.experience.trim(),
+        target_company_type: values.company.trim(),
+        onboarding_complete: Boolean(values.fullName.trim() && values.college.trim()),
+      },
+    });
+
+    setSaving(false);
+    setMessage(error ? error.message : "Profile saved.");
+  };
 
   return (
     <div className="mx-auto max-w-5xl p-5 sm:p-8">
@@ -58,11 +92,16 @@ export function ProfileForm({ user }: ProfileFormProps) {
               </div>
             )}
             <h2 className="mt-5 font-inter text-2xl font-black text-white">
-              {user.name}
+              {values.fullName || user.name}
             </h2>
             <p className="mt-1 font-inter text-sm font-semibold text-white/35">
               {user.email}
             </p>
+            {values.college && (
+              <p className="mt-4 inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 font-inter text-xs font-bold text-white/45">
+                {values.college}
+              </p>
+            )}
           </div>
         </motion.section>
 
@@ -94,10 +133,24 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
           <button
             type="button"
+            onClick={saveProfile}
+            disabled={saving}
             className="mt-6 rounded-full bg-[#006cff] px-6 py-3 font-inter text-sm font-bold text-white transition hover:bg-[#0057cc] hover:shadow-[0_0_20px_rgba(0,108,255,0.25)]"
           >
-            Save profile
+            {saving ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving
+              </span>
+            ) : (
+              "Save profile"
+            )}
           </button>
+          {message && (
+            <p className="mt-4 font-inter text-sm font-semibold text-white/40">
+              {message}
+            </p>
+          )}
         </motion.section>
       </div>
     </div>

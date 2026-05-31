@@ -29,6 +29,10 @@ export default async function DashboardProfilePage() {
         name,
         email: user.email ?? "",
         avatarUrl: user.user_metadata?.avatar_url,
+        college: user.user_metadata?.college,
+        role: user.user_metadata?.target_role,
+        experience: user.user_metadata?.experience_level,
+        company: user.user_metadata?.target_company_type,
       }}
     />
   );

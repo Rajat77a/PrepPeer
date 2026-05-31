@@ -310,7 +310,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(isSignUp ? "/onboarding" : "/dashboard");
   };
 
   const savePassword = async (password: string) => {
