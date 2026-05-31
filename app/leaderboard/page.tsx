@@ -23,51 +23,39 @@ type SupabaseLeaderboardRow = {
   sessions: number;
   previous_rank: number | null;
   rank_delta: number | null;
+  previous_score: number | null;
 };
+
+type InternalLeaderboardEntry = LeaderboardEntry & {
+  userId?: string;
+  role?: string;
+  companyType?: string;
+  previousScore?: number | null;
+};
+
+const getEntryKey = (entry: InternalLeaderboardEntry) =>
+  `${entry.userId ?? entry.name}-${entry.role ?? ""}-${entry.companyType ?? ""}`;
 
 const toRealLeaderboardEntry = (
   item: SupabaseLeaderboardRow,
   currentUserId?: string
-): LeaderboardEntry => {
-  const delta = item.rank_delta ?? 0;
+): InternalLeaderboardEntry => ({
+  rank: item.rank,
+  name: item.name,
+  subtitle: `${item.role} · ${item.company_type}`,
+  score: item.score,
+  sessions: item.sessions,
+  isYou: currentUserId === item.user_id,
+  trend: "flat",
+  source: "real",
+  userId: item.user_id,
+  role: item.role,
+  companyType: item.company_type,
+  previousScore: item.previous_score,
+});
 
-  return {
-    rank: item.rank,
-    name: item.name,
-    subtitle: `${item.role} · ${item.company_type}`,
-    score: item.score,
-    sessions: item.sessions,
-    delta:
-      item.previous_rank === null
-        ? "New"
-        : delta > 0
-          ? `↑ +${delta}`
-          : delta < 0
-            ? `↓ ${Math.abs(delta)}`
-            : undefined,
-    deltaType:
-      item.previous_rank === null || delta > 0
-        ? "up"
-        : delta < 0
-          ? "down"
-          : undefined,
-    isYou: currentUserId === item.user_id,
-    trend: delta > 0 ? "up" : delta < 0 ? "down" : "flat",
-    source: "real",
-  };
-};
-
-const mergeDemoAndRealEntries = (
-  demoEntries: LeaderboardEntry[],
-  realEntries: LeaderboardEntry[]
-): LeaderboardEntry[] => {
-  const demoWithSource = demoEntries.map((entry) => ({
-    ...entry,
-    source: "demo" as const,
-    isYou: false,
-  }));
-
-  return [...demoWithSource, ...realEntries]
+const sortEntries = (entries: InternalLeaderboardEntry[]) =>
+  [...entries]
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
       return (a.sessions ?? 999) - (b.sessions ?? 999);
@@ -76,6 +64,66 @@ const mergeDemoAndRealEntries = (
       ...entry,
       rank: index + 1,
     }));
+
+const mergeDemoAndRealEntries = (
+  demoEntries: LeaderboardEntry[],
+  realEntries: InternalLeaderboardEntry[]
+): LeaderboardEntry[] => {
+  const demoWithSource: InternalLeaderboardEntry[] = demoEntries.map((entry) => ({
+    ...entry,
+    source: "demo",
+    isYou: false,
+  }));
+
+  const currentEntries = sortEntries([...demoWithSource, ...realEntries]);
+
+  const previousRealEntries = realEntries.map((entry) => ({
+    ...entry,
+    score: entry.previousScore ?? entry.score,
+    sessions: Math.max((entry.sessions ?? 1) - 1, 1),
+  }));
+
+  const previousEntries = sortEntries([...demoWithSource, ...previousRealEntries]);
+
+  return currentEntries.map((entry) => {
+    if (entry.source !== "real") return entry;
+
+    const previousEntry = previousEntries.find(
+      (previous) => getEntryKey(previous) === getEntryKey(entry)
+    );
+
+    if (!previousEntry || entry.previousScore === null || entry.previousScore === undefined) {
+      return {
+        ...entry,
+        delta: "New",
+        deltaType: "up",
+      };
+    }
+
+    const rankDelta = previousEntry.rank - entry.rank;
+
+    return {
+      ...entry,
+      delta:
+        rankDelta > 0
+          ? `↑ +${rankDelta}`
+          : rankDelta < 0
+            ? `↓ ${Math.abs(rankDelta)}`
+            : undefined,
+      deltaType:
+        rankDelta > 0
+          ? "up"
+          : rankDelta < 0
+            ? "down"
+            : undefined,
+      trend:
+        rankDelta > 0
+          ? "up"
+          : rankDelta < 0
+            ? "down"
+            : "flat",
+    };
+  });
 };
 
 export default async function LeaderboardPage() {
@@ -91,7 +139,7 @@ export default async function LeaderboardPage() {
 
   const leaderboardRows = (data ?? []) as SupabaseLeaderboardRow[];
 
-  const realEntries = leaderboardRows.map((item: SupabaseLeaderboardRow) =>
+  const realEntries = leaderboardRows.map((item) =>
     toRealLeaderboardEntry(item, userData.user?.id)
   );
 
