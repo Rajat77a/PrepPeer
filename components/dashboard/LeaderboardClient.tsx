@@ -79,8 +79,8 @@ export function LeaderboardClient() {
         ))}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d0d0d]">
-        <div className="sticky top-0 z-10 hidden grid-cols-[0.7fr_1.2fr_1.4fr_1fr_0.8fr_0.8fr_0.8fr] gap-4 border-b border-white/[0.08] bg-[#0d0d0d]/95 px-5 py-4 font-inter text-xs font-bold uppercase tracking-[0.16em] text-white/30 backdrop-blur-xl lg:grid">
+      <div className="rounded-2xl border border-white/[0.08] bg-[#0d0d0d]">
+        <div className="sticky top-0 z-10 hidden grid-cols-[0.7fr_1.2fr_1.4fr_1fr_0.8fr_0.8fr_0.8fr] gap-4 rounded-t-2xl border-b border-white/[0.08] bg-[#0d0d0d]/95 px-5 py-4 font-inter text-xs font-bold uppercase tracking-[0.16em] text-white/30 backdrop-blur-xl lg:grid">
           <span>Rank</span>
           <span>Name</span>
           <span>College</span>
@@ -90,7 +90,7 @@ export function LeaderboardClient() {
           <span>Delta</span>
         </div>
 
-        <div className="max-h-[70vh] divide-y divide-white/[0.055] overflow-auto">
+        <div className="divide-y divide-white/[0.055]">
           {entries.map((entry) => (
             <div
               key={`${entry.rank}-${entry.name}`}
