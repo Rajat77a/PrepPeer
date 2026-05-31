@@ -266,7 +266,7 @@ export default function LoginPage() {
     const { error: signInError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: getAuthRedirectUrl("/dashboard"),
+        redirectTo: "https://prep-peer.vercel.app/auth/callback",
       },
     });
     if (signInError) setError(friendlyAuthError(signInError.message));
@@ -280,10 +280,8 @@ export default function LoginPage() {
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        emailRedirectTo: getAuthRedirectUrl(
-          isSignUp ? "/login?auth=create-password" : "/dashboard"
-        ),
-        shouldCreateUser: isSignUp,
+        shouldCreateUser: true,
+        emailRedirectTo: undefined,
       },
     });
     setLoading(false);

@@ -12,19 +12,20 @@ const safeNextPath = (next: string | null) => {
 };
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const next = safeNextPath(searchParams.get("next"));
+  const siteUrl = "https://prep-peer.vercel.app";
 
   if (!code) {
-    return NextResponse.redirect(`${origin}/login?error=missing_code`);
+    return NextResponse.redirect(`${siteUrl}/login?error=missing_code`);
   }
 
   const cookieStore = cookies();
   const { supabaseKey, supabaseUrl } = getSupabaseConfig();
 
   if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.redirect(`${origin}/login?error=auth_not_configured`);
+    return NextResponse.redirect(`${siteUrl}/login?error=auth_not_configured`);
   }
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
@@ -40,8 +41,8 @@ export async function GET(request: Request) {
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
-    return NextResponse.redirect(`${origin}/login?error=callback_failed`);
+    return NextResponse.redirect(`${siteUrl}/login?error=callback_failed`);
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  return NextResponse.redirect(`${siteUrl}${next}`);
 }
