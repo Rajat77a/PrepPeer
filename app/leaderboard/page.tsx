@@ -90,8 +90,8 @@ export default async function LeaderboardPage() {
   });
 
   const realEntries =
-    data?.map((item) =>
-      toRealLeaderboardEntry(item as SupabaseLeaderboardRow, userData.user?.id)
+    (data as SupabaseLeaderboardRow[] | null)?.map((item: SupabaseLeaderboardRow) =>
+      toRealLeaderboardEntry(item, userData.user?.id)
     ) ?? [];
 
   const entries = mergeDemoAndRealEntries(FULL_LEADERBOARD, realEntries);
