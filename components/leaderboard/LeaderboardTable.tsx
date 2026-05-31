@@ -1,7 +1,11 @@
 import { LeaderboardRow } from "./LeaderboardRow";
-import { FULL_LEADERBOARD } from "@/lib/mockData";
+import type { LeaderboardEntry } from "@/lib/types";
 
-export function LeaderboardTable() {
+interface LeaderboardTableProps {
+  entries: LeaderboardEntry[];
+}
+
+export function LeaderboardTable({ entries }: LeaderboardTableProps) {
   return (
     <div className="rounded-[20px] overflow-hidden border border-[rgba(0,132,255,0.12)]">
       <div className="bg-navy px-6 py-4 grid grid-cols-[auto_1fr_auto_auto_auto_auto] gap-4 items-center">
@@ -16,9 +20,10 @@ export function LeaderboardTable() {
         </span>
         <span className="font-fustat font-bold text-sm text-white w-20">Delta</span>
       </div>
-      {FULL_LEADERBOARD.map((entry, i) => (
+
+      {entries.map((entry, i) => (
         <div
-          key={entry.rank}
+          key={`${entry.source ?? "demo"}-${entry.rank}-${entry.name}`}
           className={i % 2 === 1 && !entry.isYou ? "bg-[#FAFAFA]" : ""}
         >
           <LeaderboardRow entry={entry} />
