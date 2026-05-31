@@ -23,27 +23,92 @@ export type RankedSession = InterviewSessionRow & {
 
 const BENCHMARK_WINDOW_MS = 5 * 60 * 1000;
 
-const benchmarkProfiles = [
-  ["Arjun S.", "NIT Trichy", "SDE Fresher", "Product Company"],
-  ["Priya M.", "IIT Bombay", "Product Manager", "Consumer App"],
-  ["Rohit V.", "BITS Pilani", "SDE", "Fintech"],
-  ["Sneha K.", "IIT Delhi", "Operations", "Marketplace"],
-  ["Karthik R.", "PSG Tech", "SDE Fresher", "Product Startup"],
-  ["Ananya S.", "IIT Bombay", "MBA", "Consulting"],
-  ["Rahul D.", "SRM Chennai", "SDE Fresher", "SaaS"],
-  ["Ishaan M.", "IIT Delhi", "Product Manager", "Enterprise"],
-  ["Divya M.", "BITS Goa", "Operations", "Logistics"],
-  ["Aditya K.", "NIT Warangal", "SDE", "Product Company"],
-  ["Meera N.", "VIT Vellore", "Data Analyst", "Fintech"],
-  ["Vikram N.", "IIT Roorkee", "SDE", "Product Startup"],
-  ["Neha P.", "NIT Calicut", "Product Manager", "Consumer App"],
-  ["Aman R.", "Manipal", "Operations", "Marketplace"],
-  ["Riya G.", "IIT Madras", "MBA", "Consulting"],
-  ["Dev S.", "IIIT Hyderabad", "SDE", "SaaS"],
-  ["Pooja B.", "Delhi University", "Data Analyst", "Enterprise"],
-  ["Nikhil J.", "BITS Hyderabad", "SDE Fresher", "Fintech"],
-  ["Tanvi C.", "Christ University", "Product Manager", "Product Startup"],
-  ["Harsh P.", "NIT Surat", "Operations", "Product Company"],
+const benchmarkFirstNames = [
+  "Aarav",
+  "Aditi",
+  "Advait",
+  "Akshay",
+  "Ananya",
+  "Anika",
+  "Arjun",
+  "Dev",
+  "Diya",
+  "Ishaan",
+  "Kabir",
+  "Karthik",
+  "Meera",
+  "Naina",
+  "Neha",
+  "Nikhil",
+  "Priya",
+  "Rahul",
+  "Riya",
+  "Rohan",
+  "Rohit",
+  "Saanvi",
+  "Sneha",
+  "Tanvi",
+  "Vikram",
+];
+
+const benchmarkLastInitials = [
+  "A.",
+  "B.",
+  "C.",
+  "D.",
+  "G.",
+  "I.",
+  "J.",
+  "K.",
+  "M.",
+  "N.",
+  "P.",
+  "R.",
+  "S.",
+  "T.",
+  "V.",
+];
+
+const benchmarkColleges = [
+  "NIT Trichy",
+  "IIT Bombay",
+  "BITS Pilani",
+  "IIT Delhi",
+  "PSG Tech",
+  "SRM Chennai",
+  "BITS Goa",
+  "NIT Warangal",
+  "VIT Vellore",
+  "IIT Roorkee",
+  "NIT Calicut",
+  "Manipal",
+  "IIT Madras",
+  "IIIT Hyderabad",
+  "Delhi University",
+  "Christ University",
+  "BITS Hyderabad",
+  "NIT Surat",
+];
+
+const benchmarkRoles = [
+  "SDE Fresher",
+  "Product Manager",
+  "SDE",
+  "Operations",
+  "Data Analyst",
+  "MBA",
+];
+
+const benchmarkCompanies = [
+  "Product Company",
+  "Consumer App",
+  "Fintech",
+  "Marketplace",
+  "Product Startup",
+  "Consulting",
+  "SaaS",
+  "Enterprise",
+  "Logistics",
 ];
 
 const seededJitter = (seed: number) => {
@@ -53,28 +118,50 @@ const seededJitter = (seed: number) => {
 
 const getBenchmarkWindow = () => Math.floor(Date.now() / BENCHMARK_WINDOW_MS);
 
+const getGeneratedBenchmarkProfile = (index: number) => {
+  const firstName = benchmarkFirstNames[index % benchmarkFirstNames.length];
+  const lastInitial =
+    benchmarkLastInitials[
+      Math.floor(index / benchmarkFirstNames.length) % benchmarkLastInitials.length
+    ];
+
+  return {
+    name: `${firstName} ${lastInitial}`,
+    college: benchmarkColleges[(index * 7) % benchmarkColleges.length],
+    role: benchmarkRoles[(index * 5) % benchmarkRoles.length],
+    company: benchmarkCompanies[(index * 4) % benchmarkCompanies.length],
+  };
+};
+
+const getBenchmarkScore = (index: number, windowId: number) => {
+  const baseScore = Math.max(24, 96 - index * 0.29);
+  const personalRhythm = seededJitter((index + 1) * 97) * Math.PI * 2;
+  const formDrift = Math.sin(windowId * 0.75 + personalRhythm) * 0.9;
+  const dailyVariance =
+    (seededJitter(Math.floor(windowId / 288) * 313 + index) - 0.5) * 0.6;
+
+  return Number(
+    Math.max(18, Math.min(98, baseScore + formDrift + dailyVariance)).toFixed(1)
+  );
+};
+
 const getBenchmarkSessions = (windowId = getBenchmarkWindow()): InterviewSessionRow[] =>
   Array.from({ length: 250 }, (_, index) => {
-    const profile = benchmarkProfiles[index % benchmarkProfiles.length];
-    const baseScore = Math.max(22, 96 - Math.floor(index * 0.28));
-    const jitter = Math.round((seededJitter(windowId * 251 + index) - 0.5) * 10);
-    const previousJitter = Math.round(
-      (seededJitter((windowId - 1) * 251 + index) - 0.5) * 10
-    );
+    const profile = getGeneratedBenchmarkProfile(index);
 
     return {
       id: `benchmark-${index + 1}`,
       user_id: `benchmark-${index + 1}`,
-      role: profile[2],
+      role: profile.role,
       experience:
         index % 3 === 0 ? "0-1 years" : index % 3 === 1 ? "1-3 years" : "3-6 years",
-      company_type: profile[3],
-      composite_score: Math.max(18, Math.min(98, baseScore + jitter)),
+      company_type: profile.company,
+      composite_score: getBenchmarkScore(index, windowId),
       created_at: new Date(Date.now() - index * 3600000).toISOString(),
       summary: {
-        name: profile[0],
-        college: profile[1],
-        previousScore: Math.max(18, Math.min(98, baseScore + previousJitter)),
+        name: profile.name,
+        college: profile.college,
+        previousScore: getBenchmarkScore(index, windowId - 1),
       },
     };
   });
@@ -252,8 +339,8 @@ export const toLeaderboardEntries = (
           : benchmarkProfile?.name ?? `Candidate ${session.user_id.slice(0, 4)}`,
       subtitle:
         session.user_id === currentUserId
-          ? `${currentUserName}${currentUserCollege ? ` · ${currentUserCollege}` : ""}`
-          : `${benchmarkProfile?.college ?? session.role ?? "Interview"} · ${session.company_type ?? "General"}`,
+          ? `${currentUserName}${currentUserCollege ? ` - ${currentUserCollege}` : ""}`
+          : `${benchmarkProfile?.college ?? session.role ?? "Interview"} - ${session.company_type ?? "General"}`,
       score: session.score,
       sessions: sessionsCount,
       delta: getRankChangeLabel(session.rank, previousRank),
@@ -278,7 +365,7 @@ export const toLeaderboardEntries = (
     entries.push({
       rank: entries.length + 1,
       name: "You",
-      subtitle: `${currentUserName}${currentUserCollege ? ` · ${currentUserCollege}` : ""}`,
+      subtitle: `${currentUserName}${currentUserCollege ? ` - ${currentUserCollege}` : ""}`,
       score: 0,
       sessions: 0,
       delta: "Start with your first interview",
