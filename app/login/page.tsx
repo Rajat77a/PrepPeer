@@ -240,6 +240,8 @@ export default function LoginPage() {
 
   const isSignUp = mode === "signup";
   const activeCopy = copy[mode];
+  const otpSlotClass =
+    "!h-14 !w-12 rounded-xl !border-[#26334b] !bg-[#0b1020] text-xl !text-white shadow-[0_16px_34px_rgba(3,10,28,0.28),inset_0_1px_1px_rgba(255,255,255,0.08)] transition-all duration-300 data-[filled=true]:!border-[#35506f] data-[filled=true]:!bg-[#111827] data-[active=true]:!border-[#ff6b6b] data-[active=true]:!shadow-[0_0_0_2px_rgba(255,107,107,0.32),0_0_24px_rgba(255,107,107,0.26),0_16px_34px_rgba(3,10,28,0.28)]";
 
   const getAuthRedirectUrl = (nextPath: string) => {
     const next = nextPath.startsWith("/") ? nextPath : "/dashboard";
@@ -463,7 +465,8 @@ export default function LoginPage() {
                   We sent it to {email}.
                 </p>
 
-                <div className="mx-auto mt-10 max-w-[460px] rounded-[30px] border border-[#1d3c75]/18 bg-[#0b1b3f]/92 px-5 py-4 shadow-[0_24px_72px_rgba(6,16,89,0.22),inset_0_1px_2px_rgba(255,255,255,0.14)] backdrop-blur-xl">
+                <div className="mx-auto mt-10 max-w-[480px] rounded-[34px] border border-white/70 bg-white/55 p-3 shadow-[0_26px_88px_rgba(0,108,255,0.14),inset_0_1px_2px_rgba(255,255,255,0.95)] backdrop-blur-2xl">
+                  <div className="rounded-[26px] border border-[#17233a]/70 bg-[#090b12]/95 px-4 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_18px_42px_rgba(5,10,25,0.32)]">
                   <InputOTP
                     maxLength={6}
                     value={otp}
@@ -472,37 +475,29 @@ export default function LoginPage() {
                       setOtp(value);
                     }}
                     disabled={loading}
+                    containerClassName="justify-center gap-2 sm:gap-3"
                   >
-                    <InputOTPGroup>
-                      <InputOTPSlot
-                        index={0}
-                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
-                      />
-                      <InputOTPSlot
-                        index={1}
-                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
-                      />
-                      <InputOTPSlot
-                        index={2}
-                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
-                      />
+                    <InputOTPGroup className="gap-2 sm:gap-3">
+                      {[0, 1, 2].map((index) => (
+                        <InputOTPSlot
+                          key={index}
+                          index={index}
+                          className={otpSlotClass}
+                        />
+                      ))}
                     </InputOTPGroup>
-                    <InputOTPSeparator className="text-white/35" />
-                    <InputOTPGroup>
-                      <InputOTPSlot
-                        index={3}
-                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
-                      />
-                      <InputOTPSlot
-                        index={4}
-                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
-                      />
-                      <InputOTPSlot
-                        index={5}
-                        className="border-white/10 bg-white/[0.08] text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.16)]"
-                      />
+                    <InputOTPSeparator className="px-0 text-[#6f7f96]/60" />
+                    <InputOTPGroup className="gap-2 sm:gap-3">
+                      {[3, 4, 5].map((index) => (
+                        <InputOTPSlot
+                          key={index}
+                          index={index}
+                          className={otpSlotClass}
+                        />
+                      ))}
                     </InputOTPGroup>
                   </InputOTP>
+                  </div>
                 </div>
 
                 <button

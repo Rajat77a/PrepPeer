@@ -82,6 +82,8 @@ const InputOTPSlot = React.forwardRef<
   const slotContent = (
     <div
       ref={ref}
+      data-active={isActive}
+      data-filled={Boolean(char)}
       className={cn(
         "relative flex items-center justify-center rounded-2xl border bg-white/80 font-inter font-bold text-[#07111f] shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_12px_30px_rgba(0,132,255,0.08)] backdrop-blur-xl transition-all duration-300",
         sizes[otpSize],
