@@ -16,6 +16,7 @@ export interface LeaderboardEntry {
   isYou?: boolean;
   sessions?: number;
   trend?: "up" | "down" | "flat";
+  source?: "demo" | "real";
 }
 
 export interface Testimonial {
