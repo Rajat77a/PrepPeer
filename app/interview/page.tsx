@@ -23,6 +23,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 
 const TOTAL = 5;
+const DEMO_COMPLETED_KEY = "preppeer_demo_interview_completed_at";
 
 type SetupData = {
   domain: string;
@@ -34,7 +35,10 @@ type Stage = "setup" | "terms" | "interview" | "feedback";
 
 export default function InterviewPage() {
   const router = useRouter();
+  const [isAccountInterview, setIsAccountInterview] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
+  const [demoGateVisible, setDemoGateVisible] = useState(false);
   const [current, setCurrent] = useState(1);
   const [questions, setQuestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -185,7 +189,7 @@ export default function InterviewPage() {
       companyType: setup.companyType || "General",
     };
 
-    if (data.user) {
+    if (isAccountInterview && data.user) {
       reportIdentity = {
         name: getDisplayName(data.user.user_metadata, data.user.email),
         role: setup.domain || "Interview",
@@ -236,9 +240,42 @@ export default function InterviewPage() {
         dimensions: resultDimensions,
         questionScores: allQuestionScores,
         summary,
+        source: isAccountInterview ? "account" : "demo",
       })
     );
+
+    if (!isAccountInterview) {
+      localStorage.setItem(DEMO_COMPLETED_KEY, new Date().toISOString());
+    }
   };
+
+  useEffect(() => {
+    const checkInterviewAccess = async () => {
+      const accountMode =
+        new URLSearchParams(window.location.search).get("mode") === "account";
+      setIsAccountInterview(accountMode);
+
+      if (accountMode) {
+        const supabase = createClient();
+        const { data } = await supabase.auth.getUser();
+
+        if (!data.user) {
+          router.replace("/login?next=/interview%3Fmode%3Daccount");
+          return;
+        }
+
+        setAccessChecked(true);
+        return;
+      }
+
+      if (localStorage.getItem(DEMO_COMPLETED_KEY)) {
+        setDemoGateVisible(true);
+      }
+      setAccessChecked(true);
+    };
+
+    void checkInterviewAccess();
+  }, [router]);
 
   useEffect(() => {
     if (shouldAutoSubmit) {
@@ -249,6 +286,11 @@ export default function InterviewPage() {
   }, [shouldAutoSubmit, router, questionReviews, dimensionHistory]);
 
   const handleStart = async (profileSetup = setup) => {
+    if (!isAccountInterview && localStorage.getItem(DEMO_COMPLETED_KEY)) {
+      setDemoGateVisible(true);
+      return;
+    }
+
     if (!profileSetup.domain || !profileSetup.experience || !profileSetup.companyType) {
       setError("Please fill in all fields.");
       return;
@@ -283,6 +325,61 @@ export default function InterviewPage() {
       setLoading(false);
     }
   };
+
+  if (!accessChecked) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar variant="inner" />
+        <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-6">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#D8EBFF] border-t-blue" />
+        </div>
+      </div>
+    );
+  }
+
+  if (demoGateVisible) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar variant="inner" />
+        <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-[760px] items-center px-6 py-20">
+          <div className="w-full overflow-hidden rounded-[28px] border border-[rgba(0,132,255,0.16)] bg-white shadow-[0_30px_90px_rgba(0,132,255,0.12)]">
+            <div className="border-b border-[rgba(0,0,0,0.06)] bg-[#F4FAFF] px-7 py-6">
+              <p className="font-inter text-[12px] font-black uppercase tracking-[0.22em] text-blue">
+                Demo interview completed
+              </p>
+              <h1 className="mt-3 font-fustat text-3xl font-extrabold text-text sm:text-4xl">
+                Your free practice run is saved on this device.
+              </h1>
+            </div>
+            <div className="px-7 py-7">
+              <p className="font-inter text-base leading-7 text-muted">
+                To continue with more interviews, save progress, and enter the
+                live leaderboard, sign in or create your PrepPeer account.
+              </p>
+              <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => router.push("/login?next=/interview%3Fmode%3Daccount")}
+                  className="rounded-[14px] bg-blue px-5 py-3.5 font-inter text-sm font-extrabold text-white shadow-[0_18px_44px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:bg-[#006cff]"
+                >
+                  Sign in to continue
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push("/login?next=/interview%3Fmode%3Daccount&mode=signup")
+                  }
+                  className="rounded-[14px] border border-[rgba(0,132,255,0.18)] bg-[#F7FBFF] px-5 py-3.5 font-inter text-sm font-extrabold text-text transition hover:-translate-y-0.5 hover:border-blue/40"
+                >
+                  Create account
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (answer: string) => {
     const answerQuality = evaluateAnswerQuality(answer);

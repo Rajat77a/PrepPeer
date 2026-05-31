@@ -126,7 +126,7 @@ function NewUserDashboard({
           </p>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <Link
-              href="/interview"
+              href="/interview?mode=account"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-[#006cff] px-8 py-3 font-inter text-sm font-bold text-white transition-all hover:bg-[#0057cc] hover:shadow-[0_0_20px_rgba(0,108,255,0.4)]"
             >
               Start Interview
@@ -226,7 +226,7 @@ function ReturningDashboard({
           </p>
         </div>
         <Link
-          href="/interview"
+          href="/interview?mode=account"
           className="inline-flex items-center justify-center gap-2 rounded-full bg-[#006cff] px-6 py-2.5 font-inter text-sm font-bold text-white transition hover:bg-[#0057cc] hover:shadow-[0_0_16px_rgba(0,108,255,0.4)]"
         >
           Practice again
