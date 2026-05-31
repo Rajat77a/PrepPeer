@@ -31,7 +31,7 @@ export default function DashboardSessionsPage() {
           <span>Company</span>
           <span>Score</span>
           <span>Rank</span>
-          <span>Delta</span>
+          <span>Rank change</span>
           <span />
         </div>
 

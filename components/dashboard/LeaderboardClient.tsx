@@ -87,7 +87,7 @@ export function LeaderboardClient() {
           <span>Role</span>
           <span>Score</span>
           <span>Sessions</span>
-          <span>Delta</span>
+          <span>Rank change</span>
         </div>
 
         <div className="divide-y divide-white/[0.055]">
