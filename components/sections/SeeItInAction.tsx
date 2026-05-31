@@ -152,7 +152,7 @@ function Stats() {
     <div ref={ref} className="mt-24">
       <div className="grid grid-cols-1 gap-10 md:grid-cols-3 md:items-start">
         <div>
-          <p className="font-fustat text-[clamp(48px,5vw,68px)] font-bold leading-none tracking-[-0.055em] text-[#07111f]">
+          <p className="font-inter text-[clamp(52px,5.4vw,76px)] font-black leading-none tracking-[-0.065em] text-[#07111f]">
             {interviews.toLocaleString()}+
           </p>
           <p className="mt-4 font-inter text-sm font-semibold text-[#64748b]">
@@ -160,7 +160,7 @@ function Stats() {
           </p>
         </div>
         <div>
-          <p className="font-fustat text-[clamp(48px,5vw,68px)] font-bold leading-none tracking-[-0.055em] text-[#07111f]">
+          <p className="font-inter text-[clamp(52px,5.4vw,76px)] font-black leading-none tracking-[-0.065em] text-[#07111f]">
             {colleges}+
           </p>
           <p className="mt-4 font-inter text-sm font-semibold text-[#64748b]">
@@ -168,7 +168,7 @@ function Stats() {
           </p>
         </div>
         <div>
-          <p className="font-fustat text-[clamp(48px,5vw,68px)] font-bold leading-none tracking-[-0.055em] text-[#006cff]">
+          <p className="font-inter text-[clamp(52px,5.4vw,76px)] font-black leading-none tracking-[-0.065em] text-[#006cff]">
             Top {top}%
           </p>
           <p className="mt-4 font-inter text-sm font-semibold text-[#64748b]">
@@ -208,10 +208,10 @@ export function SeeItInAction() {
             viewport={{ once: true, margin: "-120px" }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="font-inter text-sm font-semibold text-[#006cff]">
+            <p className="font-inter text-lg font-extrabold tracking-[-0.03em] text-[#006cff]">
               What a real interview looks like
             </p>
-            <h2 className="mt-5 max-w-[640px] font-fustat text-[clamp(44px,6vw,76px)] font-extrabold leading-[0.96] tracking-[-0.055em] text-[#07111f]">
+            <h2 className="mt-5 max-w-[640px] font-inter text-[clamp(52px,7vw,92px)] font-black leading-[0.92] tracking-[-0.07em] text-[#07111f]">
               Answer. Get scored. Know your rank.
             </h2>
             <p className="mt-6 max-w-[520px] font-inter text-lg font-medium leading-8 text-[#64748b]">
