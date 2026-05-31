@@ -237,6 +237,7 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [signupNonce, setSignupNonce] = useState("");
 
   const isSignUp = mode === "signup";
   const activeCopy = copy[mode];
@@ -259,14 +260,26 @@ export default function LoginPage() {
     setMode(nextMode);
     setStep("email");
     setOtp("");
+    setSignupNonce("");
     setError("");
   };
 
   const friendlyAuthError = (message: string) => {
     if (message.toLowerCase().includes("signups not allowed")) {
-      return "Email sign-up is not enabled yet.";
+      return isSignUp
+        ? "Email sign-up is not enabled yet."
+        : "No PrepPeer account was found for this email. Create an account first.";
     }
     return message;
+  };
+
+  const isFreshSignupUser = (createdAt?: string) => {
+    if (!createdAt) return false;
+
+    const createdTime = new Date(createdAt).getTime();
+    if (Number.isNaN(createdTime)) return false;
+
+    return Date.now() - createdTime < 12 * 60 * 1000;
   };
 
   const signInWithGoogle = async () => {
@@ -286,15 +299,28 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     const supabase = createClient();
+    const nextSignupNonce =
+      isSignUp && typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : isSignUp
+          ? `${Date.now()}-${Math.random().toString(36).slice(2)}`
+          : "";
+    setSignupNonce(nextSignupNonce);
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
-        shouldCreateUser: true,
+        shouldCreateUser: isSignUp,
+        data: isSignUp
+          ? {
+              preppeer_signup_nonce: nextSignupNonce,
+            }
+          : undefined,
       },
     });
     setLoading(false);
 
     if (otpError) {
+      setSignupNonce("");
       setError(friendlyAuthError(otpError.message));
       return;
     }
@@ -305,7 +331,7 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     const supabase = createClient();
-    const { error: verifyError } = await supabase.auth.verifyOtp({
+    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
       email: email.trim(),
       token: code,
       type: "email",
@@ -319,6 +345,19 @@ export default function LoginPage() {
 
     const nextPath = getPostAuthPath();
     if (isSignUp) {
+      const hasCurrentSignupMarker =
+        verifyData.user?.user_metadata?.preppeer_signup_nonce === signupNonce;
+
+      if (!hasCurrentSignupMarker || !isFreshSignupUser(verifyData.user?.created_at)) {
+        await supabase.auth.signOut();
+        setMode("signin");
+        setStep("email");
+        setOtp("");
+        setSignupNonce("");
+        setError("This email already has a PrepPeer account. Sign in instead to continue.");
+        return;
+      }
+
       sessionStorage.setItem("preppeer_post_onboarding_next", nextPath);
       router.push("/onboarding");
       return;
