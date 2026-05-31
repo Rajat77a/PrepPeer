@@ -45,7 +45,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
       <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[240px] border-r border-white/[0.05] bg-[#0a0a0a] px-4 py-5 lg:block">
         <div className="pointer-events-none absolute left-0 top-0 h-32 w-full bg-[#006cff]/5 blur-2xl" />
         <div className="relative z-10">
-          <Logo variant="light" size="md" />
+          <Logo variant="light" size="md" href={null} />
         </div>
 
         <nav className="relative z-10 mt-10 space-y-1">
