@@ -100,12 +100,15 @@ function ScoreCard() {
         ))}
       </div>
 
-      <div className="mt-8 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4">
-        <p className="blur-sm font-inter text-sm leading-6 text-white/50">
+      <div
+        className="mt-8 select-none rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4"
+        aria-hidden="true"
+      >
+        <p className="pointer-events-none blur-sm font-inter text-sm leading-6 text-white/50">
           Your answer demonstrated strong self-awareness but lacked specific outcome
           metrics. Consider using the STAR framework to...
         </p>
-        <div className="mt-4 flex items-center gap-2 font-inter text-xs text-white/30">
+        <div className="pointer-events-none mt-4 flex items-center gap-2 font-inter text-xs text-white/30">
           <Lock size={13} />
           Complete an interview to unlock your feedback
         </div>
@@ -224,7 +227,7 @@ export function SeeItInAction() {
         </div>
 
         <div className="mt-32">
-          <p className="mb-7 font-fustat text-2xl font-extrabold tracking-[-0.04em] text-[#07111f]">
+          <p className="mb-8 max-w-[760px] font-inter text-[clamp(42px,5.4vw,76px)] font-black leading-[0.92] tracking-[-0.07em] text-[#07111f]">
             Happening right now
           </p>
           <div className="-mx-6 space-y-2 md:-mx-10">
