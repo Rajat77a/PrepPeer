@@ -44,13 +44,13 @@ const toRealLeaderboardEntry = (
           ? `↑ +${delta}`
           : delta < 0
             ? `↓ ${Math.abs(delta)}`
-            : "No change",
+            : undefined,
     deltaType:
       item.previous_rank === null || delta > 0
         ? "up"
         : delta < 0
           ? "down"
-          : "neutral",
+          : undefined,
     isYou: currentUserId === item.user_id,
     trend: delta > 0 ? "up" : delta < 0 ? "down" : "flat",
     source: "real",
@@ -89,8 +89,9 @@ export default async function LeaderboardPage() {
     p_company_type: null,
   });
 
-  const realRows = (data ?? []) as SupabaseLeaderboardRow[];
-  const realEntries = realRows.map((item) =>
+  const leaderboardRows = (data ?? []) as SupabaseLeaderboardRow[];
+
+  const realEntries = leaderboardRows.map((item: SupabaseLeaderboardRow) =>
     toRealLeaderboardEntry(item, userData.user?.id)
   );
 
