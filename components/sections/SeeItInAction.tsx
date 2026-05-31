@@ -211,7 +211,7 @@ export function SeeItInAction() {
             viewport={{ once: true, margin: "-120px" }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            <p className="font-inter text-lg font-extrabold tracking-[-0.03em] text-[#006cff]">
+            <p className="font-inter text-[clamp(20px,2vw,28px)] font-extrabold tracking-[-0.045em] text-[#006cff]">
               What a real interview looks like
             </p>
             <h2 className="mt-5 max-w-[640px] font-inter text-[clamp(52px,7vw,92px)] font-black leading-[0.92] tracking-[-0.07em] text-[#07111f]">
