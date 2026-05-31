@@ -10,6 +10,8 @@ export interface LeaderboardEntry {
   rank: number;
   name: string;
   subtitle?: string;
+  role?: string;
+  companyType?: string;
   score: number;
   delta?: string;
   deltaType?: "up" | "down" | "neutral";

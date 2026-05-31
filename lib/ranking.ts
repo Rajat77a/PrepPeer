@@ -341,6 +341,8 @@ export const toLeaderboardEntries = (
         session.user_id === currentUserId
           ? `${currentUserName}${currentUserCollege ? ` - ${currentUserCollege}` : ""}`
           : `${benchmarkProfile?.college ?? session.role ?? "Interview"} - ${session.company_type ?? "General"}`,
+      role: session.role ?? undefined,
+      companyType: session.company_type ?? undefined,
       score: session.score,
       sessions: sessionsCount,
       delta: getRankChangeLabel(session.rank, previousRank),
@@ -366,6 +368,8 @@ export const toLeaderboardEntries = (
       rank: entries.length + 1,
       name: "You",
       subtitle: `${currentUserName}${currentUserCollege ? ` - ${currentUserCollege}` : ""}`,
+      role: undefined,
+      companyType: undefined,
       score: 0,
       sessions: 0,
       delta: "Start with your first interview",

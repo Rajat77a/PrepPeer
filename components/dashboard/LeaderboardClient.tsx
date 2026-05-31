@@ -29,12 +29,15 @@ export function LeaderboardClient({
 
     return initialEntries.filter((entry) => {
       const searchableText = `${entry.name} ${entry.subtitle ?? ""}`;
+      const roleText = entry.role ?? "";
       const roleAllowed =
         allowedRoles.length === 0 ||
-        allowedRoles.some((role) => searchableText.includes(role));
+        allowedRoles.some((role) => roleText.includes(role));
       const textAllowed =
         normalizedQuery.length === 0 ||
-        searchableText.toLowerCase().includes(normalizedQuery);
+        `${searchableText} ${roleText} ${entry.companyType ?? ""}`
+          .toLowerCase()
+          .includes(normalizedQuery);
 
       return roleAllowed && textAllowed;
     });
