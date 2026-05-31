@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardHome } from "@/components/dashboard/DashboardHome";
-import { createClient } from "@/utils/supabase/server";
+import { getCurrentUser } from "@/utils/supabase/user";
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -14,11 +14,8 @@ export default async function DashboardPage({
 }: {
   searchParams?: { view?: string };
 }) {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  cookies();
+  const user = await getCurrentUser();
 
   if (!user) redirect("/login");
 

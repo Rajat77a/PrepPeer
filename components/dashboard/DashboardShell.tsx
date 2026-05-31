@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  BarChart3,
   LayoutDashboard,
   LogOut,
   Medal,
@@ -60,6 +59,9 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch
+                onMouseEnter={() => router.prefetch(item.href)}
+                onFocus={() => router.prefetch(item.href)}
                 className={cn(
                   "flex items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-3 font-inter text-sm font-semibold text-white/40 transition duration-200 hover:bg-white/[0.035] hover:text-white/70",
                   active &&
@@ -120,6 +122,9 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
             <Link
               key={item.href}
               href={item.href}
+              prefetch
+              onMouseEnter={() => router.prefetch(item.href)}
+              onFocus={() => router.prefetch(item.href)}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 rounded-xl py-2 font-inter text-[11px] font-semibold text-white/35 transition",
                 active && "bg-white/[0.05] text-white"
