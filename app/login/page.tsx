@@ -281,7 +281,6 @@ export default function LoginPage() {
       email: email.trim(),
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: undefined,
       },
     });
     setLoading(false);
@@ -305,14 +304,10 @@ export default function LoginPage() {
     setLoading(false);
 
     if (verifyError) {
-      setError(friendlyAuthError(verifyError.message));
+      setError("Invalid code. Please try again.");
       return;
     }
 
-    if (isSignUp) {
-      setStep("password");
-      return;
-    }
     router.push("/dashboard");
   };
 
@@ -469,7 +464,15 @@ export default function LoginPage() {
                 </p>
 
                 <div className="mx-auto mt-10 max-w-[460px] rounded-[30px] border border-[#1d3c75]/18 bg-[#0b1b3f]/92 px-5 py-4 shadow-[0_24px_72px_rgba(6,16,89,0.22),inset_0_1px_2px_rgba(255,255,255,0.14)] backdrop-blur-xl">
-                  <InputOTP maxLength={6} value={otp} onChange={setOtp} disabled={loading}>
+                  <InputOTP
+                    maxLength={6}
+                    value={otp}
+                    onChange={(value) => {
+                      setError("");
+                      setOtp(value);
+                    }}
+                    disabled={loading}
+                  >
                     <InputOTPGroup>
                       <InputOTPSlot
                         index={0}
