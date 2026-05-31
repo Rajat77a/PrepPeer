@@ -236,13 +236,9 @@ export function SeeItInAction() {
         <Stats />
       </div>
 
-      <style jsx>{`
+      <style jsx global>{`
         .ticker-mask {
           mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-        }
-
-        .ticker-track:hover {
-          animation-play-state: paused;
         }
 
         .ticker-left {
