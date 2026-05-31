@@ -18,6 +18,7 @@ import {
 import { createClient } from "@/utils/supabase/client";
 
 type StoredResult = Partial<SessionReport> & {
+  source?: "account" | "demo";
   unlockedUserId?: string;
   unlockedSessionId?: string;
 };
@@ -39,8 +40,9 @@ export default function ResultsPage() {
       if (stored) {
         const realData = JSON.parse(stored) as StoredResult;
         const shouldLockRank =
-          !realData.unlockedUserId &&
-          (!realData.currentRank || !realData.totalCandidates);
+          (realData.source === "demo" && !realData.unlockedUserId) ||
+          (!realData.unlockedUserId &&
+            (!realData.currentRank || !realData.totalCandidates));
 
         setReport((prev) => ({
           ...prev,
@@ -66,6 +68,10 @@ export default function ResultsPage() {
 
   useEffect(() => {
     if (!rankLocked) return;
+    const shouldUnlockRank =
+      new URLSearchParams(window.location.search).get("unlockRank") === "1";
+
+    if (!shouldUnlockRank) return;
 
     const unlockStoredRank = async () => {
       if (unlockInFlightRef.current) return;

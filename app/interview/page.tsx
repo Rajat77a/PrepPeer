@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
 import { FeedbackPanel } from "@/components/interview/FeedbackPanel";
@@ -357,22 +358,18 @@ export default function InterviewPage() {
                 live leaderboard, sign in or create your PrepPeer account.
               </p>
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={() => router.push("/login?next=/interview%3Fmode%3Daccount")}
+                <Link
+                  href="/login?next=%2Finterview%3Fmode%3Daccount"
                   className="rounded-[14px] bg-blue px-5 py-3.5 font-inter text-sm font-extrabold text-white shadow-[0_18px_44px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:bg-[#006cff]"
                 >
                   Sign in to continue
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push("/login?next=/interview%3Fmode%3Daccount&mode=signup")
-                  }
+                </Link>
+                <Link
+                  href="/login?next=%2Finterview%3Fmode%3Daccount&mode=signup"
                   className="rounded-[14px] border border-[rgba(0,132,255,0.18)] bg-[#F7FBFF] px-5 py-3.5 font-inter text-sm font-extrabold text-text transition hover:-translate-y-0.5 hover:border-blue/40"
                 >
                   Create account
-                </button>
+                </Link>
               </div>
             </div>
           </div>

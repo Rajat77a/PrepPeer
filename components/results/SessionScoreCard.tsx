@@ -62,7 +62,7 @@ export function SessionScoreCard({
                   Rank locked for demo mode
                 </p>
                 <p className="mt-2 max-w-[260px] font-inter text-[12px] leading-5 text-white/58">
-                  Sign in to place this score on the live board.
+                  Sign in or create an account to place this score on the live board.
                 </p>
               </div>
             ) : (
@@ -102,17 +102,17 @@ export function SessionScoreCard({
             Practice Again
           </Link>
           <Link
-            href={rankLocked ? "/login?next=/results" : "/leaderboard"}
+            href={rankLocked ? "/login?next=%2Fresults%3FunlockRank%3D1" : "/leaderboard"}
             className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.08)] font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
           >
-            {rankLocked ? "Unlock Rank" : "View Leaderboard"}
+            {rankLocked ? "Sign in to unlock" : "View Leaderboard"}
           </Link>
           {rankLocked ? (
             <Link
-              href="/login?next=/results&mode=signup"
+              href="/login?next=%2Fresults%3FunlockRank%3D1&mode=signup"
               className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,132,255,0.18)] bg-[rgba(0,132,255,0.06)] font-inter font-semibold text-[13px] text-blue hover:scale-[1.02] transition-transform cursor-pointer"
             >
-              Create Account
+              Create account
             </Link>
           ) : (
             <button
