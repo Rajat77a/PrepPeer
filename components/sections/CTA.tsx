@@ -1,6 +1,5 @@
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import { Button } from "@/components/ui/Button";
-import Link from "next/link";
 
 export function CTA() {
   return (
@@ -32,16 +31,10 @@ export function CTA() {
             Join 12,400+ students who already know where they stand. Start your
             first free interview in 60 seconds.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex justify-center">
             <Button href="/interview" variant="navy-cta">
               Start Free Interview
             </Button>
-            <Link
-              href="/leaderboard"
-              className="inline-flex items-center justify-center px-[26px] py-3.5 rounded-2xl border border-white/30 text-white font-inter font-medium text-base hover:scale-[1.02] hover:border-white/60 transition-all cursor-pointer"
-            >
-              View Leaderboard
-            </Link>
           </div>
         </div>
       </ScrollReveal>
