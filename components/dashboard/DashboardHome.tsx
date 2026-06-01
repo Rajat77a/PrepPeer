@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
@@ -34,6 +35,162 @@ export type DashboardRankSummary = {
   role: string;
   companyType: string;
   dimensions?: DimensionScore[];
+};
+
+const createRankCardBlob = async ({
+  firstName,
+  rankSummary,
+  recentSessionScore,
+}: {
+  firstName: string;
+  rankSummary: DashboardRankSummary;
+  recentSessionScore: number;
+}) => {
+  const canvas = document.createElement("canvas");
+  const scale = 2;
+  const width = 1200;
+  const height = 630;
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) throw new Error("Could not create rank card.");
+
+  ctx.scale(scale, scale);
+
+  const bg = ctx.createLinearGradient(0, 0, width, height);
+  bg.addColorStop(0, "#06111f");
+  bg.addColorStop(0.46, "#082c55");
+  bg.addColorStop(1, "#05070c");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, width, height);
+
+  const glow = ctx.createRadialGradient(880, 120, 30, 880, 120, 440);
+  glow.addColorStop(0, "rgba(0, 132, 255, 0.48)");
+  glow.addColorStop(0.45, "rgba(0, 132, 255, 0.16)");
+  glow.addColorStop(1, "rgba(0, 132, 255, 0)");
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= width; x += 38) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= height; y += 38) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = "rgba(255,255,255,0.08)";
+  roundRect(ctx, 66, 64, 1068, 502, 34);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(96,177,255,0.28)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  const orb = ctx.createRadialGradient(166, 150, 14, 156, 150, 52);
+  orb.addColorStop(0, "#f8ffff");
+  orb.addColorStop(0.2, "#7df0ff");
+  orb.addColorStop(0.58, "#0084ff");
+  orb.addColorStop(0.82, "#083a9c");
+  orb.addColorStop(1, "#050b25");
+  ctx.fillStyle = orb;
+  ctx.beginPath();
+  ctx.arc(156, 150, 46, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(125,255,217,0.55)";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "800 34px Inter, Arial, sans-serif";
+  ctx.fillText("PrepPeer", 224, 162);
+
+  ctx.fillStyle = "rgba(255,255,255,0.55)";
+  ctx.font = "700 21px Inter, Arial, sans-serif";
+  ctx.fillText(`${firstName}'s live rank card`, 90, 262);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 140px Inter, Arial, sans-serif";
+  ctx.fillText(`#${rankSummary.rank}`, 86, 402);
+
+  ctx.fillStyle = "rgba(255,255,255,0.42)";
+  ctx.font = "800 34px Inter, Arial, sans-serif";
+  ctx.fillText(`of ${rankSummary.totalCandidates}`, 430, 396);
+
+  ctx.fillStyle = "#60b1ff";
+  ctx.font = "800 30px Inter, Arial, sans-serif";
+  ctx.fillText(rankSummary.percentile, 92, 462);
+
+  ctx.fillStyle = "rgba(255,255,255,0.38)";
+  ctx.font = "700 24px Inter, Arial, sans-serif";
+  ctx.fillText(`${rankSummary.role} / ${rankSummary.companyType}`, 92, 506);
+
+  ctx.fillStyle = "rgba(0,108,255,0.18)";
+  roundRect(ctx, 790, 172, 246, 246, 123);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(96,177,255,0.35)";
+  ctx.lineWidth = 5;
+  ctx.stroke();
+
+  const endAngle = -Math.PI / 2 + (Math.PI * 2 * recentSessionScore) / 100;
+  ctx.strokeStyle = "rgba(255,255,255,0.13)";
+  ctx.lineWidth = 20;
+  ctx.beginPath();
+  ctx.arc(913, 295, 92, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.strokeStyle = "#0084ff";
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.arc(913, 295, 92, -Math.PI / 2, endAngle);
+  ctx.stroke();
+  ctx.lineCap = "butt";
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 58px Inter, Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(String(recentSessionScore), 913, 292);
+  ctx.fillStyle = "rgba(255,255,255,0.42)";
+  ctx.font = "800 20px Inter, Arial, sans-serif";
+  ctx.fillText("recent score", 913, 326);
+  ctx.textAlign = "left";
+
+  ctx.fillStyle = "rgba(255,255,255,0.18)";
+  roundRect(ctx, 742, 458, 342, 54, 27);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "800 20px Inter, Arial, sans-serif";
+  ctx.fillText(rankSummary.rankChange, 772, 492);
+
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("Could not export rank card."));
+    }, "image/png");
+  });
+};
+
+const roundRect = (
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) => {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.arcTo(x + width, y, x + width, y + height, radius);
+  ctx.arcTo(x + width, y + height, x, y + height, radius);
+  ctx.arcTo(x, y + height, x, y, radius);
+  ctx.arcTo(x, y, x + width, y, radius);
+  ctx.closePath();
 };
 
 export function DashboardHome({
@@ -207,6 +364,7 @@ function ReturningDashboard({
   rankSummary: DashboardRankSummary;
   recentSessionScore: number;
 }) {
+  const [shareState, setShareState] = useState<"idle" | "creating" | "done" | "error">("idle");
   const userIndex = leaderboardEntries.findIndex((entry) => entry.isYou);
   const nearby =
     userIndex >= 0
@@ -218,6 +376,61 @@ function ReturningDashboard({
         label: dimension.label,
         value: dimension.score,
       }));
+  const shareLabel =
+    shareState === "creating"
+      ? "Creating card..."
+      : shareState === "done"
+        ? "Rank card ready"
+        : shareState === "error"
+          ? "Try again"
+          : "Share rank card";
+
+  const shareRankCard = async () => {
+    if (shareState === "creating") return;
+
+    setShareState("creating");
+
+    try {
+      const blob = await createRankCardBlob({
+        firstName,
+        rankSummary,
+        recentSessionScore,
+      });
+      const file = new File([blob], "preppeer-rank-card.png", {
+        type: "image/png",
+      });
+      const shareData = {
+        title: "PrepPeer rank card",
+        text: `I am ranked #${rankSummary.rank} on PrepPeer.`,
+        files: [file],
+      };
+      const navigatorWithShare = navigator as Navigator & {
+        canShare?: (data: ShareData) => boolean;
+      };
+
+      if (
+        navigator.share &&
+        (!navigatorWithShare.canShare || navigatorWithShare.canShare(shareData))
+      ) {
+        await navigator.share(shareData);
+      } else {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "preppeer-rank-card.png";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      }
+
+      setShareState("done");
+      window.setTimeout(() => setShareState("idle"), 2400);
+    } catch {
+      setShareState("error");
+      window.setTimeout(() => setShareState("idle"), 2400);
+    }
+  };
 
   return (
     <div className="mx-auto max-w-6xl p-5 sm:p-8">
@@ -281,8 +494,13 @@ function ReturningDashboard({
             <PercentileRing value={recentSessionScore} />
           </div>
           <div className="relative z-10 mt-6">
-            <button className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 font-inter text-xs font-bold text-white/30 transition hover:border-white/30 hover:text-white">
-              Share rank card
+            <button
+              type="button"
+              onClick={shareRankCard}
+              disabled={shareState === "creating"}
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 font-inter text-xs font-bold text-white/30 transition hover:border-white/30 hover:text-white disabled:cursor-wait disabled:opacity-70"
+            >
+              {shareLabel}
               <ExternalLink className="h-3 w-3" />
             </button>
           </div>
