@@ -8,6 +8,7 @@ import {
   History,
 } from "lucide-react";
 import Link from "next/link";
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Logo } from "@/components/ui/Logo";
@@ -29,6 +30,8 @@ const navItems = [
   { label: "Profile", href: "/dashboard/profile", icon: UserRound },
 ];
 
+const LIVE_REFRESH_MS = 5 * 60 * 1000;
+
 export function DashboardShell({ children, user }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -39,6 +42,22 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
     router.push("/");
     router.refresh();
   };
+
+  useEffect(() => {
+    const refreshLiveRanks = () => {
+      if (document.visibilityState === "visible") {
+        router.refresh();
+      }
+    };
+
+    const interval = window.setInterval(refreshLiveRanks, LIVE_REFRESH_MS);
+    document.addEventListener("visibilitychange", refreshLiveRanks);
+
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshLiveRanks);
+    };
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-[#080808] text-white">

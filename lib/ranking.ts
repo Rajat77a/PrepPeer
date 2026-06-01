@@ -139,11 +139,11 @@ const getGeneratedBenchmarkProfile = (index: number) => {
 };
 
 const getBenchmarkScore = (index: number, windowId: number) => {
-  const baseScore = Math.max(24, 96 - index * 0.29);
+  const baseScore = Math.max(24, 96 - index * 0.26);
   const personalRhythm = seededJitter((index + 1) * 97) * Math.PI * 2;
-  const formDrift = Math.sin(windowId * 0.75 + personalRhythm) * 0.9;
+  const formDrift = Math.sin(windowId * 0.75 + personalRhythm) * 1.45;
   const dailyVariance =
-    (seededJitter(Math.floor(windowId / 288) * 313 + index) - 0.5) * 0.6;
+    (seededJitter(Math.floor(windowId / 288) * 313 + index) - 0.5) * 0.7;
 
   return Number(
     Math.max(18, Math.min(98, baseScore + formDrift + dailyVariance)).toFixed(1)
@@ -260,12 +260,13 @@ const getPreviousRank = (
         new Date(a.created_at ?? 0).getTime()
     );
 
-  if (userSessions.length <= 1) return null;
+  if (userSessions.length === 0) return null;
 
   const currentBestIsLatestAttempt = userSessions[0]?.id === currentBestSessionId;
-  const previousRealSessions = currentBestIsLatestAttempt
-    ? realSessions.filter((session) => session.id !== currentBestSessionId)
-    : realSessions;
+  const previousRealSessions =
+    userSessions.length > 1 && currentBestIsLatestAttempt
+      ? realSessions.filter((session) => session.id !== currentBestSessionId)
+      : realSessions;
   const previousBenchmarked = withBenchmarkSessions(
     previousRealSessions,
     getBenchmarkWindow() - 1
