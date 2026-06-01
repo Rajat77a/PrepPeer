@@ -9,13 +9,11 @@ import type { SessionReport } from "@/lib/types";
 
 interface SessionScoreCardProps {
   report: SessionReport;
-  onShare?: () => void;
   rankLocked?: boolean;
 }
 
 export function SessionScoreCard({
   report,
-  onShare,
   rankLocked = false,
 }: SessionScoreCardProps) {
   const [practiceGateOpen, setPracticeGateOpen] = useState(false);
@@ -129,7 +127,7 @@ export function SessionScoreCard({
           >
             {rankLocked ? "Sign in to unlock" : "View Leaderboard"}
           </Link>
-          {rankLocked ? (
+          {rankLocked && (
             <Link
               href="/login?next=%2Fresults%3FunlockRank%3D1&mode=signup"
               target="_blank"
@@ -138,14 +136,6 @@ export function SessionScoreCard({
             >
               Create account
             </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={onShare}
-              className="flex-1 py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.08)] font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
-            >
-              Share Score
-            </button>
           )}
         </div>
       </div>

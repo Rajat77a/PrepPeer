@@ -65,6 +65,20 @@ const isSameUnlockedDemoSession = (
   );
 };
 
+const hasLockedDemoResult = () => {
+  const stored =
+    sessionStorage.getItem(RESULTS_KEY) ?? localStorage.getItem(DEMO_RESULTS_KEY);
+
+  if (!stored) return false;
+
+  try {
+    const storedResult = JSON.parse(stored) as StoredResult;
+    return storedResult.source === "demo" && !storedResult.unlockedUserId;
+  } catch {
+    return false;
+  }
+};
+
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
   const [rankLocked, setRankLocked] = useState(false);
@@ -112,6 +126,83 @@ export default function ResultsPage() {
     } catch {
       setMissingUnlockResult(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const loadLatestAccountResult = async () => {
+      if (hasLockedDemoResult()) return;
+
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data: sessionRows } = await supabase
+        .from("interview_sessions")
+        .select(
+          "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
+        )
+        .order("created_at", { ascending: false })
+        .limit(1000);
+
+      const allSessions = (sessionRows ?? []) as InterviewSessionRow[];
+      const latestSession = allSessions.find((session) => session.user_id === user.id);
+
+      if (!latestSession) return;
+
+      const rankSummary = getRankSummary(allSessions, user.id);
+      const accountResult: StoredResult = {
+        name: getDisplayName(user.user_metadata, user.email),
+        role: latestSession.role ?? "Interview",
+        companyType: latestSession.company_type ?? "General",
+        source: "account",
+        unlockedUserId: user.id,
+        unlockedSessionId: latestSession.id,
+        compositeScore: Number(latestSession.composite_score ?? 0),
+        percentile: rankSummary
+          ? getRankPercentileLabel(rankSummary.rank, rankSummary.totalCandidates)
+          : "Not ranked",
+        rankDelta: rankSummary?.rankChange ?? "No ranked session yet",
+        previousRank: rankSummary?.previousRank ?? 0,
+        currentRank: rankSummary?.rank ?? 0,
+        totalCandidates: rankSummary?.totalCandidates ?? 0,
+        dimensions: latestSession.dimensions ?? [],
+        questionScores: latestSession.question_scores ?? [],
+        summary:
+          latestSession.summary &&
+          typeof latestSession.summary === "object" &&
+          !Array.isArray(latestSession.summary)
+            ? (latestSession.summary as SessionReport["summary"])
+            : undefined,
+      };
+
+      sessionStorage.setItem(RESULTS_KEY, JSON.stringify(accountResult));
+      setRankLocked(false);
+      setReport((prev) => ({
+        ...prev,
+        name: accountResult.name ?? prev.name,
+        role: accountResult.role ?? prev.role,
+        companyType: accountResult.companyType ?? prev.companyType,
+        source: "account",
+        compositeScore: accountResult.compositeScore ?? prev.compositeScore,
+        percentile: accountResult.percentile ?? prev.percentile,
+        rankDelta: accountResult.rankDelta ?? prev.rankDelta,
+        previousRank: accountResult.previousRank ?? prev.previousRank,
+        currentRank: accountResult.currentRank ?? prev.currentRank,
+        totalCandidates: accountResult.totalCandidates ?? prev.totalCandidates,
+        dimensions: accountResult.dimensions?.length
+          ? accountResult.dimensions
+          : prev.dimensions,
+        questionScores: accountResult.questionScores?.length
+          ? accountResult.questionScores
+          : prev.questionScores,
+        summary: accountResult.summary ?? prev.summary,
+      }));
+    };
+
+    void loadLatestAccountResult();
   }, []);
 
   useEffect(() => {
@@ -240,20 +331,6 @@ export default function ResultsPage() {
 
     void unlockStoredRank();
   }, [rankLocked]);
-
-  const handleShare = async () => {
-    const url =
-      typeof window !== "undefined"
-        ? window.location.href
-        : "https://preppeer.app/results";
-
-    try {
-      await navigator.clipboard.writeText(url);
-      alert("Score card link copied to clipboard!");
-    } catch {
-      alert("Could not copy link. Please copy manually.");
-    }
-  };
 
   const summaryPreview =
     report.summary?.overallSummary ??
@@ -445,7 +522,6 @@ export default function ResultsPage() {
 
         <SessionScoreCard
           report={report}
-          onShare={handleShare}
           rankLocked={rankLocked}
         />
         <QuestionBreakdownChart data={report.questionScores} />
