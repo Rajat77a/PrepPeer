@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
@@ -10,12 +10,6 @@ import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
-import {
-  getDisplayName,
-  getRankPercentileLabel,
-  getRankSummary,
-  type InterviewSessionRow,
-} from "@/lib/ranking";
 import { createClient } from "@/utils/supabase/client";
 import type { QuestionReview } from "@/lib/types";
 import { AlertTriangle, ArrowRight, Clock, LockKeyhole, ShieldCheck } from "lucide-react";
@@ -23,8 +17,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 
 const TOTAL = 5;
-const DEMO_RESULTS_KEY = "preppeer_pending_demo_results";
-const RESULTS_KEY = "preppeer_results";
 
 type SetupData = {
   domain: string;
@@ -36,8 +28,6 @@ type Stage = "setup" | "terms" | "interview" | "feedback";
 
 export default function InterviewPage() {
   const router = useRouter();
-  const [isAccountInterview, setIsAccountInterview] = useState(false);
-  const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
   const [current, setCurrent] = useState(1);
   const [questions, setQuestions] = useState<string[]>([]);
@@ -69,7 +59,7 @@ export default function InterviewPage() {
   const toPercentScore = (scoreOutOf40: number) =>
     Math.round((Math.max(0, Math.min(40, scoreOutOf40)) / 40) * 100);
 
-  const saveResults = useCallback(async (
+  const saveResults = async (
     reviews: QuestionReview[],
     completionReason: "completed" | "autoSubmitted"
   ) => {
@@ -96,10 +86,30 @@ export default function InterviewPage() {
     );
 
     const zeroDimensions = [
-      { label: "Communication", value: 0, color: "#0084FF", reason: "No valid answer was submitted." },
-      { label: "Problem Solving", value: 0, color: "#319AFF", reason: "No valid answer was submitted." },
-      { label: "Specificity", value: 0, color: "#FF6B3D", reason: "No valid answer was submitted." },
-      { label: "Accuracy", value: 0, color: "#0084FF", reason: "No valid answer was submitted." },
+      {
+        label: "Communication",
+        value: 0,
+        color: "#0084FF",
+        reason: "No valid answer was submitted.",
+      },
+      {
+        label: "Problem Solving",
+        value: 0,
+        color: "#319AFF",
+        reason: "No valid answer was submitted.",
+      },
+      {
+        label: "Specificity",
+        value: 0,
+        color: "#FF6B3D",
+        reason: "No valid answer was submitted.",
+      },
+      {
+        label: "Accuracy",
+        value: 0,
+        color: "#0084FF",
+        reason: "No valid answer was submitted.",
+      },
     ];
 
     const resultDimensions =
@@ -112,7 +122,7 @@ export default function InterviewPage() {
 
             return {
               ...dimension,
-              value: Number((total / dimensionHistory.length).toFixed(1)),
+              value: Number((total / TOTAL).toFixed(1)),
             };
           })
         : zeroDimensions;
@@ -156,127 +166,32 @@ export default function InterviewPage() {
       }),
     };
 
+    sessionStorage.setItem(
+      "preppeer_results",
+      JSON.stringify({
+        compositeScore,
+        dimensions: resultDimensions,
+        questionScores: allQuestionScores,
+        summary,
+      })
+    );
+
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
-    let rankSummary = null;
-    let savedSessionId: string | undefined;
-    let reportIdentity = {
-      name: "Guest",
-      role: setup.domain || "Interview",
-      companyType: setup.companyType || "General",
-    };
 
-    if (isAccountInterview && data.user) {
-      reportIdentity = {
-        name: getDisplayName(data.user.user_metadata, data.user.email),
-        role: setup.domain || "Interview",
-        companyType: setup.companyType || "General",
-      };
-
-      const { data: insertedSession, error: insertError } = await supabase
-        .from("interview_sessions")
-        .insert({
-          user_id: data.user.id,
-          role: setup.domain,
-          experience: setup.experience,
-          company_type: setup.companyType,
-          composite_score: compositeScore,
-          dimensions: resultDimensions,
-          question_scores: allQuestionScores,
-          summary,
-        })
-        .select("id")
-        .single();
-
-      if (insertError) {
-        throw new Error(insertError.message);
-      }
-
-      savedSessionId = insertedSession?.id;
-
-      const { data: sessionRows } = await supabase
-        .from("interview_sessions")
-        .select(
-          "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
-        )
-        .order("created_at", { ascending: false })
-        .limit(1000);
-
-      rankSummary = getRankSummary(
-        (sessionRows ?? []) as InterviewSessionRow[],
-        data.user.id
-      );
+    if (data.user) {
+      await supabase.from("interview_sessions").insert({
+        user_id: data.user.id,
+        role: setup.domain,
+        experience: setup.experience,
+        company_type: setup.companyType,
+        composite_score: compositeScore,
+        dimensions: resultDimensions,
+        question_scores: allQuestionScores,
+        summary,
+      });
     }
-
-    const resultPayload = {
-      name: reportIdentity.name,
-      role: reportIdentity.role,
-      companyType: reportIdentity.companyType,
-      demoAttemptId: isAccountInterview
-        ? undefined
-        : typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      compositeScore,
-      percentile: rankSummary
-        ? getRankPercentileLabel(rankSummary.rank, rankSummary.totalCandidates)
-        : "Not ranked",
-      rankDelta: rankSummary
-        ? rankSummary.rankChange
-        : "Sign in to join the leaderboard",
-      previousRank: rankSummary?.previousRank ?? 0,
-      currentRank: rankSummary?.rank ?? 0,
-      totalCandidates: rankSummary?.totalCandidates ?? 0,
-      dimensions: resultDimensions,
-      questionScores: allQuestionScores,
-      summary,
-      source: isAccountInterview ? "account" : "demo",
-      unlockedUserId: isAccountInterview ? data.user?.id : undefined,
-      unlockedSessionId: savedSessionId,
-    };
-
-    sessionStorage.setItem(RESULTS_KEY, JSON.stringify(resultPayload));
-
-    if (isAccountInterview) {
-      localStorage.removeItem(DEMO_RESULTS_KEY);
-    } else {
-      localStorage.setItem(DEMO_RESULTS_KEY, JSON.stringify(resultPayload));
-    }
-  }, [
-    dimensionHistory,
-    isAccountInterview,
-    questions,
-    setup.companyType,
-    setup.domain,
-    setup.experience,
-  ]);
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      const accountMode =
-        new URLSearchParams(window.location.search).get("mode") === "account";
-      setIsAccountInterview(accountMode);
-
-      if (!accountMode) {
-        setAccessChecked(true);
-        return;
-      }
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.replace("/login?next=%2Finterview%3Fmode%3Daccount");
-        return;
-      }
-
-      setAccessChecked(true);
-    };
-
-    void checkAccess();
-  }, [router]);
+  };
 
   useEffect(() => {
     if (shouldAutoSubmit) {
@@ -284,7 +199,7 @@ export default function InterviewPage() {
         router.push("/results");
       });
     }
-  }, [shouldAutoSubmit, router, questionReviews, dimensionHistory, saveResults]);
+  }, [shouldAutoSubmit, router, questionReviews, dimensionHistory]);
 
   const handleStart = async (profileSetup = setup) => {
     if (!profileSetup.domain || !profileSetup.experience || !profileSetup.companyType) {
@@ -310,8 +225,7 @@ export default function InterviewPage() {
         setQuestionScores([]);
         setQuestionReviews([]);
         setDimensionHistory([]);
-        sessionStorage.removeItem(RESULTS_KEY);
-        if (isAccountInterview) localStorage.removeItem(DEMO_RESULTS_KEY);
+        sessionStorage.removeItem("preppeer_results");
         setStage("interview");
       } else {
         setError("Failed to generate questions. Try again.");
@@ -331,7 +245,10 @@ export default function InterviewPage() {
 
       setFeedback(zeroFeedback);
       setAiDetected(null);
-      setQuestionScores((prev) => [...prev, { question: `Q${current}`, score: 0 }]);
+      setQuestionScores((prev) => [
+        ...prev,
+        { question: `Q${current}`, score: 0 },
+      ]);
       setQuestionReviews((prev) => [
         ...prev,
         {
@@ -378,7 +295,10 @@ export default function InterviewPage() {
         );
 
         setFeedback(aiFeedback);
-        setQuestionScores((prev) => [...prev, { question: `Q${current}`, score: 0 }]);
+        setQuestionScores((prev) => [
+          ...prev,
+          { question: `Q${current}`, score: 0 },
+        ]);
         setQuestionReviews((prev) => [
           ...prev,
           {
@@ -395,7 +315,10 @@ export default function InterviewPage() {
 
         setFeedback(evalData.feedback);
         setDimensionHistory((prev) => [...prev, evalData.feedback.dimensions]);
-        setQuestionScores((prev) => [...prev, { question: `Q${current}`, score }]);
+        setQuestionScores((prev) => [
+          ...prev,
+          { question: `Q${current}`, score },
+        ]);
         setQuestionReviews((prev) => [
           ...prev,
           {
@@ -434,25 +357,16 @@ export default function InterviewPage() {
     }
   };
 
-  if (!accessChecked) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar variant="inner" />
-        <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-6">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#D8EBFF] border-t-blue" />
-        </div>
-      </div>
-    );
-  }
-
   if (stage === "setup" || stage === "terms") {
     return (
       <div className="min-h-screen bg-white">
         <Navbar variant="inner" />
+
         <div className="max-w-[560px] mx-auto px-6 py-28">
           <h1 className="font-fustat font-extrabold text-3xl text-text mb-2">
             Set up your interview
           </h1>
+
           <p className="font-inter text-muted text-base mb-10">
             Tell us about the role so we can tailor your questions.
           </p>
@@ -473,7 +387,9 @@ export default function InterviewPage() {
           />
 
           {error && (
-            <p className="mt-5 text-center font-inter text-sm text-red-500">{error}</p>
+            <p className="mt-5 text-center font-inter text-sm text-red-500">
+              {error}
+            </p>
           )}
         </div>
 
@@ -519,6 +435,7 @@ export default function InterviewPage() {
               <div className="flex items-center gap-3">
                 <span className="h-8 w-px bg-[#00A07A]" />
                 <ShieldCheck size={18} color="#00A07A" strokeWidth={1.8} />
+
                 <div>
                   <p className="font-inter text-[11px] font-bold uppercase tracking-[0.16em] text-[#00A07A]">
                     Integrity watch
@@ -531,6 +448,7 @@ export default function InterviewPage() {
 
               <div className="flex items-center gap-3 sm:text-right">
                 <Clock size={17} color="#6B7280" strokeWidth={1.8} />
+
                 <div>
                   <p className="font-inter text-[11px] font-bold uppercase tracking-[0.16em] text-muted">
                     Elapsed
@@ -555,7 +473,9 @@ export default function InterviewPage() {
                 className="flex flex-col items-center justify-center py-20 gap-4"
               >
                 <div className="w-10 h-10 border-4 border-[#319AFF] border-t-transparent rounded-full animate-spin" />
-                <p className="font-inter text-muted text-sm">Evaluating your answer...</p>
+                <p className="font-inter text-muted text-sm">
+                  Evaluating your answer...
+                </p>
               </motion.div>
             ) : (
               <motion.div
@@ -591,16 +511,20 @@ export default function InterviewPage() {
               {aiDetected?.isAI ? (
                 <div className="mt-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-6">
                   <AlertTriangle className="mt-1 shrink-0" size={24} color="#ef4444" />
+
                   <div>
                     <p className="font-inter font-bold text-base text-red-700">
                       AI-generated answer detected ({aiDetected.confidence}% confidence)
                     </p>
+
                     <p className="font-inter text-sm text-red-600 mt-1 mb-4">
                       {aiDetected.reason}
                     </p>
+
                     <p className="font-inter text-sm text-red-700 font-medium">
                       This answer will receive 0 score and will be included in your final summary.
                     </p>
+
                     <button
                       onClick={handleNext}
                       className="mt-4 bg-red-600 hover:bg-red-700 text-white font-inter font-semibold text-sm px-6 py-3 rounded-xl transition-all"
@@ -664,10 +588,12 @@ function IntegrityTermsModal({
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[rgba(0,132,255,0.1)]">
                 <LockKeyhole size={23} color="#0084FF" />
               </div>
+
               <div>
                 <h2 className="font-fustat text-2xl font-extrabold tracking-[-0.04em] text-text sm:text-3xl">
                   Accept terms to continue
                 </h2>
+
                 <p className="mt-2 font-inter text-sm font-semibold text-muted">
                   {profileLabel}
                 </p>
@@ -707,6 +633,7 @@ function IntegrityTermsModal({
               >
                 Back
               </button>
+
               <button
                 type="button"
                 onClick={onAccept}
