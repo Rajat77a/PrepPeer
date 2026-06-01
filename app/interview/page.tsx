@@ -114,14 +114,16 @@ export default function InterviewPage() {
 
     const resultDimensions =
       dimensionHistory.length > 0
-        ? dimensionHistory[0].map((dimension, index) => {
+        ? zeroDimensions.map((fallbackDimension, index) => {
+            const sourceDimension = dimensionHistory[0]?.[index] ?? fallbackDimension;
+
             const total = dimensionHistory.reduce(
               (sum, item) => sum + (item[index]?.value ?? 0),
               0
             );
 
             return {
-              ...dimension,
+              ...sourceDimension,
               value: Number((total / TOTAL).toFixed(1)),
             };
           })
