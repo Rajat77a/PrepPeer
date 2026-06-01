@@ -376,6 +376,12 @@ function ReturningDashboard({
         label: dimension.label,
         value: dimension.score,
       }));
+  const latestSession = sessions[0];
+  const practiceAgainHref = `/interview?mode=account&autostart=1&role=${encodeURIComponent(
+    latestSession?.role ?? rankSummary.role
+  )}&experience=${encodeURIComponent(
+    latestSession?.experience ?? "Not set"
+  )}&company=${encodeURIComponent(latestSession?.company ?? rankSummary.companyType)}`;
   const shareLabel =
     shareState === "creating"
       ? "Creating card..."
@@ -444,7 +450,7 @@ function ReturningDashboard({
           </p>
         </div>
         <Link
-          href="/interview?mode=account"
+          href={practiceAgainHref}
           className="inline-flex items-center justify-center gap-2 rounded-full bg-[#006cff] px-6 py-2.5 font-inter text-sm font-bold text-white transition hover:bg-[#0057cc] hover:shadow-[0_0_16px_rgba(0,108,255,0.4)]"
         >
           Practice again
