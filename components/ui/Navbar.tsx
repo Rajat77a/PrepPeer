@@ -17,12 +17,14 @@ interface NavbarProps {
   variant?: "landing" | "inner";
   sessionLabel?: string;
   progress?: { current: number; total: number };
+  homeHref?: string;
 }
 
 export function Navbar({
   variant = "landing",
   sessionLabel,
   progress,
+  homeHref = "/",
 }: NavbarProps) {
   const pathname = usePathname();
   const isHome = pathname === "/";
@@ -35,7 +37,7 @@ export function Navbar({
     return (
       <header className="sticky top-0 z-[100] bg-white/95 backdrop-blur-md border-b border-[rgba(0,0,0,0.06)]">
         <div className="flex items-center justify-between px-4 sm:px-8 py-4 max-w-[1200px] mx-auto">
-          <Logo />
+          <Logo href={homeHref} />
           {sessionLabel && (
             <span className="font-inter font-medium text-sm text-muted hidden sm:block">
               Session: {sessionLabel}

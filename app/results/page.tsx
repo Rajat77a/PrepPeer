@@ -423,7 +423,7 @@ export default function ResultsPage() {
   if (missingUnlockResult) {
     return (
       <div className="min-h-screen bg-off-white">
-        <Navbar variant="inner" />
+        <Navbar variant="inner" homeHref="/" />
         <div className="mx-auto flex min-h-[calc(100vh-84px)] max-w-[760px] items-center px-6 py-20">
           <div className="w-full rounded-[28px] border border-[rgba(0,132,255,0.16)] bg-white p-8 shadow-[0_24px_70px_rgba(0,132,255,0.1)]">
             <p className="font-inter text-[11px] font-bold uppercase tracking-[0.22em] text-blue">
@@ -450,7 +450,10 @@ export default function ResultsPage() {
 
   return (
     <div className="min-h-screen bg-off-white">
-      <Navbar variant="inner" />
+      <Navbar
+        variant="inner"
+        homeHref={report.source === "account" ? "/dashboard" : "/"}
+      />
 
       <div className="max-w-[900px] mx-auto px-6 py-20">
         <div className="mb-8">

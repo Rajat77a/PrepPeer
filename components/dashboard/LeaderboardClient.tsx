@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "@/lib/types";
+import { RefreshTableButton } from "@/components/dashboard/RefreshTableButton";
 
 const tabs = ["All Roles", "SDE", "PM", "Operations", "MBA"];
 
@@ -58,14 +59,17 @@ export function LeaderboardClient({
           </p>
         </div>
 
-        <div className="relative w-full xl:w-[340px]">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search name, college, role"
-            className="h-12 w-full rounded-full border border-white/[0.08] bg-[#0d0d0d] pl-11 pr-4 font-inter text-sm font-semibold text-white outline-none transition placeholder:text-white/20 focus:border-[#006cff]/60 focus:shadow-[0_0_24px_rgba(0,108,255,0.14)]"
-          />
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center xl:w-auto">
+          <div className="relative w-full xl:w-[340px]">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search name, college, role"
+              className="h-12 w-full rounded-full border border-white/[0.08] bg-[#0d0d0d] pl-11 pr-4 font-inter text-sm font-semibold text-white outline-none transition placeholder:text-white/20 focus:border-[#006cff]/60 focus:shadow-[0_0_24px_rgba(0,108,255,0.14)]"
+            />
+          </div>
+          <RefreshTableButton label="Refresh board" />
         </div>
       </div>
 

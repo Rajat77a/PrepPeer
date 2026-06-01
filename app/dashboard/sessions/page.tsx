@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { ArrowUpRight } from "lucide-react";
+import { RefreshTableButton } from "@/components/dashboard/RefreshTableButton";
 import {
   getRankSummary,
   type InterviewSessionRow,
@@ -32,17 +33,20 @@ export default async function DashboardSessionsPage() {
 
   return (
     <div className="mx-auto max-w-6xl p-5 sm:p-8">
-      <div className="mb-8">
-        <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#006cff]">
-          Session history
-        </p>
-        <h1 className="mt-3 font-inter text-[clamp(36px,6vw,64px)] font-black leading-none tracking-[-0.05em] text-white">
-          Every attempt, in order.
-        </h1>
-        <p className="mt-4 max-w-2xl font-inter text-base leading-7 text-white/40">
-          Review scores, role context, rank movement, and the session that changed
-          your standing.
-        </p>
+      <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#006cff]">
+            Session history
+          </p>
+          <h1 className="mt-3 font-inter text-[clamp(36px,6vw,64px)] font-black leading-none tracking-[-0.05em] text-white">
+            Every attempt, in order.
+          </h1>
+          <p className="mt-4 max-w-2xl font-inter text-base leading-7 text-white/40">
+            Review scores, role context, rank movement, and the session that changed
+            your standing.
+          </p>
+        </div>
+        <RefreshTableButton />
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d0d0d]">
