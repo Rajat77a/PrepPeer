@@ -80,6 +80,7 @@ export default async function DashboardPage() {
       firstName={firstName}
       sessions={dashboardSessions}
       leaderboardEntries={leaderboardEntries}
+      recentSessionScore={dashboardSessions[0]?.score ?? null}
       rankSummary={
         rankSummary
           ? {

@@ -11,6 +11,7 @@ type DashboardHomeProps = {
   sessions: DashboardSession[];
   leaderboardEntries: LeaderboardEntry[];
   rankSummary: DashboardRankSummary | null;
+  recentSessionScore: number | null;
 };
 
 export type DashboardSession = {
@@ -40,6 +41,7 @@ export function DashboardHome({
   sessions,
   leaderboardEntries,
   rankSummary,
+  recentSessionScore,
 }: DashboardHomeProps) {
   if (sessions.length === 0 || !rankSummary) {
     return (
@@ -56,6 +58,7 @@ export function DashboardHome({
       sessions={sessions}
       leaderboardEntries={leaderboardEntries}
       rankSummary={rankSummary}
+      recentSessionScore={recentSessionScore ?? sessions[0]?.score ?? rankSummary.score}
     />
   );
 }
@@ -196,11 +199,13 @@ function ReturningDashboard({
   sessions,
   leaderboardEntries,
   rankSummary,
+  recentSessionScore,
 }: {
   firstName: string;
   sessions: DashboardSession[];
   leaderboardEntries: LeaderboardEntry[];
   rankSummary: DashboardRankSummary;
+  recentSessionScore: number;
 }) {
   const userIndex = leaderboardEntries.findIndex((entry) => entry.isYou);
   const nearby =
@@ -273,7 +278,7 @@ function ReturningDashboard({
                 <span className="text-white/40">{rankSummary.companyType}</span>
               </div>
             </div>
-            <PercentileRing value={rankSummary.score} />
+            <PercentileRing value={recentSessionScore} />
           </div>
           <div className="relative z-10 mt-6">
             <button className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 font-inter text-xs font-bold text-white/30 transition hover:border-white/30 hover:text-white">
@@ -427,7 +432,7 @@ function PercentileRing({ value }: { value: number }) {
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="font-inter text-xl font-black text-white">{value}</span>
         <span className="font-inter text-xs font-semibold text-white/30">
-          score
+          recent score
         </span>
       </div>
     </div>
