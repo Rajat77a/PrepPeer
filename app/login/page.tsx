@@ -246,7 +246,7 @@ export default function LoginPage() {
 
   const getAuthRedirectUrl = (nextPath: string) => {
     const next = nextPath.startsWith("/") ? nextPath : "/dashboard";
-    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
+    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}&mode=${mode}`;
   };
 
   const getPostAuthPath = () => {

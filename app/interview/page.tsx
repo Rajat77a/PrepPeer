@@ -267,15 +267,6 @@ export default function InterviewPage() {
         return;
       }
 
-      const hasRequiredProfile =
-        Boolean(user.user_metadata?.full_name ?? user.user_metadata?.name) &&
-        Boolean(user.user_metadata?.college);
-
-      if (!hasRequiredProfile) {
-        router.replace("/onboarding?next=%2Finterview%3Fmode%3Daccount");
-        return;
-      }
-
       setAccessChecked(true);
     };
 

@@ -15,6 +15,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const next = safeNextPath(searchParams.get("next"));
+  const mode = searchParams.get("mode");
   const siteUrl = "https://prep-peer.vercel.app";
 
   if (!code) {
@@ -51,7 +52,7 @@ export async function GET(request: Request) {
     Boolean(user?.user_metadata?.full_name ?? user?.user_metadata?.name) &&
     Boolean(user?.user_metadata?.college);
 
-  if (!hasRequiredProfile) {
+  if (mode === "signup" && !hasRequiredProfile) {
     return NextResponse.redirect(
       `${siteUrl}/onboarding?next=${encodeURIComponent(next)}`
     );
