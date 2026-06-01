@@ -20,8 +20,11 @@ export function SessionScoreCard({
 }: SessionScoreCardProps) {
   const [practiceGateOpen, setPracticeGateOpen] = useState(false);
   const isAccountResult = report.source === "account";
+  const hasLiveRank =
+    !rankLocked && report.currentRank > 0 && report.totalCandidates > 0;
   const practiceHref = isAccountResult ? "/interview?mode=account" : "/interview";
-  const leaderboardHref = isAccountResult ? "/dashboard/leaderboard" : "/leaderboard";
+  const leaderboardHref =
+    isAccountResult || hasLiveRank ? "/dashboard/leaderboard" : "/leaderboard";
   const accountPracticePath = "%2Finterview%3Fmode%3Daccount";
 
   return (
