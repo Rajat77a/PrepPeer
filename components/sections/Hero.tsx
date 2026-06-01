@@ -2,11 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 import { Button } from "@/components/ui/Button";
-import { HashLinkButton } from "@/components/ui/HashLinkButton";
 import TypingText from "@/components/sections/TypingText";
 
 const heroVariants = {
@@ -361,18 +359,6 @@ export function Hero() {
             >
               <span className="hero-cta-label">Start Interview</span>
             </Button>
-            <HashLinkButton
-              href="#leaderboard-preview"
-              className="hero-cta-secondary group relative min-h-[62px] min-w-[230px] overflow-hidden px-7 text-[15px] sm:px-8"
-            >
-              <span className="relative z-10 inline-flex items-center gap-2.5">
-                <span className="hero-cta-label">Leaderboard</span>
-                <ArrowRight
-                  size={16}
-                  className="text-blue transition-transform duration-300 group-hover:translate-x-1"
-                />
-              </span>
-            </HashLinkButton>
           </motion.div>
 
           <motion.div

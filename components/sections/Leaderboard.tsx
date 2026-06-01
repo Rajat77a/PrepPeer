@@ -1,4 +1,3 @@
-import Link from "next/link";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import HoverCard from "@/components/ui/HoverCard";
 import CountUp from "@/components/ui/CountUp";
@@ -38,12 +37,6 @@ export function LeaderboardSection() {
               <LeaderboardRow key={entry.rank} entry={entry} compact />
             ))}
           </HoverCard>
-          <Link
-            href="/leaderboard"
-            className="inline-flex mt-6 font-inter font-semibold text-sm text-blue hover:underline cursor-pointer"
-          >
-            View full leaderboard
-          </Link>
         </ScrollReveal>
 
         <ScrollReveal direction="right" delay={0.15} duration={0.8}>
