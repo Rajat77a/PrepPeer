@@ -212,6 +212,11 @@ export default function InterviewPage() {
       name: reportIdentity.name,
       role: reportIdentity.role,
       companyType: reportIdentity.companyType,
+      demoAttemptId: isAccountInterview
+        ? undefined
+        : typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       compositeScore,
       percentile: rankSummary
         ? getRankPercentileLabel(rankSummary.rank, rankSummary.totalCandidates)

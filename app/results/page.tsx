@@ -21,12 +21,49 @@ import { createClient } from "@/utils/supabase/client";
 
 type StoredResult = Partial<SessionReport> & {
   source?: "account" | "demo";
+  demoAttemptId?: string;
   unlockedUserId?: string;
   unlockedSessionId?: string;
 };
 
 const DEMO_RESULTS_KEY = "preppeer_pending_demo_results";
 const RESULTS_KEY = "preppeer_results";
+
+const getObjectSummary = (summary: unknown) =>
+  summary && typeof summary === "object" && !Array.isArray(summary)
+    ? (summary as Record<string, unknown>)
+    : {};
+
+const normalizeJson = (value: unknown) => JSON.stringify(value ?? []);
+
+const isSameUnlockedDemoSession = (
+  session: InterviewSessionRow,
+  storedResult: StoredResult
+) => {
+  const summary = getObjectSummary(session.summary);
+
+  if (
+    storedResult.demoAttemptId &&
+    summary.demoAttemptId === storedResult.demoAttemptId
+  ) {
+    return true;
+  }
+
+  const createdAt = new Date(session.created_at ?? 0).getTime();
+  const isRecent = Date.now() - createdAt < 6 * 60 * 60 * 1000;
+
+  return (
+    isRecent &&
+    Number(session.composite_score ?? 0) ===
+      Number(storedResult.compositeScore ?? 0) &&
+    (session.role ?? "Interview") === (storedResult.role ?? "Interview") &&
+    (session.company_type ?? "General") ===
+      (storedResult.companyType ?? "General") &&
+    normalizeJson(session.question_scores) ===
+      normalizeJson(storedResult.questionScores) &&
+    normalizeJson(session.dimensions) === normalizeJson(storedResult.dimensions)
+  );
+};
 
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
@@ -101,22 +138,46 @@ export default function ResultsPage() {
 
         if (!user || storedResult.unlockedUserId === user.id) return;
 
-        const { data: insertedSession, error: insertError } = await supabase
+        const { data: existingUserSessions } = await supabase
           .from("interview_sessions")
-          .insert({
-            user_id: user.id,
-            role: storedResult.role ?? "Interview",
-            experience: null,
-            company_type: storedResult.companyType ?? "General",
-            composite_score: storedResult.compositeScore ?? 0,
-            dimensions: storedResult.dimensions ?? [],
-            question_scores: storedResult.questionScores ?? [],
-            summary: storedResult.summary ?? null,
-          })
-          .select("id")
-          .single();
+          .select(
+            "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
+          )
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(50);
 
-        if (insertError) return;
+        const alreadySavedSession = (
+          (existingUserSessions ?? []) as InterviewSessionRow[]
+        ).find((session) => isSameUnlockedDemoSession(session, storedResult));
+
+        let unlockedSessionId = alreadySavedSession?.id;
+
+        if (!alreadySavedSession) {
+          const { data: insertedSession, error: insertError } = await supabase
+            .from("interview_sessions")
+            .insert({
+              user_id: user.id,
+              role: storedResult.role ?? "Interview",
+              experience: null,
+              company_type: storedResult.companyType ?? "General",
+              composite_score: storedResult.compositeScore ?? 0,
+              dimensions: storedResult.dimensions ?? [],
+              question_scores: storedResult.questionScores ?? [],
+              summary: {
+                ...getObjectSummary(storedResult.summary),
+                source: "demo-unlock",
+                demoAttemptId:
+                  storedResult.demoAttemptId ??
+                  `${user.id}-${storedResult.compositeScore ?? 0}`,
+              },
+            })
+            .select("id")
+            .single();
+
+          if (insertError) return;
+          unlockedSessionId = insertedSession?.id;
+        }
 
         const { data: sessionRows } = await supabase
           .from("interview_sessions")
@@ -140,7 +201,7 @@ export default function ResultsPage() {
           companyType: storedResult.companyType ?? "General",
           source: "account",
           unlockedUserId: user.id,
-          unlockedSessionId: insertedSession?.id,
+          unlockedSessionId,
           percentile: getRankPercentileLabel(
             rankSummary.rank,
             rankSummary.totalCandidates
