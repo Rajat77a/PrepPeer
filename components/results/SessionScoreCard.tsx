@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { LockKeyhole } from "lucide-react";
+import { ArrowRight, LockKeyhole, X } from "lucide-react";
 import { ScoreBar } from "@/components/ui/ScoreBar";
 import { DeltaText } from "@/components/ui/DeltaText";
 import type { SessionReport } from "@/lib/types";
@@ -17,9 +18,11 @@ export function SessionScoreCard({
   onShare,
   rankLocked = false,
 }: SessionScoreCardProps) {
+  const [practiceGateOpen, setPracticeGateOpen] = useState(false);
   const isAccountResult = report.source === "account";
   const practiceHref = isAccountResult ? "/interview?mode=account" : "/interview";
   const leaderboardHref = isAccountResult ? "/dashboard/leaderboard" : "/leaderboard";
+  const accountPracticePath = "%2Finterview%3Fmode%3Daccount";
 
   return (
     <div className="rounded-3xl overflow-hidden border border-[rgba(0,132,255,0.15)] shadow-[0_32px_80px_rgba(0,0,0,0.08)] bg-white">
@@ -99,12 +102,22 @@ export function SessionScoreCard({
           />
         ))}
         <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
-          <Link
-            href={practiceHref}
-            className="flex-1 text-center py-2.5 rounded-[10px] bg-blue text-white font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
-          >
-            Practice Again
-          </Link>
+          {rankLocked ? (
+            <button
+              type="button"
+              onClick={() => setPracticeGateOpen(true)}
+              className="flex-1 text-center py-2.5 rounded-[10px] bg-blue text-white font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
+            >
+              Practice Again
+            </button>
+          ) : (
+            <Link
+              href={practiceHref}
+              className="flex-1 text-center py-2.5 rounded-[10px] bg-blue text-white font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
+            >
+              Practice Again
+            </Link>
+          )}
           <Link
             href={rankLocked ? "/login?next=%2Fresults%3FunlockRank%3D1" : leaderboardHref}
             target={rankLocked ? "_blank" : undefined}
@@ -133,6 +146,70 @@ export function SessionScoreCard({
           )}
         </div>
       </div>
+      {practiceGateOpen && (
+        <div
+          className="fixed inset-0 z-[500] flex items-center justify-center bg-[#07111f]/55 px-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="practice-gate-title"
+        >
+          <div className="relative w-full max-w-[520px] overflow-hidden rounded-[28px] border border-[rgba(0,132,255,0.18)] bg-white shadow-[0_34px_90px_rgba(0,40,90,0.24)]">
+            <div className="absolute right-[-80px] top-[-90px] h-60 w-60 rounded-full bg-[#0084ff]/15 blur-[55px]" />
+            <div className="absolute bottom-[-120px] left-[-80px] h-64 w-64 rounded-full bg-[#7dffd9]/12 blur-[65px]" />
+            <button
+              type="button"
+              onClick={() => setPracticeGateOpen(false)}
+              className="absolute right-5 top-5 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(0,0,0,0.08)] bg-white/80 text-muted transition hover:text-text"
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+            <div className="relative z-10 p-7 sm:p-8">
+              <div className="mb-6 flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EAF5FF] shadow-[inset_0_0_0_1px_rgba(0,132,255,0.14)]">
+                  <LockKeyhole size={24} className="text-blue" strokeWidth={2.1} />
+                </div>
+                <div>
+                  <p className="font-inter text-[11px] font-extrabold uppercase tracking-[0.22em] text-blue">
+                    Demo completed
+                  </p>
+                  <h2
+                    id="practice-gate-title"
+                    className="mt-1 font-fustat text-2xl font-extrabold tracking-[-0.04em] text-text"
+                  >
+                    Continue inside your account.
+                  </h2>
+                </div>
+              </div>
+              <p className="font-inter text-[15px] leading-7 text-muted">
+                The free landing-page interview is a one-time preview. Sign in or
+                create an account to start the next interview, save each session,
+                and track your rank on the live board.
+              </p>
+              <div className="mt-7 grid gap-3 sm:grid-cols-2">
+                <Link
+                  href={`/login?next=${accountPracticePath}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center justify-center gap-2 rounded-2xl bg-blue px-5 py-3 font-inter text-sm font-extrabold text-white shadow-[0_18px_38px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_48px_rgba(0,132,255,0.32)]"
+                >
+                  Sign in to continue
+                  <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
+                </Link>
+                <Link
+                  href={`/login?next=${accountPracticePath}&mode=signup`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center justify-center gap-2 rounded-2xl border border-[rgba(0,132,255,0.18)] bg-[#F2F8FF] px-5 py-3 font-inter text-sm font-extrabold text-blue transition hover:-translate-y-0.5 hover:border-blue/35 hover:bg-white"
+                >
+                  Create account
+                  <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
