@@ -44,5 +44,18 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${siteUrl}/login?error=callback_failed`);
   }
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const hasRequiredProfile =
+    Boolean(user?.user_metadata?.full_name ?? user?.user_metadata?.name) &&
+    Boolean(user?.user_metadata?.college);
+
+  if (!hasRequiredProfile) {
+    return NextResponse.redirect(
+      `${siteUrl}/onboarding?next=${encodeURIComponent(next)}`
+    );
+  }
+
   return NextResponse.redirect(`${siteUrl}${next}`);
 }

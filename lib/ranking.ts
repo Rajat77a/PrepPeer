@@ -21,6 +21,11 @@ export type RankedSession = InterviewSessionRow & {
   previousRank: number | null;
 };
 
+export type LeaderboardUserProfile = {
+  name?: string;
+  college?: string;
+};
+
 const BENCHMARK_WINDOW_MS = 5 * 60 * 1000;
 
 const benchmarkFirstNames = [
@@ -322,7 +327,8 @@ export const toLeaderboardEntries = (
   allSessions: InterviewSessionRow[],
   currentUserId?: string,
   currentUserName = "You",
-  currentUserCollege?: string
+  currentUserCollege?: string,
+  userProfiles: Record<string, LeaderboardUserProfile> = {}
 ): LeaderboardEntry[] => {
   const benchmarkedSessions = withBenchmarkSessions(allSessions);
   const rankedSessions = rankSessions(getBestByUser(benchmarkedSessions));
@@ -332,6 +338,7 @@ export const toLeaderboardEntries = (
     const benchmarkProfile = session.user_id.startsWith("benchmark-")
       ? getBenchmarkProfile(session)
       : null;
+    const realUserProfile = userProfiles[session.user_id];
     const sessionsCount = benchmarkProfile
       ? 1 + (Number(session.user_id.replace("benchmark-", "")) % 14)
       : allSessions.filter((item) => item.user_id === session.user_id).length;
@@ -341,11 +348,18 @@ export const toLeaderboardEntries = (
       name:
         session.user_id === currentUserId
           ? "You"
-          : benchmarkProfile?.name ?? `Candidate ${session.user_id.slice(0, 4)}`,
+          : realUserProfile?.name ??
+            benchmarkProfile?.name ??
+            "PrepPeer user",
       subtitle:
         session.user_id === currentUserId
           ? `${currentUserName}${currentUserCollege ? ` - ${currentUserCollege}` : ""}`
-          : `${benchmarkProfile?.college ?? session.role ?? "Interview"} - ${session.company_type ?? "General"}`,
+          : `${
+              realUserProfile?.college ??
+              benchmarkProfile?.college ??
+              session.role ??
+              "Interview"
+            } - ${session.company_type ?? "General"}`,
       role: session.role ?? undefined,
       companyType: session.company_type ?? undefined,
       score: session.score,

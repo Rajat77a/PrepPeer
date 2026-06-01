@@ -11,6 +11,7 @@ import {
   toLeaderboardEntries,
   type InterviewSessionRow,
 } from "@/lib/ranking";
+import { getLeaderboardUserProfiles } from "@/lib/leaderboardProfiles";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
 
@@ -39,6 +40,7 @@ export default async function DashboardPage() {
     )
     .order("created_at", { ascending: false })
     .limit(1000);
+  const userProfiles = await getLeaderboardUserProfiles(supabase);
 
   const allSessions = (rows ?? []) as InterviewSessionRow[];
   const rankSummary = getRankSummary(allSessions, user.id);
@@ -46,7 +48,8 @@ export default async function DashboardPage() {
     allSessions,
     user.id,
     name,
-    String(user.user_metadata?.college ?? "")
+    String(user.user_metadata?.college ?? ""),
+    userProfiles
   );
 
   const userRank = rankSummary?.rank;

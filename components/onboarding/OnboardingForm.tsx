@@ -10,11 +10,13 @@ import { createClient } from "@/utils/supabase/client";
 type OnboardingFormProps = {
   initialName: string;
   initialCollege: string;
+  postSubmitPath?: string;
 };
 
 export function OnboardingForm({
   initialName,
   initialCollege,
+  postSubmitPath,
 }: OnboardingFormProps) {
   const router = useRouter();
   const [fullName, setFullName] = useState(initialName);
@@ -49,7 +51,9 @@ export function OnboardingForm({
     }
 
     const nextPath =
-      sessionStorage.getItem("preppeer_post_onboarding_next") ?? "/dashboard/profile";
+      sessionStorage.getItem("preppeer_post_onboarding_next") ??
+      postSubmitPath ??
+      "/dashboard/profile";
     sessionStorage.removeItem("preppeer_post_onboarding_next");
 
     router.replace(nextPath);

@@ -5,6 +5,7 @@ import {
   toLeaderboardEntries,
   type InterviewSessionRow,
 } from "@/lib/ranking";
+import { getLeaderboardUserProfiles } from "@/lib/leaderboardProfiles";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
 
@@ -24,12 +25,14 @@ export default async function DashboardLeaderboardPage() {
     )
     .order("created_at", { ascending: false })
     .limit(1000);
+  const userProfiles = await getLeaderboardUserProfiles(supabase);
 
   const entries = toLeaderboardEntries(
     (rows ?? []) as InterviewSessionRow[],
     user?.id,
     String(user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? "You"),
-    String(user?.user_metadata?.college ?? "")
+    String(user?.user_metadata?.college ?? ""),
+    userProfiles
   );
 
   return <LeaderboardClient entries={entries} />;
