@@ -17,6 +17,10 @@ export function SessionScoreCard({
   onShare,
   rankLocked = false,
 }: SessionScoreCardProps) {
+  const isAccountResult = report.source === "account";
+  const practiceHref = isAccountResult ? "/interview?mode=account" : "/interview";
+  const leaderboardHref = isAccountResult ? "/dashboard/leaderboard" : "/leaderboard";
+
   return (
     <div className="rounded-3xl overflow-hidden border border-[rgba(0,132,255,0.15)] shadow-[0_32px_80px_rgba(0,0,0,0.08)] bg-white">
       <div
@@ -96,13 +100,13 @@ export function SessionScoreCard({
         ))}
         <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
           <Link
-            href="/interview"
+            href={practiceHref}
             className="flex-1 text-center py-2.5 rounded-[10px] bg-blue text-white font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
           >
             Practice Again
           </Link>
           <Link
-            href={rankLocked ? "/login?next=%2Fresults%3FunlockRank%3D1" : "/leaderboard"}
+            href={rankLocked ? "/login?next=%2Fresults%3FunlockRank%3D1" : leaderboardHref}
             target={rankLocked ? "_blank" : undefined}
             rel={rankLocked ? "noopener noreferrer" : undefined}
             className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.08)] font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"

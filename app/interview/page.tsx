@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
@@ -69,7 +69,7 @@ export default function InterviewPage() {
   const toPercentScore = (scoreOutOf40: number) =>
     Math.round((Math.max(0, Math.min(40, scoreOutOf40)) / 40) * 100);
 
-  const saveResults = async (
+  const saveResults = useCallback(async (
     reviews: QuestionReview[],
     completionReason: "completed" | "autoSubmitted"
   ) => {
@@ -159,6 +159,7 @@ export default function InterviewPage() {
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
     let rankSummary = null;
+    let savedSessionId: string | undefined;
     let reportIdentity = {
       name: "Guest",
       role: setup.domain || "Interview",
@@ -172,16 +173,26 @@ export default function InterviewPage() {
         companyType: setup.companyType || "General",
       };
 
-      await supabase.from("interview_sessions").insert({
-        user_id: data.user.id,
-        role: setup.domain,
-        experience: setup.experience,
-        company_type: setup.companyType,
-        composite_score: compositeScore,
-        dimensions: resultDimensions,
-        question_scores: allQuestionScores,
-        summary,
-      });
+      const { data: insertedSession, error: insertError } = await supabase
+        .from("interview_sessions")
+        .insert({
+          user_id: data.user.id,
+          role: setup.domain,
+          experience: setup.experience,
+          company_type: setup.companyType,
+          composite_score: compositeScore,
+          dimensions: resultDimensions,
+          question_scores: allQuestionScores,
+          summary,
+        })
+        .select("id")
+        .single();
+
+      if (insertError) {
+        throw new Error(insertError.message);
+      }
+
+      savedSessionId = insertedSession?.id;
 
       const { data: sessionRows } = await supabase
         .from("interview_sessions")
@@ -215,6 +226,8 @@ export default function InterviewPage() {
       questionScores: allQuestionScores,
       summary,
       source: isAccountInterview ? "account" : "demo",
+      unlockedUserId: isAccountInterview ? data.user?.id : undefined,
+      unlockedSessionId: savedSessionId,
     };
 
     sessionStorage.setItem(RESULTS_KEY, JSON.stringify(resultPayload));
@@ -224,7 +237,14 @@ export default function InterviewPage() {
     } else {
       localStorage.setItem(DEMO_RESULTS_KEY, JSON.stringify(resultPayload));
     }
-  };
+  }, [
+    dimensionHistory,
+    isAccountInterview,
+    questions,
+    setup.companyType,
+    setup.domain,
+    setup.experience,
+  ]);
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -268,7 +288,7 @@ export default function InterviewPage() {
         router.push("/results");
       });
     }
-  }, [shouldAutoSubmit, router, questionReviews, dimensionHistory]);
+  }, [shouldAutoSubmit, router, questionReviews, dimensionHistory, saveResults]);
 
   const handleStart = async (profileSetup = setup) => {
     if (!profileSetup.domain || !profileSetup.experience || !profileSetup.companyType) {

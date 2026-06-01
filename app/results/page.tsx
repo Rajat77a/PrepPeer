@@ -50,15 +50,14 @@ export default function ResultsPage() {
         sessionStorage.setItem(RESULTS_KEY, stored);
         const realData = JSON.parse(stored) as StoredResult;
         const shouldLockRank =
-          (realData.source === "demo" && !realData.unlockedUserId) ||
-          (!realData.unlockedUserId &&
-            (!realData.currentRank || !realData.totalCandidates));
+          realData.source === "demo" && !realData.unlockedUserId;
 
         setReport((prev) => ({
           ...prev,
           name: realData.name ?? prev.name,
           role: realData.role ?? prev.role,
           companyType: realData.companyType ?? prev.companyType,
+          source: realData.source ?? prev.source,
           compositeScore: realData.compositeScore ?? prev.compositeScore,
           percentile: realData.percentile ?? "Not ranked",
           rankDelta: realData.rankDelta ?? "No ranked session yet",
@@ -159,6 +158,7 @@ export default function ResultsPage() {
           name: unlockedResult.name ?? prev.name,
           role: unlockedResult.role ?? prev.role,
           companyType: unlockedResult.companyType ?? prev.companyType,
+          source: unlockedResult.source ?? prev.source,
           compositeScore: unlockedResult.compositeScore ?? prev.compositeScore,
           percentile: unlockedResult.percentile ?? prev.percentile,
           rankDelta: unlockedResult.rankDelta ?? prev.rankDelta,

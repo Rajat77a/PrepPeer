@@ -108,6 +108,7 @@ export interface SessionReport {
   name: string;
   role: string;
   companyType: string;
+  source?: "account" | "demo";
   compositeScore: number;
   percentile: string;
   rankDelta: string;
