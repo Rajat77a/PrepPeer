@@ -58,6 +58,141 @@ const COMMON_WORDS = new Set([
   "would",
 ]);
 
+const GENERIC_FILLER_WORDS = new Set([
+  "answer",
+  "aspect",
+  "aspects",
+  "best",
+  "better",
+  "careful",
+  "carefully",
+  "clear",
+  "decision",
+  "detail",
+  "details",
+  "good",
+  "great",
+  "handle",
+  "important",
+  "interviewer",
+  "improve",
+  "issue",
+  "logic",
+  "meaningful",
+  "proper",
+  "question",
+  "reason",
+  "score",
+  "solution",
+  "step",
+  "steps",
+  "test",
+  "thing",
+  "things",
+  "understand",
+  "way",
+]);
+
+const ACTION_OR_DOMAIN_WORDS = new Set([
+  "audit",
+  "benchmark",
+  "compare",
+  "debug",
+  "define",
+  "design",
+  "diagnose",
+  "estimate",
+  "experiment",
+  "inspect",
+  "instrument",
+  "investigate",
+  "measure",
+  "mitigate",
+  "monitor",
+  "prioritize",
+  "review",
+  "rollback",
+  "segment",
+  "test",
+  "tradeoff",
+  "validate",
+]);
+
+const META_OR_NON_ANSWER_PATTERNS = [
+  /\bi\s+(do\s+not|don't|dont|cannot|can't|cant)\s+(know|understand|answer)/,
+  /\b(no|not)\s+(idea|answer|clue)\b/,
+  /\b(this|that)\s+is\s+(a\s+)?(test|sample|dummy|placeholder)\b/,
+  /\b(testing|checking)\s+(the\s+)?(ai|score|scoring|system|website|app)\b/,
+  /\b(fill|filling|filled)\s+(the\s+)?(word|words|limit|minimum)\b/,
+  /\b(just|only)\s+(typing|writing|adding|testing|checking)\b/,
+  /\bignore\s+(this|the)\s+(answer|response|text)\b/,
+];
+
+const tokenize = (value: string) => value.toLowerCase().match(/[a-z][a-z0-9]+/g) ?? [];
+
+const getContentTokens = (value: string) =>
+  tokenize(value).filter((token) => token.length >= 4 && !COMMON_WORDS.has(token));
+
+const hasSubstanceSignals = (tokens: string[], answer: string) => {
+  const concreteTokens = tokens.filter((token) => !GENERIC_FILLER_WORDS.has(token));
+  const hasNumberOrMetric = /\b\d+(\.\d+)?\s*(%|ms|s|sec|seconds|users|requests|qps|rps|x|k|m)?\b/i.test(answer);
+  const hasCausalReasoning =
+    /\b(because|therefore|tradeoff|trade-offs|risk|impact|measure|metric|latency|scale|cost|constraint|validate|prioritize|monitor|debug|root cause)\b/i.test(answer);
+  const actionSignalCount = concreteTokens.filter((token) =>
+    ACTION_OR_DOMAIN_WORDS.has(token)
+  ).length;
+
+  return (
+    concreteTokens.length >= 4 &&
+    (hasNumberOrMetric || hasCausalReasoning || actionSignalCount >= 2)
+  );
+};
+
+const evaluateQuestionRelevance = (answer: string, question?: unknown) => {
+  if (typeof question !== "string" || !question.trim()) {
+    return { valid: true, reason: "" };
+  }
+
+  const normalizedAnswer = answer.trim().toLowerCase();
+
+  if (META_OR_NON_ANSWER_PATTERNS.some((pattern) => pattern.test(normalizedAnswer))) {
+    return {
+      valid: false,
+      reason:
+        "The response is a non-answer or meta response rather than an attempt to answer the interview question.",
+    };
+  }
+
+  const questionTokens = new Set(getContentTokens(question));
+  const answerTokens = getContentTokens(answer);
+  const answerTokenSet = new Set(answerTokens);
+  const overlapCount = Array.from(questionTokens).filter((token) =>
+    answerTokenSet.has(token)
+  ).length;
+  const overlapRatio = questionTokens.size ? overlapCount / questionTokens.size : 1;
+
+  const hasEnoughQuestionOverlap =
+    overlapCount >= 2 || (overlapCount >= 1 && overlapRatio >= 0.18);
+
+  if (!hasEnoughQuestionOverlap && !hasSubstanceSignals(answerTokens, answer)) {
+    return {
+      valid: false,
+      reason:
+        "The response does not directly address the question with relevant interview content.",
+    };
+  }
+
+  if (!hasSubstanceSignals(answerTokens, answer) && overlapCount < 3) {
+    return {
+      valid: false,
+      reason:
+        "The response is too generic to show a real attempt at the interview question.",
+    };
+  }
+
+  return { valid: true, reason: "" };
+};
+
 export const createZeroFeedback = (reason: string): FeedbackData => ({
   compositeScore: 0,
   dimensions: [
@@ -70,7 +205,7 @@ export const createZeroFeedback = (reason: string): FeedbackData => ({
     "A strong answer should directly address the question, explain the reasoning step by step, include relevant tradeoffs, and use concrete technical details or examples.",
 });
 
-export const evaluateAnswerQuality = (answer: unknown) => {
+export const evaluateAnswerQuality = (answer: unknown, question?: unknown) => {
   if (typeof answer !== "string") {
     return {
       valid: false,
@@ -132,6 +267,9 @@ export const evaluateAnswerQuality = (answer: unknown) => {
       reason: "The answer appears to be random or nonsensical text, so it cannot receive interview credit.",
     };
   }
+
+  const relevance = evaluateQuestionRelevance(answer, question);
+  if (!relevance.valid) return relevance;
 
   return { valid: true, reason: "" };
 };

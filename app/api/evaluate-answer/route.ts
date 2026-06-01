@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
   try {
     const { question, answer, domain, experience } = await req.json();
 
-    const answerQuality = evaluateAnswerQuality(answer);
+    const answerQuality = evaluateAnswerQuality(answer, question);
     if (!answerQuality.valid) {
       return NextResponse.json({ feedback: createZeroFeedback(answerQuality.reason) });
     }
@@ -40,6 +40,9 @@ Candidate Level: ${experience}
 Domain: ${domain}
 Answer: ${answer}
 
+First decide whether the answer is a real attempt to answer THIS exact question.
+A real attempt must address the question's topic and provide relevant reasoning, approach, tradeoffs, facts, examples, or concrete steps.
+
 Evaluate strictly on these 4 dimensions (score each out of 10):
 
 1. Communication (0-10): Is the answer clear, structured, and easy to follow?
@@ -51,6 +54,11 @@ Scoring rules:
 - If the answer is random, unreadable, nonsensical, or mostly meaningless characters, score 0 on all dimensions
 - If you cannot understand the candidate's content well enough to evaluate it, score 0 on all dimensions
 - A random or gibberish answer must never receive credit for communication, problem solving, specificity, or accuracy
+- If the answer is meta-commentary about the question, the test, the scoring system, the AI, or filling the word limit, score 0 on all dimensions
+- If the answer is fluent but does not actually answer THIS question, score 0 on all dimensions
+- If the answer is generic interview-sounding filler without question-specific reasoning or concrete details, score 0 on all dimensions
+- Do not award Communication points for a clear non-answer; a non-answer is 0 even if it is grammatical
+- Accuracy cannot exceed 2 unless the answer contains relevant factual or domain-specific content for the question
 - A vague answer with no examples scores max 4 on Specificity
 - Only award 8-10 if the answer is genuinely impressive for a ${experience} level candidate
 - compositeScore = Communication + ProblemSolving + Specificity + Accuracy
@@ -86,6 +94,14 @@ Return ONLY this JSON, no explanation:
     }
 
     const feedback = JSON.parse(match[0]);
+    const finalQualityCheck = evaluateAnswerQuality(answer, question);
+
+    if (!finalQualityCheck.valid) {
+      return NextResponse.json({
+        feedback: createZeroFeedback(finalQualityCheck.reason),
+      });
+    }
+
     const dimensions = Array.isArray(feedback.dimensions)
       ? feedback.dimensions.map((dimension: { label?: string; value?: unknown; reason?: string }) => ({
           ...dimension,

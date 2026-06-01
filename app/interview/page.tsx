@@ -272,7 +272,7 @@ export default function InterviewPage() {
   }, [stage]);
 
   const handleSubmit = async (answer: string) => {
-    const answerQuality = evaluateAnswerQuality(answer);
+    const answerQuality = evaluateAnswerQuality(answer, questions[current - 1]);
 
     if (!answerQuality.valid) {
       const zeroFeedback = createZeroFeedback(answerQuality.reason);
