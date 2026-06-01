@@ -94,7 +94,7 @@ export function LeaderboardClient({
           <span>Status</span>
           <span>Score</span>
           <span>Sessions</span>
-          <span>Rank change</span>
+          <span>Movement</span>
         </div>
 
         <div className="divide-y divide-white/[0.055]">
@@ -132,7 +132,7 @@ export function LeaderboardClient({
               </span>
               <span
                 className={cn(
-                  "font-inter text-sm font-bold",
+                  "inline-flex items-center gap-2 font-inter text-sm font-bold",
                   entry.deltaType === "up"
                     ? "text-green-400"
                     : entry.deltaType === "down"
@@ -140,7 +140,18 @@ export function LeaderboardClient({
                       : "text-white/35"
                 )}
               >
-                {entry.delta ?? "No rank change"}
+                <span
+                  className={cn(
+                    "h-px w-6",
+                    entry.deltaType === "up"
+                      ? "bg-green-400"
+                      : entry.deltaType === "down"
+                        ? "bg-red-400"
+                        : "bg-white/20"
+                  )}
+                  aria-hidden="true"
+                />
+                {entry.delta ?? "→ steady"}
               </span>
             </div>
           ))}

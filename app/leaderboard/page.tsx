@@ -5,6 +5,7 @@ import { LeaderboardFilters } from "@/components/leaderboard/LeaderboardFilters"
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
 import { createClient } from "@/utils/supabase/server";
 import { FULL_LEADERBOARD } from "@/lib/mockData";
+import { getRankChangeLabel } from "@/lib/ranking";
 import type { LeaderboardEntry } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -95,33 +96,23 @@ const mergeDemoAndRealEntries = (
     if (!previousEntry || entry.previousScore === null || entry.previousScore === undefined) {
       return {
         ...entry,
-        delta: "New",
+        delta: "new entry",
         deltaType: "up",
       };
     }
 
     const rankDelta = previousEntry.rank - entry.rank;
+    const deltaType =
+      rankDelta > 0 ? "up" : rankDelta < 0 ? "down" : "neutral";
 
     return {
       ...entry,
       delta:
-        rankDelta > 0
-          ? `↑ +${rankDelta}`
-          : rankDelta < 0
-            ? `↓ ${Math.abs(rankDelta)}`
-            : undefined,
-      deltaType:
-        rankDelta > 0
-          ? "up"
-          : rankDelta < 0
-            ? "down"
-            : undefined,
-      trend:
-        rankDelta > 0
-          ? "up"
-          : rankDelta < 0
-            ? "down"
-            : "flat",
+        rankDelta === 0
+          ? "→ steady"
+          : getRankChangeLabel(entry.rank, previousEntry.rank),
+      deltaType,
+      trend: deltaType === "neutral" ? "flat" : deltaType,
     };
   });
 };

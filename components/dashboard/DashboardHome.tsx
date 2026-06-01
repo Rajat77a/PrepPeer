@@ -338,12 +338,14 @@ function ReturningDashboard({
                 </span>
                 <span
                   className={
-                    session.delta?.startsWith("Up")
+                    session.delta?.startsWith("↗")
                       ? "text-xs font-bold text-green-400"
-                      : "text-xs font-bold text-red-400"
+                      : session.delta?.startsWith("↘")
+                        ? "text-xs font-bold text-red-400"
+                        : "text-xs font-bold text-white/35"
                   }
                 >
-                  {session.delta ?? "First session"}
+                  {session.delta ?? "new entry"}
                 </span>
               </div>
             </Link>

@@ -289,12 +289,12 @@ export const PRICING_PLANS: PricingPlan[] = [
 ];
 
 export const FULL_LEADERBOARD: LeaderboardEntry[] = [
-  { rank: 1, name: "Arjun S.", subtitle: "SDE Fresher", score: 94, sessions: 18, delta: "↑ +5", deltaType: "up", trend: "up" },
-  { rank: 2, name: "Priya M.", subtitle: "SDE Fresher", score: 89, sessions: 15, delta: "↑ +2", deltaType: "up", trend: "up" },
-  { rank: 3, name: "Sneha K.", subtitle: "SDE Fresher", score: 85, sessions: 12, delta: "↑ +8", deltaType: "up", trend: "up" },
+  { rank: 1, name: "Arjun S.", subtitle: "SDE Fresher", score: 94, sessions: 18, delta: "↗ 5 ranks", deltaType: "up", trend: "up" },
+  { rank: 2, name: "Priya M.", subtitle: "SDE Fresher", score: 89, sessions: 15, delta: "↗ 2 ranks", deltaType: "up", trend: "up" },
+  { rank: 3, name: "Sneha K.", subtitle: "SDE Fresher", score: 85, sessions: 12, delta: "↗ 8 ranks", deltaType: "up", trend: "up" },
   { rank: 4, name: "Vikram P.", subtitle: "SDE Fresher", score: 83, sessions: 10, trend: "flat" },
-  { rank: 5, name: "Ananya R.", subtitle: "SDE Fresher", score: 81, sessions: 9, delta: "↓ -1", deltaType: "down", trend: "down" },
-  { rank: 15, name: "Rohan T.", subtitle: "SDE Fresher", score: 76, sessions: 7, delta: "↑ +4", deltaType: "up", trend: "up" },
+  { rank: 5, name: "Ananya R.", subtitle: "SDE Fresher", score: 81, sessions: 9, delta: "↘ 1 rank", deltaType: "down", trend: "down" },
+  { rank: 15, name: "Rohan T.", subtitle: "SDE Fresher", score: 76, sessions: 7, delta: "↗ 4 ranks", deltaType: "up", trend: "up" },
   { rank: 28, name: "Meera L.", subtitle: "SDE Fresher", score: 74, sessions: 6, trend: "up" },
   {
     rank: 41,
@@ -302,12 +302,12 @@ export const FULL_LEADERBOARD: LeaderboardEntry[] = [
     subtitle: "SDE Fresher",
     score: 72,
     sessions: 12,
-    delta: "↑ +26",
+    delta: "↗ 26 ranks",
     deltaType: "up",
     isYou: true,
     trend: "up",
   },
-  { rank: 42, name: "Karthik R.", subtitle: "SDE Fresher", score: 71, sessions: 8, delta: "↓ -3", deltaType: "down", trend: "down" },
+  { rank: 42, name: "Karthik R.", subtitle: "SDE Fresher", score: 71, sessions: 8, delta: "↘ 3 ranks", deltaType: "down", trend: "down" },
   { rank: 43, name: "Divya N.", subtitle: "SDE Fresher", score: 70, sessions: 5, trend: "flat" },
 ];
 

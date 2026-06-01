@@ -89,7 +89,15 @@ export function LeaderboardRow({ entry, compact }: LeaderboardRowProps) {
         {entry.score}
       </span>
       {entry.delta && (
-        <DeltaText type={entry.deltaType === "down" ? "down" : "up"}>
+        <DeltaText
+          type={
+            entry.deltaType === "down"
+              ? "down"
+              : entry.deltaType === "neutral"
+                ? "neutral"
+                : "up"
+          }
+        >
           {entry.delta}
         </DeltaText>
       )}

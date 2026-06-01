@@ -70,7 +70,7 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <Stat label="Score" value={`${Number(session.composite_score ?? 0)}/100`} />
             <Stat label="Current rank" value={rankSummary ? `#${rankSummary.rank}` : "-"} />
-            <Stat label="Rank change" value={rankSummary?.rankChange ?? "-"} />
+            <Stat label="Movement" value={rankSummary?.rankChange ?? "-"} />
           </div>
         </div>
       </section>

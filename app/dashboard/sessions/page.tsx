@@ -53,7 +53,7 @@ export default async function DashboardSessionsPage() {
           <span>Company</span>
           <span>Score</span>
           <span>Rank</span>
-          <span>Rank change</span>
+          <span>Movement</span>
           <span />
         </div>
 

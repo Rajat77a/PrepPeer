@@ -18,7 +18,7 @@ export function LeaderboardTable({ entries }: LeaderboardTableProps) {
         <span className="font-fustat font-bold text-sm text-white w-16 hidden sm:block">
           Trend
         </span>
-        <span className="font-fustat font-bold text-sm text-white w-24">Rank change</span>
+        <span className="font-fustat font-bold text-sm text-white w-24">Movement</span>
       </div>
 
       {entries.map((entry, i) => (

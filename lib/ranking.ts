@@ -278,11 +278,16 @@ export const getRankChangeLabel = (
   currentRank: number,
   previousRank: number | null
 ) => {
-  if (!previousRank) return "First ranked session";
-  if (previousRank === currentRank) return "No rank change";
+  if (!previousRank) return "new entry";
+  if (previousRank === currentRank) return "→ steady";
 
   const movement = previousRank - currentRank;
-  return movement > 0 ? `Up ${movement}` : `Down ${Math.abs(movement)}`;
+  const places = Math.abs(movement);
+  const placeLabel = places === 1 ? "rank" : "ranks";
+
+  return movement > 0
+    ? `↗ ${places} ${placeLabel}`
+    : `↘ ${places} ${placeLabel}`;
 };
 
 export const getRankSummary = (
