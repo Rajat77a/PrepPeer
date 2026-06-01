@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
 import { FeedbackPanel } from "@/components/interview/FeedbackPanel";
@@ -11,12 +10,6 @@ import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
-import {
-  getDisplayName,
-  getRankPercentileLabel,
-  getRankSummary,
-  type InterviewSessionRow,
-} from "@/lib/ranking";
 import { createClient } from "@/utils/supabase/client";
 import type { QuestionReview } from "@/lib/types";
 import { AlertTriangle, ArrowRight, Clock, LockKeyhole, ShieldCheck } from "lucide-react";
@@ -24,8 +17,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 
 const TOTAL = 5;
-const DEMO_COMPLETED_KEY = "preppeer_demo_interview_completed_at";
-const DEMO_RESULTS_KEY = "preppeer_pending_demo_results";
 
 type SetupData = {
   domain: string;
@@ -37,10 +28,7 @@ type Stage = "setup" | "terms" | "interview" | "feedback";
 
 export default function InterviewPage() {
   const router = useRouter();
-  const [isAccountInterview, setIsAccountInterview] = useState(false);
-  const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
-  const [demoGateVisible, setDemoGateVisible] = useState(false);
   const [current, setCurrent] = useState(1);
   const [questions, setQuestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -93,39 +81,15 @@ export default function InterviewPage() {
       score: item.score,
     }));
 
-    const validScores = allReviews
-      .filter((item) => item.status === "answered")
-      .map((item) => item.score);
-
-    const compositeScore = validScores.length
-      ? Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length)
-      : 0;
+    const compositeScore = Math.round(
+      allReviews.reduce((sum, item) => sum + item.score, 0) / TOTAL
+    );
 
     const zeroDimensions = [
-      {
-        label: "Communication",
-        value: 0,
-        color: "#0084FF",
-        reason: "No valid answer was submitted.",
-      },
-      {
-        label: "Problem Solving",
-        value: 0,
-        color: "#319AFF",
-        reason: "No valid answer was submitted.",
-      },
-      {
-        label: "Specificity",
-        value: 0,
-        color: "#FF6B3D",
-        reason: "No valid answer was submitted.",
-      },
-      {
-        label: "Accuracy",
-        value: 0,
-        color: "#0084FF",
-        reason: "No valid answer was submitted.",
-      },
+      { label: "Communication", value: 0, color: "#0084FF", reason: "No valid answer was submitted." },
+      { label: "Problem Solving", value: 0, color: "#319AFF", reason: "No valid answer was submitted." },
+      { label: "Specificity", value: 0, color: "#FF6B3D", reason: "No valid answer was submitted." },
+      { label: "Accuracy", value: 0, color: "#0084FF", reason: "No valid answer was submitted." },
     ];
 
     const resultDimensions =
@@ -182,22 +146,20 @@ export default function InterviewPage() {
       }),
     };
 
+    sessionStorage.setItem(
+      "preppeer_results",
+      JSON.stringify({
+        compositeScore,
+        dimensions: resultDimensions,
+        questionScores: allQuestionScores,
+        summary,
+      })
+    );
+
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
-    let rankSummary = null;
-    let reportIdentity = {
-      name: "Guest",
-      role: setup.domain || "Interview",
-      companyType: setup.companyType || "General",
-    };
 
-    if (isAccountInterview && data.user) {
-      reportIdentity = {
-        name: getDisplayName(data.user.user_metadata, data.user.email),
-        role: setup.domain || "Interview",
-        companyType: setup.companyType || "General",
-      };
-
+    if (data.user) {
       await supabase.from("interview_sessions").insert({
         user_id: data.user.id,
         role: setup.domain,
@@ -208,78 +170,8 @@ export default function InterviewPage() {
         question_scores: allQuestionScores,
         summary,
       });
-
-      const { data: sessionRows } = await supabase
-        .from("interview_sessions")
-        .select(
-          "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
-        )
-        .order("created_at", { ascending: false })
-        .limit(1000);
-
-      rankSummary = getRankSummary(
-        ((sessionRows ?? []) as InterviewSessionRow[]),
-        data.user.id
-      );
-    }
-
-    const resultPayload = {
-      name: reportIdentity.name,
-      role: reportIdentity.role,
-      companyType: reportIdentity.companyType,
-      compositeScore,
-      percentile: rankSummary
-        ? getRankPercentileLabel(rankSummary.rank, rankSummary.totalCandidates)
-        : "Not ranked",
-      rankDelta: rankSummary
-        ? rankSummary.rankChange
-        : "Sign in to join the leaderboard",
-      previousRank: rankSummary?.previousRank ?? 0,
-      currentRank: rankSummary?.rank ?? 0,
-      totalCandidates: rankSummary?.totalCandidates ?? 0,
-      dimensions: resultDimensions,
-      questionScores: allQuestionScores,
-      summary,
-      source: isAccountInterview ? "account" : "demo",
-    };
-
-    sessionStorage.setItem("preppeer_results", JSON.stringify(resultPayload));
-
-    if (!isAccountInterview) {
-      localStorage.setItem(DEMO_RESULTS_KEY, JSON.stringify(resultPayload));
-      localStorage.setItem(DEMO_COMPLETED_KEY, new Date().toISOString());
-    } else {
-      localStorage.removeItem(DEMO_RESULTS_KEY);
     }
   };
-
-  useEffect(() => {
-    const checkInterviewAccess = async () => {
-      const accountMode =
-        new URLSearchParams(window.location.search).get("mode") === "account";
-      setIsAccountInterview(accountMode);
-
-      if (accountMode) {
-        const supabase = createClient();
-        const { data } = await supabase.auth.getUser();
-
-        if (!data.user) {
-          router.replace("/login?next=/interview%3Fmode%3Daccount");
-          return;
-        }
-
-        setAccessChecked(true);
-        return;
-      }
-
-      if (localStorage.getItem(DEMO_COMPLETED_KEY)) {
-        setDemoGateVisible(true);
-      }
-      setAccessChecked(true);
-    };
-
-    void checkInterviewAccess();
-  }, [router]);
 
   useEffect(() => {
     if (shouldAutoSubmit) {
@@ -290,11 +182,6 @@ export default function InterviewPage() {
   }, [shouldAutoSubmit, router, questionReviews, dimensionHistory]);
 
   const handleStart = async (profileSetup = setup) => {
-    if (!isAccountInterview && localStorage.getItem(DEMO_COMPLETED_KEY)) {
-      setDemoGateVisible(true);
-      return;
-    }
-
     if (!profileSetup.domain || !profileSetup.experience || !profileSetup.companyType) {
       setError("Please fill in all fields.");
       return;
@@ -319,7 +206,6 @@ export default function InterviewPage() {
         setQuestionReviews([]);
         setDimensionHistory([]);
         sessionStorage.removeItem("preppeer_results");
-        if (isAccountInterview) localStorage.removeItem(DEMO_RESULTS_KEY);
         setStage("interview");
       } else {
         setError("Failed to generate questions. Try again.");
@@ -331,61 +217,6 @@ export default function InterviewPage() {
     }
   };
 
-  if (!accessChecked) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar variant="inner" />
-        <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-6">
-          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#D8EBFF] border-t-blue" />
-        </div>
-      </div>
-    );
-  }
-
-  if (demoGateVisible) {
-    return (
-      <div className="min-h-screen bg-white">
-        <Navbar variant="inner" />
-        <div className="mx-auto flex min-h-[calc(100vh-80px)] max-w-[760px] items-center px-6 py-20">
-          <div className="w-full overflow-hidden rounded-[28px] border border-[rgba(0,132,255,0.16)] bg-white shadow-[0_30px_90px_rgba(0,132,255,0.12)]">
-            <div className="border-b border-[rgba(0,0,0,0.06)] bg-[#F4FAFF] px-7 py-6">
-              <p className="font-inter text-[12px] font-black uppercase tracking-[0.22em] text-blue">
-                Demo interview completed
-              </p>
-              <h1 className="mt-3 font-fustat text-3xl font-extrabold text-text sm:text-4xl">
-                Your free practice run is saved on this device.
-              </h1>
-            </div>
-            <div className="px-7 py-7">
-              <p className="font-inter text-base leading-7 text-muted">
-                To continue with more interviews, save progress, and enter the
-                live leaderboard, sign in or create your PrepPeer account.
-              </p>
-              <div className="mt-7 grid gap-3 sm:grid-cols-2">
-                <Link
-                  href="/login?next=%2Finterview%3Fmode%3Daccount"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-[14px] bg-blue px-5 py-3.5 font-inter text-sm font-extrabold text-white shadow-[0_18px_44px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:bg-[#006cff]"
-                >
-                  Sign in to continue
-                </Link>
-                <Link
-                  href="/login?next=%2Finterview%3Fmode%3Daccount&mode=signup"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-[14px] border border-[rgba(0,132,255,0.18)] bg-[#F7FBFF] px-5 py-3.5 font-inter text-sm font-extrabold text-text transition hover:-translate-y-0.5 hover:border-blue/40"
-                >
-                  Create account
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const handleSubmit = async (answer: string) => {
     const answerQuality = evaluateAnswerQuality(answer);
 
@@ -394,10 +225,7 @@ export default function InterviewPage() {
 
       setFeedback(zeroFeedback);
       setAiDetected(null);
-      setQuestionScores((prev) => [
-        ...prev,
-        { question: `Q${current}`, score: 0 },
-      ]);
+      setQuestionScores((prev) => [...prev, { question: `Q${current}`, score: 0 }]);
       setQuestionReviews((prev) => [
         ...prev,
         {
@@ -444,10 +272,7 @@ export default function InterviewPage() {
         );
 
         setFeedback(aiFeedback);
-        setQuestionScores((prev) => [
-          ...prev,
-          { question: `Q${current}`, score: 0 },
-        ]);
+        setQuestionScores((prev) => [...prev, { question: `Q${current}`, score: 0 }]);
         setQuestionReviews((prev) => [
           ...prev,
           {
@@ -464,10 +289,7 @@ export default function InterviewPage() {
 
         setFeedback(evalData.feedback);
         setDimensionHistory((prev) => [...prev, evalData.feedback.dimensions]);
-        setQuestionScores((prev) => [
-          ...prev,
-          { question: `Q${current}`, score },
-        ]);
+        setQuestionScores((prev) => [...prev, { question: `Q${current}`, score }]);
         setQuestionReviews((prev) => [
           ...prev,
           {
@@ -676,37 +498,6 @@ export default function InterviewPage() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {strikeCount > 0 && (
-          <div
-            className="mt-6 border-l-2 py-3 pl-4"
-            style={{
-              borderColor: strikeCount >= 2 ? "#FF6B3D" : "#FFBE3D",
-              background: strikeCount >= 2
-                ? "linear-gradient(90deg, rgba(255,107,61,0.08), transparent)"
-                : "linear-gradient(90deg, rgba(255,190,61,0.1), transparent)",
-            }}
-          >
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p
-                  className="font-inter text-[11px] font-bold uppercase tracking-[0.16em]"
-                  style={{ color: strikeCount >= 2 ? "#CC4422" : "#996600" }}
-                >
-                  Session attention record
-                </p>
-                <p className="mt-1 font-inter text-sm font-semibold text-text">
-                  {strikeCount === 1
-                    ? "One tab change has been recorded."
-                    : "Two tab changes have been recorded. The next one completes the session."}
-                </p>
-              </div>
-              <p className="font-inter text-[13px] font-bold tabular-nums text-muted">
-                {Math.min(strikeCount, 2)} / 2 warnings used
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
