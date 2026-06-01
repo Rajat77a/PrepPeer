@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { TouchEvent, WheelEvent } from "react";
+import Link from "next/link";
 import { BookOpenText, ChevronRight, ListChecks, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SessionScoreCard } from "@/components/results/SessionScoreCard";
@@ -11,6 +12,7 @@ import { Navbar } from "@/components/ui/Navbar";
 import { SESSION_REPORT } from "@/lib/mockData";
 import type { SessionReport } from "@/lib/types";
 import {
+  getDisplayName,
   getRankPercentileLabel,
   getRankSummary,
   type InterviewSessionRow,
@@ -29,6 +31,7 @@ const RESULTS_KEY = "preppeer_results";
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
   const [rankLocked, setRankLocked] = useState(false);
+  const [missingUnlockResult, setMissingUnlockResult] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const reviewScrollRef = useRef<HTMLDivElement>(null);
   const unlockInFlightRef = useRef(false);
@@ -40,6 +43,8 @@ export default function ResultsPage() {
     try {
       const stored =
         sessionStorage.getItem(RESULTS_KEY) ?? localStorage.getItem(DEMO_RESULTS_KEY);
+      const shouldUnlockRank =
+        new URLSearchParams(window.location.search).get("unlockRank") === "1";
 
       if (stored) {
         sessionStorage.setItem(RESULTS_KEY, stored);
@@ -65,9 +70,11 @@ export default function ResultsPage() {
           summary: realData.summary ?? prev.summary,
         }));
         setRankLocked(shouldLockRank);
+      } else if (shouldUnlockRank) {
+        setMissingUnlockResult(true);
       }
     } catch {
-      // fallback to mock
+      setMissingUnlockResult(true);
     }
   }, []);
 
@@ -129,6 +136,10 @@ export default function ResultsPage() {
 
         const unlockedResult: StoredResult = {
           ...storedResult,
+          name: getDisplayName(user.user_metadata, user.email),
+          role: storedResult.role ?? "Interview",
+          companyType: storedResult.companyType ?? "General",
+          source: "account",
           unlockedUserId: user.id,
           unlockedSessionId: insertedSession?.id,
           percentile: getRankPercentileLabel(
@@ -145,11 +156,18 @@ export default function ResultsPage() {
         localStorage.removeItem(DEMO_RESULTS_KEY);
         setReport((prev) => ({
           ...prev,
+          name: unlockedResult.name ?? prev.name,
+          role: unlockedResult.role ?? prev.role,
+          companyType: unlockedResult.companyType ?? prev.companyType,
+          compositeScore: unlockedResult.compositeScore ?? prev.compositeScore,
           percentile: unlockedResult.percentile ?? prev.percentile,
           rankDelta: unlockedResult.rankDelta ?? prev.rankDelta,
           previousRank: unlockedResult.previousRank ?? prev.previousRank,
           currentRank: unlockedResult.currentRank ?? prev.currentRank,
           totalCandidates: unlockedResult.totalCandidates ?? prev.totalCandidates,
+          dimensions: unlockedResult.dimensions ?? prev.dimensions,
+          questionScores: unlockedResult.questionScores ?? prev.questionScores,
+          summary: unlockedResult.summary ?? prev.summary,
         }));
         setRankLocked(false);
       } catch {
@@ -263,6 +281,34 @@ export default function ResultsPage() {
       window.scrollTo(0, scrollY);
     };
   }, [briefOpen]);
+
+  if (missingUnlockResult) {
+    return (
+      <div className="min-h-screen bg-off-white">
+        <Navbar variant="inner" />
+        <div className="mx-auto flex min-h-[calc(100vh-84px)] max-w-[760px] items-center px-6 py-20">
+          <div className="w-full rounded-[28px] border border-[rgba(0,132,255,0.16)] bg-white p-8 shadow-[0_24px_70px_rgba(0,132,255,0.1)]">
+            <p className="font-inter text-[11px] font-bold uppercase tracking-[0.22em] text-blue">
+              Demo result not found
+            </p>
+            <h1 className="mt-3 font-fustat text-3xl font-extrabold tracking-[-0.04em] text-text sm:text-4xl">
+              Your saved demo score was not available in this tab.
+            </h1>
+            <p className="mt-4 max-w-[560px] font-inter text-base leading-7 text-muted">
+              Start an interview from your account dashboard to get a ranked
+              result connected to your profile and the live leaderboard.
+            </p>
+            <Link
+              href="/dashboard"
+              className="mt-7 inline-flex rounded-2xl bg-blue px-6 py-3 font-inter text-sm font-extrabold text-white shadow-[0_16px_34px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5"
+            >
+              Go to dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-off-white">

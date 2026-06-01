@@ -10,6 +10,12 @@ import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
+import {
+  getDisplayName,
+  getRankPercentileLabel,
+  getRankSummary,
+  type InterviewSessionRow,
+} from "@/lib/ranking";
 import { createClient } from "@/utils/supabase/client";
 import type { QuestionReview } from "@/lib/types";
 import { AlertTriangle, ArrowRight, Clock, LockKeyhole, ShieldCheck } from "lucide-react";
@@ -17,6 +23,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 
 const TOTAL = 5;
+const DEMO_RESULTS_KEY = "preppeer_pending_demo_results";
+const RESULTS_KEY = "preppeer_results";
 
 type SetupData = {
   domain: string;
@@ -28,6 +36,8 @@ type Stage = "setup" | "terms" | "interview" | "feedback";
 
 export default function InterviewPage() {
   const router = useRouter();
+  const [isAccountInterview, setIsAccountInterview] = useState(false);
+  const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
   const [current, setCurrent] = useState(1);
   const [questions, setQuestions] = useState<string[]>([]);
@@ -146,20 +156,22 @@ export default function InterviewPage() {
       }),
     };
 
-    sessionStorage.setItem(
-      "preppeer_results",
-      JSON.stringify({
-        compositeScore,
-        dimensions: resultDimensions,
-        questionScores: allQuestionScores,
-        summary,
-      })
-    );
-
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
+    let rankSummary = null;
+    let reportIdentity = {
+      name: "Guest",
+      role: setup.domain || "Interview",
+      companyType: setup.companyType || "General",
+    };
 
-    if (data.user) {
+    if (isAccountInterview && data.user) {
+      reportIdentity = {
+        name: getDisplayName(data.user.user_metadata, data.user.email),
+        role: setup.domain || "Interview",
+        companyType: setup.companyType || "General",
+      };
+
       await supabase.from("interview_sessions").insert({
         user_id: data.user.id,
         role: setup.domain,
@@ -170,8 +182,85 @@ export default function InterviewPage() {
         question_scores: allQuestionScores,
         summary,
       });
+
+      const { data: sessionRows } = await supabase
+        .from("interview_sessions")
+        .select(
+          "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
+        )
+        .order("created_at", { ascending: false })
+        .limit(1000);
+
+      rankSummary = getRankSummary(
+        (sessionRows ?? []) as InterviewSessionRow[],
+        data.user.id
+      );
+    }
+
+    const resultPayload = {
+      name: reportIdentity.name,
+      role: reportIdentity.role,
+      companyType: reportIdentity.companyType,
+      compositeScore,
+      percentile: rankSummary
+        ? getRankPercentileLabel(rankSummary.rank, rankSummary.totalCandidates)
+        : "Not ranked",
+      rankDelta: rankSummary
+        ? rankSummary.rankChange
+        : "Sign in to join the leaderboard",
+      previousRank: rankSummary?.previousRank ?? 0,
+      currentRank: rankSummary?.rank ?? 0,
+      totalCandidates: rankSummary?.totalCandidates ?? 0,
+      dimensions: resultDimensions,
+      questionScores: allQuestionScores,
+      summary,
+      source: isAccountInterview ? "account" : "demo",
+    };
+
+    sessionStorage.setItem(RESULTS_KEY, JSON.stringify(resultPayload));
+
+    if (isAccountInterview) {
+      localStorage.removeItem(DEMO_RESULTS_KEY);
+    } else {
+      localStorage.setItem(DEMO_RESULTS_KEY, JSON.stringify(resultPayload));
     }
   };
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      const accountMode =
+        new URLSearchParams(window.location.search).get("mode") === "account";
+      setIsAccountInterview(accountMode);
+
+      if (!accountMode) {
+        setAccessChecked(true);
+        return;
+      }
+
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        router.replace("/login?next=%2Finterview%3Fmode%3Daccount");
+        return;
+      }
+
+      const hasRequiredProfile =
+        Boolean(user.user_metadata?.full_name ?? user.user_metadata?.name) &&
+        Boolean(user.user_metadata?.college);
+
+      if (!hasRequiredProfile) {
+        router.replace("/onboarding?next=%2Finterview%3Fmode%3Daccount");
+        return;
+      }
+
+      setAccessChecked(true);
+    };
+
+    void checkAccess();
+  }, [router]);
 
   useEffect(() => {
     if (shouldAutoSubmit) {
@@ -205,7 +294,8 @@ export default function InterviewPage() {
         setQuestionScores([]);
         setQuestionReviews([]);
         setDimensionHistory([]);
-        sessionStorage.removeItem("preppeer_results");
+        sessionStorage.removeItem(RESULTS_KEY);
+        if (isAccountInterview) localStorage.removeItem(DEMO_RESULTS_KEY);
         setStage("interview");
       } else {
         setError("Failed to generate questions. Try again.");
@@ -327,6 +417,17 @@ export default function InterviewPage() {
       setStage("interview");
     }
   };
+
+  if (!accessChecked) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar variant="inner" />
+        <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-6">
+          <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#D8EBFF] border-t-blue" />
+        </div>
+      </div>
+    );
+  }
 
   if (stage === "setup" || stage === "terms") {
     return (
