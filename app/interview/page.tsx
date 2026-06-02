@@ -251,12 +251,13 @@ export default function InterviewPage() {
 
       const data = await res.json();
 
-      if (data.questions) {
+      if (res.ok && Array.isArray(data.questions) && data.questions.length > 0) {
         setQuestions(data.questions);
         setQuestionScores([]);
         setQuestionReviews([]);
         setDimensionHistory([]);
         sessionStorage.removeItem("preppeer_results");
+        setError("");
         setStage("interview");
       } else {
         setError("Failed to generate questions. Try again.");
@@ -460,7 +461,7 @@ export default function InterviewPage() {
             }}
           />
 
-          {error && (
+          {error === "Please fill in all fields." && (
             <p className="mt-5 text-center font-inter text-sm text-red-500">
               {error}
             </p>
@@ -473,7 +474,10 @@ export default function InterviewPage() {
           error={error}
           setup={pendingSetup}
           onBack={() => {
-            if (!loading) setStage("setup");
+            if (!loading) {
+              setError("");
+              setStage("setup");
+            }
           }}
           onAccept={() => {
             if (pendingSetup) handleStart(pendingSetup);
