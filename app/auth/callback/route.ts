@@ -11,6 +11,26 @@ const safeNextPath = (next: string | null) => {
   return next;
 };
 
+const isFreshAuthUser = (createdAt?: string) => {
+  if (!createdAt) return false;
+
+  const createdTime = new Date(createdAt).getTime();
+  if (Number.isNaN(createdTime)) return false;
+
+  return Date.now() - createdTime < 12 * 60 * 1000;
+};
+
+const hasCompletedAccountSetup = (
+  metadata?: Record<string, unknown> | null
+) => {
+  const fullName = String(
+    metadata?.full_name ?? metadata?.name ?? ""
+  ).trim();
+  const college = String(metadata?.college ?? "").trim();
+
+  return metadata?.onboarding_complete === true || Boolean(fullName && college);
+};
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
@@ -48,11 +68,11 @@ export async function GET(request: Request) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const hasRequiredProfile =
-    Boolean(user?.user_metadata?.full_name ?? user?.user_metadata?.name) &&
-    Boolean(user?.user_metadata?.college);
 
-  if (mode === "signup" && !hasRequiredProfile) {
+  if (
+    isFreshAuthUser(user?.created_at) &&
+    !hasCompletedAccountSetup(user?.user_metadata)
+  ) {
     return NextResponse.redirect(
       `${siteUrl}/onboarding?next=${encodeURIComponent(next)}`
     );

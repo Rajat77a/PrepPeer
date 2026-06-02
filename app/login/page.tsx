@@ -364,7 +364,7 @@ export default function LoginPage() {
       }
 
       sessionStorage.setItem("preppeer_post_onboarding_next", nextPath);
-      router.push("/onboarding");
+      router.push(`/onboarding?next=${encodeURIComponent(nextPath)}`);
       return;
     }
 

@@ -17,6 +17,17 @@ const safeNextPath = (next?: string | string[]) => {
   return value;
 };
 
+const hasCompletedAccountSetup = (
+  metadata?: Record<string, unknown> | null
+) => {
+  const fullName = String(
+    metadata?.full_name ?? metadata?.name ?? ""
+  ).trim();
+  const college = String(metadata?.college ?? "").trim();
+
+  return metadata?.onboarding_complete === true || Boolean(fullName && college);
+};
+
 export default async function OnboardingPage({
   searchParams,
 }: {
@@ -35,7 +46,7 @@ export default async function OnboardingPage({
   const college = user.user_metadata?.college ?? "";
   const nextPath = safeNextPath(searchParams?.next);
 
-  if (fullName && college) {
+  if (hasCompletedAccountSetup(user.user_metadata)) {
     redirect(nextPath);
   }
 
