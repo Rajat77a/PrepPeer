@@ -74,30 +74,43 @@ const toRealEntry = (
   };
 };
 
-const getBestRealRowsByUser = (rows: SupabaseLeaderboardRow[]) => {
-  const bestByUser = new Map<string, SupabaseLeaderboardRow>();
+const getRecentAverageRowsByUser = (rows: SupabaseLeaderboardRow[]) => {
+  const rowsByUser = new Map<string, SupabaseLeaderboardRow[]>();
 
   rows.forEach((row) => {
     if (!row.user_id) return;
-
-    const current = bestByUser.get(row.user_id);
-    const score = Number(row.score ?? 0);
-    const currentScore = Number(current?.score ?? -1);
-
-    if (!current || score > currentScore) {
-      bestByUser.set(row.user_id, row);
-      return;
-    }
-
-    if (score === currentScore) {
-      bestByUser.set(row.user_id, {
-        ...current,
-        sessions: Math.max(Number(current.sessions ?? 0), Number(row.sessions ?? 0)),
-      });
-    }
+    rowsByUser.set(row.user_id, [...(rowsByUser.get(row.user_id) ?? []), row]);
   });
 
-  return Array.from(bestByUser.values());
+  return Array.from(rowsByUser.values()).map((userRows) => {
+    const recentRows = userRows.slice(0, 5);
+    const currentScoreAverage =
+      recentRows.reduce((total, row) => total + Number(row.score ?? 0), 0) /
+      Math.max(recentRows.length, 1);
+    const previousScores = recentRows
+      .map((row) => row.previous_score)
+      .filter((score): score is number => typeof score === "number");
+    const previousScoreAverage = previousScores.length
+      ? previousScores.reduce((total, score) => total + Number(score), 0) /
+        previousScores.length
+      : null;
+    const sessionTotal = Math.max(
+      ...userRows.map((row) => Number(row.sessions ?? 0)),
+      userRows.length
+    );
+    const representative = recentRows[0];
+
+    return {
+      ...representative,
+      rank: Math.min(...userRows.map((row) => Number(row.rank ?? 9999))),
+      score: Number(currentScoreAverage.toFixed(1)),
+      sessions: sessionTotal || userRows.length,
+      previous_score:
+        previousScoreAverage === null
+          ? null
+          : Number(previousScoreAverage.toFixed(1)),
+    };
+  });
 };
 
 export const toLiveLeaderboardEntries = (
@@ -113,7 +126,7 @@ export const toLiveLeaderboardEntries = (
     })
   );
 
-  const realEntries = getBestRealRowsByUser(rows).map((row) =>
+  const realEntries = getRecentAverageRowsByUser(rows).map((row) =>
     toRealEntry(row, currentUserId)
   );
   const currentEntries = sortEntries([...benchmarkEntries, ...realEntries]);
