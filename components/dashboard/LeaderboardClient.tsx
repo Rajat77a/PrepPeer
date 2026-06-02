@@ -51,22 +51,22 @@ export function LeaderboardClient({
           <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#006cff]">
             Leaderboard
           </p>
-          <h1 className="mt-3 font-inter text-[clamp(38px,6vw,72px)] font-black leading-none tracking-[-0.05em] text-white">
+          <h1 className="mt-3 font-inter text-[clamp(38px,6vw,72px)] font-black leading-none tracking-[-0.05em] text-[#07111f]">
             The ranked board.
           </h1>
-          <p className="mt-4 max-w-2xl font-inter text-base leading-7 text-white/40">
+          <p className="mt-4 max-w-2xl font-inter text-base font-medium leading-7 text-[#64748b]">
             Compare score, session count, and movement across role-matched peers.
           </p>
         </div>
 
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center xl:w-auto">
           <div className="relative w-full xl:w-[340px]">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-white/25" />
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8ba0b8]" />
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search name, college, role"
-              className="h-12 w-full rounded-full border border-white/[0.08] bg-[#0d0d0d] pl-11 pr-4 font-inter text-sm font-semibold text-white outline-none transition placeholder:text-white/20 focus:border-[#006cff]/60 focus:shadow-[0_0_24px_rgba(0,108,255,0.14)]"
+              className="h-12 w-full rounded-full border border-[rgba(0,132,255,0.14)] bg-white/88 pl-11 pr-4 font-inter text-sm font-semibold text-[#07111f] outline-none shadow-[0_12px_32px_rgba(0,108,255,0.07)] transition placeholder:text-[#9aa9bb] focus:border-[#006cff]/60 focus:shadow-[0_0_24px_rgba(0,108,255,0.14)]"
             />
           </div>
           <RefreshTableButton label="Refresh board" />
@@ -80,9 +80,9 @@ export function LeaderboardClient({
             type="button"
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "shrink-0 rounded-full border border-white/[0.08] px-4 py-2 font-inter text-sm font-bold text-white/35 transition hover:text-white/70",
+              "shrink-0 rounded-full border border-[rgba(0,132,255,0.12)] bg-white/70 px-4 py-2 font-inter text-sm font-bold text-[#64748b] transition hover:border-[#006cff]/30 hover:bg-[#eef7ff] hover:text-[#07111f]",
               activeTab === tab &&
-                "border-[#006cff]/35 bg-[#006cff]/15 text-white shadow-[0_0_30px_rgba(0,108,255,0.12)]"
+                "border-[#006cff]/35 bg-[#eaf5ff] text-[#07111f] shadow-[0_0_30px_rgba(0,108,255,0.12)]"
             )}
           >
             {tab}
@@ -90,8 +90,8 @@ export function LeaderboardClient({
         ))}
       </div>
 
-      <div className="rounded-2xl border border-white/[0.08] bg-[#0d0d0d]">
-        <div className="sticky top-0 z-10 hidden grid-cols-[0.7fr_1.2fr_1.4fr_1fr_0.8fr_0.8fr_0.8fr] gap-4 rounded-t-2xl border-b border-white/[0.08] bg-[#0d0d0d]/95 px-5 py-4 font-inter text-xs font-bold uppercase tracking-[0.16em] text-white/30 backdrop-blur-xl lg:grid">
+      <div className="overflow-hidden rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/88 shadow-[0_18px_60px_rgba(0,108,255,0.08)] backdrop-blur-xl">
+        <div className="sticky top-0 z-10 hidden grid-cols-[0.7fr_1.2fr_1.4fr_1fr_0.8fr_0.8fr_0.8fr] gap-4 rounded-t-2xl border-b border-[rgba(0,132,255,0.10)] bg-white/95 px-5 py-4 font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b] backdrop-blur-xl lg:grid">
           <span>Rank</span>
           <span>Name</span>
           <span>Context</span>
@@ -101,37 +101,37 @@ export function LeaderboardClient({
           <span>Movement</span>
         </div>
 
-        <div className="divide-y divide-white/[0.055]">
+        <div className="divide-y divide-[rgba(0,132,255,0.08)]">
           {entries.map((entry) => (
             <div
               key={`${entry.rank}-${entry.name}`}
               className={cn(
-                "grid gap-3 px-5 py-4 transition hover:bg-white/[0.025] lg:grid-cols-[0.7fr_1.2fr_1.4fr_1fr_0.8fr_0.8fr_0.8fr] lg:items-center lg:gap-4",
+                "grid gap-3 px-5 py-4 transition hover:bg-[#f7fbff] lg:grid-cols-[0.7fr_1.2fr_1.4fr_1fr_0.8fr_0.8fr_0.8fr] lg:items-center lg:gap-4",
                 entry.isYou &&
-                  "border-y border-[#006cff]/20 bg-[#006cff]/10 hover:bg-[#006cff]/12"
+                  "border-y border-[#006cff]/20 bg-[#eaf5ff] hover:bg-[#dff0ff]"
               )}
             >
               <span
                 className={cn(
                   "font-inter text-sm font-black",
-                  entry.isYou ? "text-[#006cff]" : "text-white/35"
+                  entry.isYou ? "text-[#006cff]" : "text-[#8ba0b8]"
                 )}
               >
                 #{entry.rank}
               </span>
-              <span className="font-inter text-sm font-bold text-white">
+              <span className="font-inter text-sm font-bold text-[#07111f]">
                 {entry.name}
               </span>
-              <span className="font-inter text-sm font-semibold text-white/45">
+              <span className="font-inter text-sm font-semibold text-[#64748b]">
                 {entry.subtitle ?? "-"}
               </span>
-              <span className="font-inter text-sm font-semibold text-white/45">
+              <span className="font-inter text-sm font-semibold text-[#64748b]">
                 {entry.sessions ? `${entry.sessions} sessions` : "No sessions yet"}
               </span>
-              <span className="font-inter text-sm font-bold text-white">
+              <span className="font-inter text-sm font-bold text-[#07111f]">
                 {entry.score}
               </span>
-              <span className="font-inter text-sm font-semibold text-white/45">
+              <span className="font-inter text-sm font-semibold text-[#64748b]">
                 {entry.sessions}
               </span>
               <span
@@ -141,7 +141,7 @@ export function LeaderboardClient({
                     ? "text-green-400"
                     : entry.deltaType === "down"
                       ? "text-red-400"
-                      : "text-white/35"
+                    : "text-[#64748b]"
                 )}
               >
                 <span
@@ -151,7 +151,7 @@ export function LeaderboardClient({
                       ? "bg-green-400"
                       : entry.deltaType === "down"
                         ? "bg-red-400"
-                        : "bg-white/20"
+                        : "bg-[#b7c6d8]"
                   )}
                   aria-hidden="true"
                 />

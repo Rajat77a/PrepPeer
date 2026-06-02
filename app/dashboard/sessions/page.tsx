@@ -38,10 +38,10 @@ export default async function DashboardSessionsPage() {
           <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#006cff]">
             Session history
           </p>
-          <h1 className="mt-3 font-inter text-[clamp(36px,6vw,64px)] font-black leading-none tracking-[-0.05em] text-white">
+          <h1 className="mt-3 font-inter text-[clamp(36px,6vw,64px)] font-black leading-none tracking-[-0.05em] text-[#07111f]">
             Every attempt, in order.
           </h1>
-          <p className="mt-4 max-w-2xl font-inter text-base leading-7 text-white/40">
+          <p className="mt-4 max-w-2xl font-inter text-base font-medium leading-7 text-[#64748b]">
             Review scores, role context, rank movement, and the session that changed
             your standing.
           </p>
@@ -49,8 +49,8 @@ export default async function DashboardSessionsPage() {
         <RefreshTableButton />
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0d0d0d]">
-        <div className="hidden grid-cols-[1.05fr_1fr_1fr_1.15fr_0.7fr_0.7fr_0.85fr_48px] gap-4 border-b border-white/[0.08] px-5 py-4 font-inter text-xs font-bold uppercase tracking-[0.16em] text-white/30 lg:grid">
+      <div className="overflow-hidden rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/88 shadow-[0_18px_60px_rgba(0,108,255,0.08)] backdrop-blur-xl">
+        <div className="hidden grid-cols-[1.05fr_1fr_1fr_1.15fr_0.7fr_0.7fr_0.85fr_48px] gap-4 border-b border-[rgba(0,132,255,0.10)] bg-white/90 px-5 py-4 font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b] lg:grid">
           <span>Date</span>
           <span>Role</span>
           <span>Experience</span>
@@ -61,9 +61,9 @@ export default async function DashboardSessionsPage() {
           <span />
         </div>
 
-        <div className="divide-y divide-white/[0.06]">
+        <div className="divide-y divide-[rgba(0,132,255,0.08)]">
           {userSessions.length === 0 && (
-            <div className="px-5 py-10 text-center font-inter text-sm font-semibold text-white/35">
+            <div className="px-5 py-10 text-center font-inter text-sm font-semibold text-[#64748b]">
               No interview sessions yet. Complete your first interview to enter
               the ranked board.
             </div>
@@ -76,10 +76,10 @@ export default async function DashboardSessionsPage() {
               <Link
                 key={session.id}
                 href={`/dashboard/sessions/${session.id}`}
-                className="grid gap-3 px-5 py-5 transition hover:bg-white/[0.025] lg:grid-cols-[1.05fr_1fr_1fr_1.15fr_0.7fr_0.7fr_0.85fr_48px] lg:items-center lg:gap-4"
+                className="grid gap-3 px-5 py-5 transition hover:bg-[#f7fbff] lg:grid-cols-[1.05fr_1fr_1fr_1.15fr_0.7fr_0.7fr_0.85fr_48px] lg:items-center lg:gap-4"
               >
                 <div>
-                  <p className="font-inter text-sm font-bold text-white">
+                  <p className="font-inter text-sm font-bold text-[#07111f]">
                     {session.created_at
                       ? new Intl.DateTimeFormat("en", {
                           month: "short",
@@ -87,29 +87,29 @@ export default async function DashboardSessionsPage() {
                         }).format(new Date(session.created_at))
                       : "Session"}
                   </p>
-                  <p className="mt-1 font-inter text-xs text-white/25 lg:hidden">
+                  <p className="mt-1 font-inter text-xs font-semibold text-[#64748b] lg:hidden">
                     {session.company_type ?? "General"}
                   </p>
                 </div>
-                <span className="font-inter text-sm font-semibold text-white/55">
+                <span className="font-inter text-sm font-semibold text-[#41516a]">
                   {session.role ?? "Interview"}
                 </span>
-                <span className="font-inter text-sm text-white/40">
+                <span className="font-inter text-sm font-medium text-[#64748b]">
                   {session.experience ?? "Not set"}
                 </span>
-                <span className="hidden font-inter text-sm text-white/40 lg:block">
+                <span className="hidden font-inter text-sm font-medium text-[#64748b] lg:block">
                   {session.company_type ?? "General"}
                 </span>
-                <span className="font-inter text-sm font-bold text-white">
+                <span className="font-inter text-sm font-bold text-[#07111f]">
                   {Number(session.composite_score ?? 0)}
                 </span>
-                <span className="font-inter text-sm font-bold text-white/60">
+                <span className="font-inter text-sm font-bold text-[#41516a]">
                   {isLatest && rankSummary ? `#${rankSummary.rank}` : "-"}
                 </span>
-                <span className="font-inter text-sm font-bold text-white/45">
+                <span className="font-inter text-sm font-bold text-[#64748b]">
                   {isLatest && rankSummary ? rankSummary.rankChange : "-"}
                 </span>
-                <ArrowUpRight className="hidden h-4 w-4 text-white/20 lg:block" />
+                <ArrowUpRight className="hidden h-4 w-4 text-[#8ba0b8] lg:block" />
               </Link>
             );
           })}

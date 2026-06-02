@@ -42,13 +42,13 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
     <div className="mx-auto max-w-5xl p-5 sm:p-8">
       <Link
         href="/dashboard/sessions"
-        className="mb-8 inline-flex items-center gap-2 font-inter text-sm font-bold text-white/40 transition hover:text-white"
+        className="mb-8 inline-flex items-center gap-2 font-inter text-sm font-bold text-[#64748b] transition hover:text-[#006cff]"
       >
         <ArrowLeft className="h-4 w-4" />
         Sessions
       </Link>
 
-      <section className="relative overflow-hidden rounded-2xl border border-[#006cff]/20 bg-gradient-to-br from-[#0d1929] to-[#080808] p-7 sm:p-10">
+      <section className="relative overflow-hidden rounded-2xl border border-[#006cff]/16 bg-white/88 p-7 shadow-[0_24px_80px_rgba(0,108,255,0.12)] backdrop-blur-xl sm:p-10">
         <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-[#006cff]/10 blur-[90px]" />
         <div className="relative z-10">
           <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#006cff]">
@@ -60,10 +60,10 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
                 }).format(new Date(session.created_at))
               : "Session"}
           </p>
-          <h1 className="mt-4 font-inter text-[clamp(36px,6vw,68px)] font-black leading-none tracking-[-0.05em] text-white">
+          <h1 className="mt-4 font-inter text-[clamp(36px,6vw,68px)] font-black leading-none tracking-[-0.05em] text-[#07111f]">
             {session.role ?? "Interview"}
           </h1>
-          <p className="mt-4 font-inter text-white/40">
+          <p className="mt-4 font-inter font-semibold text-[#64748b]">
             {session.company_type ?? "General"} / {session.experience ?? "Not set"}
           </p>
 
@@ -75,18 +75,18 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
         </div>
       </section>
 
-      <section className="mt-5 rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-6">
-        <p className="mb-5 font-inter text-xs font-bold uppercase tracking-[0.22em] text-white/40">
+      <section className="mt-5 rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/88 p-6 shadow-[0_18px_60px_rgba(0,108,255,0.08)] backdrop-blur-xl">
+        <p className="mb-5 font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#64748b]">
           Score dimensions
         </p>
         <div className="grid gap-5 sm:grid-cols-2">
           {dimensions.map((dimension) => (
             <div key={dimension.label}>
               <div className="mb-2 flex justify-between font-inter text-sm">
-                <span className="font-semibold text-white/55">{dimension.label}</span>
-                <span className="font-bold text-white">{dimension.value}</span>
+                <span className="font-semibold text-[#64748b]">{dimension.label}</span>
+                <span className="font-bold text-[#07111f]">{dimension.value}</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-white/[0.05]">
+              <div className="h-2 overflow-hidden rounded-full bg-[#e6eff8]">
                 <div
                   className="h-full rounded-full bg-[#006cff]"
                   style={{ width: `${dimension.value}%` }}
@@ -102,11 +102,11 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-white/[0.04] p-5">
-      <p className="font-inter text-xs font-bold uppercase tracking-[0.18em] text-white/30">
+    <div className="rounded-xl border border-[rgba(0,132,255,0.12)] bg-[#f7fbff] p-5">
+      <p className="font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#64748b]">
         {label}
       </p>
-      <p className="mt-3 font-inter text-3xl font-black text-white">{value}</p>
+      <p className="mt-3 font-inter text-3xl font-black text-[#07111f]">{value}</p>
     </div>
   );
 }

@@ -63,10 +63,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
         <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#006cff]">
           Profile
         </p>
-        <h1 className="mt-3 font-inter text-[clamp(38px,6vw,72px)] font-black leading-none tracking-[-0.05em] text-white">
+        <h1 className="mt-3 font-inter text-[clamp(38px,6vw,72px)] font-black leading-none tracking-[-0.05em] text-[#07111f]">
           Your PrepPeer identity.
         </h1>
-        <p className="mt-4 max-w-2xl font-inter text-base leading-7 text-white/40">
+        <p className="mt-4 max-w-2xl font-inter text-base font-medium leading-7 text-[#64748b]">
           Keep your role and target context ready for sharper interview sessions.
         </p>
       </div>
@@ -75,7 +75,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         <motion.section
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl border border-[#006cff]/20 bg-gradient-to-br from-[#0d1929] to-[#080808] p-7"
+          className="relative overflow-hidden rounded-2xl border border-[#006cff]/16 bg-white/88 p-7 shadow-[0_24px_80px_rgba(0,108,255,0.12)] backdrop-blur-xl"
         >
           <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-[#006cff]/10 blur-[90px]" />
           <div className="relative z-10">
@@ -84,21 +84,21 @@ export function ProfileForm({ user }: ProfileFormProps) {
               <img
                 src={user.avatarUrl}
                 alt={user.name}
-                className="h-20 w-20 rounded-full border border-white/10 object-cover"
+                className="h-20 w-20 rounded-full border border-[rgba(0,132,255,0.16)] object-cover"
               />
             ) : (
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#006cff] font-inter text-3xl font-black text-white">
                 {user.name.charAt(0).toUpperCase()}
               </div>
             )}
-            <h2 className="mt-5 font-inter text-2xl font-black text-white">
+            <h2 className="mt-5 font-inter text-2xl font-black text-[#07111f]">
               {values.fullName || user.name}
             </h2>
-            <p className="mt-1 font-inter text-sm font-semibold text-white/35">
+            <p className="mt-1 font-inter text-sm font-semibold text-[#64748b]">
               {user.email}
             </p>
             {values.college && (
-              <p className="mt-4 inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 font-inter text-xs font-bold text-white/45">
+              <p className="mt-4 inline-flex rounded-full border border-[rgba(0,132,255,0.14)] bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
                 {values.college}
               </p>
             )}
@@ -109,12 +109,12 @@ export function ProfileForm({ user }: ProfileFormProps) {
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.08 }}
-          className="rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-6"
+          className="rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/88 p-6 shadow-[0_18px_60px_rgba(0,108,255,0.08)] backdrop-blur-xl"
         >
           <div className="grid gap-4">
             {fields.map((field) => (
               <label key={field.id} className="block">
-                <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-white/30">
+                <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
                   {field.label}
                 </span>
                 <input
@@ -125,7 +125,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                       [field.id]: event.target.value,
                     }))
                   }
-                  className="mt-2 h-12 w-full rounded-xl border border-white/[0.08] bg-white/[0.035] px-4 font-inter text-sm font-semibold text-white outline-none transition placeholder:text-white/20 focus:border-[#006cff]/60 focus:shadow-[0_0_24px_rgba(0,108,255,0.12)]"
+                  className="mt-2 h-12 w-full rounded-xl border border-[rgba(0,132,255,0.12)] bg-[#f7fbff] px-4 font-inter text-sm font-semibold text-[#07111f] outline-none transition placeholder:text-[#9aa9bb] focus:border-[#006cff]/60 focus:bg-white focus:shadow-[0_0_24px_rgba(0,108,255,0.12)]"
                 />
               </label>
             ))}
@@ -147,7 +147,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             )}
           </button>
           {message && (
-            <p className="mt-4 font-inter text-sm font-semibold text-white/40">
+            <p className="mt-4 font-inter text-sm font-semibold text-[#64748b]">
               {message}
             </p>
           )}

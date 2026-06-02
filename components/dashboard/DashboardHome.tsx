@@ -240,10 +240,10 @@ function NewUserDashboard({
         transition={{ duration: 0.6 }}
         className="relative z-10 mb-12 text-center"
       >
-        <h1 className="font-inter text-[clamp(42px,8vw,72px)] font-black leading-none tracking-[-0.04em] text-white">
+        <h1 className="font-inter text-[clamp(42px,8vw,72px)] font-black leading-none tracking-[-0.04em] text-[#07111f]">
           Welcome, {firstName}
         </h1>
-        <p className="mx-auto mt-4 max-w-2xl font-inter text-lg leading-8 text-white/40">
+        <p className="mx-auto mt-4 max-w-2xl font-inter text-lg font-medium leading-8 text-[#64748b]">
           Your rank is waiting. Take your first mock to find out where you stand.
         </p>
       </motion.div>
@@ -259,7 +259,7 @@ function NewUserDashboard({
           transition: { duration: 0.3 },
         }}
         style={{ transformStyle: "preserve-3d", perspective: 1000 }}
-        className="relative mb-6 w-full max-w-2xl cursor-pointer overflow-hidden rounded-2xl border border-[#006cff]/20 bg-gradient-to-br from-[#0d1929] via-[#0a0f1a] to-[#080808] p-7 shadow-[0_24px_100px_rgba(0,0,0,0.45)] sm:p-10"
+        className="relative mb-6 w-full max-w-2xl cursor-pointer overflow-hidden rounded-2xl border border-[#006cff]/16 bg-white/86 p-7 shadow-[0_24px_80px_rgba(0,108,255,0.12)] backdrop-blur-xl sm:p-10"
       >
         <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-[#006cff]/15 blur-[80px]" />
         <div
@@ -274,14 +274,14 @@ function NewUserDashboard({
         <div className="relative z-10">
           <div className="mb-6 flex items-center gap-2">
             <div className="h-2 w-2 animate-pulse rounded-full bg-[#006cff]" />
-            <span className="font-inter text-sm font-semibold text-white/40">
+            <span className="font-inter text-sm font-bold text-[#64748b]">
               Interview room ready
             </span>
           </div>
-          <h2 className="font-inter text-[clamp(30px,5vw,48px)] font-black leading-tight tracking-[-0.04em] text-white">
+          <h2 className="font-inter text-[clamp(30px,5vw,48px)] font-black leading-tight tracking-[-0.04em] text-[#07111f]">
             Start your first mock interview
           </h2>
-          <p className="mb-8 mt-4 max-w-lg font-inter text-base leading-7 text-white/50">
+          <p className="mb-8 mt-4 max-w-lg font-inter text-base font-medium leading-7 text-[#64748b]">
             Five real questions. Scored on clarity, structure, confidence, and
             depth. See your rank among role-matched peers instantly.
           </p>
@@ -301,10 +301,10 @@ function NewUserDashboard({
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
-        className="w-full max-w-2xl rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-6"
+        className="w-full max-w-2xl rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/86 p-6 shadow-[0_18px_60px_rgba(0,108,255,0.09)] backdrop-blur-xl"
       >
         <div className="mb-5 flex items-center justify-between">
-          <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-white/40">
+          <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#64748b]">
             Live leaderboard
           </p>
           <Link
@@ -318,23 +318,23 @@ function NewUserDashboard({
           {topEntries.map((entry) => (
             <div
               key={entry.rank}
-              className="flex items-center justify-between rounded-lg border-b border-white/[0.05] px-2 py-3 transition hover:bg-white/[0.02]"
+              className="flex items-center justify-between rounded-lg border-b border-[rgba(0,132,255,0.08)] px-2 py-3 transition hover:bg-[#f7fbff]"
             >
               <div className="flex min-w-0 items-center gap-4">
-                <span className="w-7 font-inter text-sm font-bold text-white/20">
+                <span className="w-7 font-inter text-sm font-bold text-[#9aa9bb]">
                   #{entry.rank}
                 </span>
                 <div className="min-w-0">
-                  <span className="font-inter text-sm font-semibold text-white">
+                  <span className="font-inter text-sm font-bold text-[#07111f]">
                     {entry.name}
                   </span>
-                  <span className="ml-2 font-inter text-xs text-white/30">
+                  <span className="ml-2 font-inter text-xs font-semibold text-[#64748b]">
                     {entry.subtitle}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <span className="font-inter text-sm font-semibold text-white/60">
+                <span className="font-inter text-sm font-bold text-[#07111f]">
                   {entry.score}
                 </span>
                 <span className="font-inter text-xs font-bold text-green-400">
@@ -344,7 +344,7 @@ function NewUserDashboard({
             </div>
           ))}
         </div>
-        <p className="mt-4 text-center font-inter text-xs font-semibold text-white/20">
+        <p className="mt-4 text-center font-inter text-xs font-semibold text-[#64748b]">
           Complete your first interview to appear on the leaderboard
         </p>
       </motion.div>
@@ -443,10 +443,10 @@ function ReturningDashboard({
     <div className="mx-auto max-w-6xl p-5 sm:p-8">
       <div className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-inter text-3xl font-black tracking-[-0.03em] text-white">
+          <h1 className="font-inter text-3xl font-black tracking-[-0.03em] text-[#07111f]">
             Welcome back, {firstName}
           </h1>
-          <p className="mt-1 font-inter text-white/40">
+          <p className="mt-1 font-inter font-medium text-[#64748b]">
             Here is where you stand today.
           </p>
         </div>
@@ -462,27 +462,27 @@ function ReturningDashboard({
       <div className="mb-6 grid gap-4 xl:grid-cols-3">
         <motion.div
           whileHover={{ scale: 1.01 }}
-          className="relative overflow-hidden rounded-2xl border border-[#006cff]/20 bg-gradient-to-br from-[#0d1929] to-[#080808] p-6 xl:col-span-2 xl:p-8"
+          className="relative overflow-hidden rounded-2xl border border-[#006cff]/16 bg-white/88 p-6 shadow-[0_24px_80px_rgba(0,108,255,0.12)] backdrop-blur-xl xl:col-span-2 xl:p-8"
         >
           <div className="pointer-events-none absolute right-0 top-0 h-80 w-80 rounded-full bg-[#006cff]/10 blur-[100px]" />
           <div
             className="pointer-events-none absolute inset-0 opacity-15"
             style={{
               backgroundImage:
-                "radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px)",
+                "radial-gradient(circle, rgba(0,132,255,0.10) 1px, transparent 1px)",
               backgroundSize: "18px 18px",
             }}
           />
           <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="mb-3 font-inter text-sm font-semibold text-white/40">
+              <p className="mb-3 font-inter text-sm font-bold text-[#64748b]">
                 Your current rank
               </p>
               <div className="mb-3 flex items-end gap-3">
-                <span className="font-inter text-7xl font-black leading-none tracking-[-0.05em] text-white sm:text-8xl">
+                <span className="font-inter text-7xl font-black leading-none tracking-[-0.05em] text-[#07111f] sm:text-8xl">
                   #{rankSummary.rank}
                 </span>
-                <span className="mb-3 font-inter text-xl font-bold text-white/30">
+                <span className="mb-3 font-inter text-xl font-bold text-[#64748b]">
                   of {rankSummary.totalCandidates}
                 </span>
               </div>
@@ -490,12 +490,12 @@ function ReturningDashboard({
                 <span className="font-bold text-[#006cff]">
                   {rankSummary.rankChange}
                 </span>
-                <span className="text-white/20">/</span>
-                <span className="text-white/40">{rankSummary.percentile}</span>
-                <span className="text-white/20">/</span>
-                <span className="text-white/40">{rankSummary.role}</span>
-                <span className="text-white/20">/</span>
-                <span className="text-white/40">{rankSummary.companyType}</span>
+                <span className="text-[#b7c6d8]">/</span>
+                <span className="font-semibold text-[#64748b]">{rankSummary.percentile}</span>
+                <span className="text-[#b7c6d8]">/</span>
+                <span className="font-semibold text-[#64748b]">{rankSummary.role}</span>
+                <span className="text-[#b7c6d8]">/</span>
+                <span className="font-semibold text-[#64748b]">{rankSummary.companyType}</span>
               </div>
             </div>
             <PercentileRing value={recentSessionScore} />
@@ -505,7 +505,7 @@ function ReturningDashboard({
               type="button"
               onClick={shareRankCard}
               disabled={shareState === "creating"}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-1.5 font-inter text-xs font-bold text-white/30 transition hover:border-white/30 hover:text-white disabled:cursor-wait disabled:opacity-70"
+              className="inline-flex items-center gap-2 rounded-full border border-[#006cff]/16 bg-[#f7fbff] px-4 py-1.5 font-inter text-xs font-bold text-[#64748b] transition hover:border-[#006cff]/35 hover:text-[#006cff] disabled:cursor-wait disabled:opacity-70"
             >
               {shareLabel}
               <ExternalLink className="h-3 w-3" />
@@ -513,22 +513,22 @@ function ReturningDashboard({
           </div>
         </motion.div>
 
-        <div className="flex flex-col justify-between rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-6">
-          <p className="mb-5 font-inter text-xs font-bold uppercase tracking-[0.2em] text-white/40">
+        <div className="flex flex-col justify-between rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/88 p-6 shadow-[0_18px_60px_rgba(0,108,255,0.08)] backdrop-blur-xl">
+          <p className="mb-5 font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#64748b]">
             Score breakdown
           </p>
           <div className="flex-1 space-y-4">
             {dimensions.map((dim) => (
               <div key={dim.label}>
                 <div className="mb-1.5 flex justify-between">
-                  <span className="font-inter text-xs font-semibold text-white/50">
+                  <span className="font-inter text-xs font-bold text-[#64748b]">
                     {dim.label}
                   </span>
-                  <span className="font-inter text-xs font-bold text-white">
+                  <span className="font-inter text-xs font-bold text-[#07111f]">
                     {dim.value}
                   </span>
                 </div>
-                <div className="h-1 overflow-hidden rounded-full bg-white/[0.05]">
+                <div className="h-1 overflow-hidden rounded-full bg-[#e6eff8]">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${dim.value}%` }}
@@ -539,9 +539,9 @@ function ReturningDashboard({
               </div>
             ))}
           </div>
-          <div className="mt-5 border-t border-white/[0.05] pt-4">
-            <p className="font-inter text-xs text-white/20">
-              Weakest: <span className="text-white/50">Structure</span>
+          <div className="mt-5 border-t border-[rgba(0,132,255,0.10)] pt-4">
+            <p className="font-inter text-xs font-semibold text-[#64748b]">
+              Weakest: <span className="text-[#07111f]">Structure</span>
             </p>
           </div>
         </div>
@@ -553,17 +553,17 @@ function ReturningDashboard({
             <Link
               key={session.id}
               href={`/dashboard/sessions/${session.id}`}
-              className="flex items-center justify-between rounded-lg border-b border-white/[0.05] px-2 py-3 transition hover:bg-white/[0.02]"
+              className="flex items-center justify-between rounded-lg border-b border-[rgba(0,132,255,0.08)] px-2 py-3 transition hover:bg-[#f7fbff]"
             >
               <div>
-                <p className="font-inter text-sm font-semibold text-white">
+                <p className="font-inter text-sm font-bold text-[#07111f]">
                   {session.date}
                 </p>
-                <p className="font-inter text-xs text-white/30">{session.role}</p>
+                <p className="font-inter text-xs font-semibold text-[#64748b]">{session.role}</p>
               </div>
               <div className="flex items-center gap-4 font-inter text-sm">
-                <span className="text-white/60">Score: {session.score}</span>
-                <span className="text-white/40">
+                <span className="font-semibold text-[#07111f]">Score: {session.score}</span>
+                <span className="font-semibold text-[#64748b]">
                   {session.rank ? `#${session.rank}` : "Not ranked"}
                 </span>
                 <span
@@ -572,7 +572,7 @@ function ReturningDashboard({
                       ? "text-xs font-bold text-green-400"
                       : session.delta?.startsWith("↘")
                         ? "text-xs font-bold text-red-400"
-                        : "text-xs font-bold text-white/35"
+                        : "text-xs font-bold text-[#64748b]"
                   }
                 >
                   {session.delta ?? "new entry"}
@@ -588,8 +588,8 @@ function ReturningDashboard({
               key={entry.rank}
               className={
                 entry.isYou
-                  ? "flex items-center justify-between rounded-lg border border-[#006cff]/20 bg-[#006cff]/10 px-2 py-3 transition"
-                  : "flex items-center justify-between rounded-lg border-b border-white/[0.05] px-2 py-3 transition hover:bg-white/[0.02]"
+                  ? "flex items-center justify-between rounded-lg border border-[#006cff]/20 bg-[#eaf5ff] px-2 py-3 transition"
+                  : "flex items-center justify-between rounded-lg border-b border-[rgba(0,132,255,0.08)] px-2 py-3 transition hover:bg-[#f7fbff]"
               }
             >
               <div className="flex items-center gap-3">
@@ -597,7 +597,7 @@ function ReturningDashboard({
                   className={
                     entry.isYou
                       ? "w-8 font-inter text-sm font-bold text-[#006cff]"
-                      : "w-8 font-inter text-sm font-bold text-white/20"
+                      : "w-8 font-inter text-sm font-bold text-[#9aa9bb]"
                   }
                 >
                   #{entry.rank}
@@ -605,8 +605,8 @@ function ReturningDashboard({
                 <span
                   className={
                     entry.isYou
-                      ? "font-inter text-sm font-bold text-white"
-                      : "font-inter text-sm font-semibold text-white/60"
+                      ? "font-inter text-sm font-bold text-[#07111f]"
+                      : "font-inter text-sm font-bold text-[#41516a]"
                   }
                 >
                   {entry.name}
@@ -615,8 +615,8 @@ function ReturningDashboard({
               <span
                 className={
                   entry.isYou
-                    ? "font-inter text-sm font-bold text-white"
-                    : "font-inter text-sm font-semibold text-white/40"
+                    ? "font-inter text-sm font-bold text-[#07111f]"
+                    : "font-inter text-sm font-bold text-[#64748b]"
                 }
               >
                 {entry.score}
@@ -640,7 +640,7 @@ function PercentileRing({ value }: { value: number }) {
           cy="50"
           r="38"
           fill="none"
-          stroke="rgba(255,255,255,0.05)"
+          stroke="rgba(0,108,255,0.10)"
           strokeWidth="8"
         />
         <circle
@@ -655,8 +655,8 @@ function PercentileRing({ value }: { value: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-inter text-xl font-black text-white">{value}</span>
-        <span className="font-inter text-xs font-semibold text-white/30">
+        <span className="font-inter text-xl font-black text-[#07111f]">{value}</span>
+        <span className="font-inter text-xs font-semibold text-[#64748b]">
           recent score
         </span>
       </div>
@@ -674,9 +674,9 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-white/[0.08] bg-[#0d0d0d] p-6">
+    <div className="rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/88 p-6 shadow-[0_18px_60px_rgba(0,108,255,0.08)] backdrop-blur-xl">
       <div className="mb-5 flex items-center justify-between">
-        <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-white/40">
+        <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#64748b]">
           {title}
         </p>
         <Link
