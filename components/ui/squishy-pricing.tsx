@@ -29,7 +29,7 @@ const plans: Plan[] = [
     price: "₹0",
     description: "3 mock interviews every month. Know where you stand, no card needed.",
     cta: "Start Free",
-    href: "/interview",
+    href: "/login?next=%2Finterview%3Fmode%3Daccount",
     bg: "bg-[#0F172A]",
     accent: "#0F172A",
     features: [
@@ -47,7 +47,7 @@ const plans: Plan[] = [
     price: "₹299",
     description: "Unlimited mocks, curated questions, weakness heatmap and rank tracking.",
     cta: "Get Pro →",
-    href: "/interview",
+    href: "/login?next=%2Finterview%3Fmode%3Daccount",
     bg: "bg-[#4F46E5]",
     accent: "#4F46E5",
     popular: true,

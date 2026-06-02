@@ -174,7 +174,7 @@ function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps
     <motion.div variants={orbVariants} className="shrink-0 transform-gpu">
       <Link
         ref={linkRef}
-        href="/interview"
+        href="/login?next=%2Finterview%3Fmode%3Daccount"
         aria-label="Start free interview"
         onClick={onOrbClick}
         onMouseEnter={onHoverStart}
@@ -352,7 +352,7 @@ export function Hero() {
             className="flex flex-col sm:flex-row gap-4"
           >
             <Button
-              href="/interview"
+              href="/login?next=%2Finterview%3Fmode%3Daccount"
               variant="primary"
               showArrow
               className="hero-cta-primary relative min-h-[62px] min-w-[290px] overflow-hidden px-7 text-[15px] sm:px-8"

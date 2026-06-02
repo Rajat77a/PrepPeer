@@ -83,7 +83,7 @@ export function Navbar({
             <Logo />
 
             <Link
-              href="/interview"
+              href="/login?next=%2Finterview%3Fmode%3Daccount"
               className="relative z-[1] inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[rgba(0,132,255,0.18)] bg-white/55 px-3 py-1.5 font-inter text-[12px] font-extrabold text-blue shadow-[inset_0_1px_1px_rgba(255,255,255,0.75),0_8px_20px_rgba(0,132,255,0.12)] backdrop-blur-md transition active:scale-[0.98] sm:hidden"
             >
               Start
@@ -114,7 +114,7 @@ export function Navbar({
               >
                 Sign in
               </Link>
-              <Button href="/interview" variant="glass" showArrow>
+              <Button href="/login?next=%2Finterview%3Fmode%3Daccount" variant="glass" showArrow>
                 Start Free
               </Button>
             </div>

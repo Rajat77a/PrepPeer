@@ -28,6 +28,7 @@ type Stage = "setup" | "terms" | "interview" | "feedback";
 
 export default function InterviewPage() {
   const router = useRouter();
+  const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
   const [current, setCurrent] = useState(1);
   const [questions, setQuestions] = useState<string[]>([]);
@@ -57,6 +58,32 @@ export default function InterviewPage() {
     resetTimer,
     textareaProps,
   } = useAntiCheat(stage === "interview" && !evaluating);
+
+  useEffect(() => {
+    const checkAccountAccess = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const isAccountMode = params.get("mode") === "account";
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        router.replace("/login?next=%2Finterview%3Fmode%3Daccount");
+        return;
+      }
+
+      if (!isAccountMode) {
+        setAccessChecked(true);
+        router.replace("/interview?mode=account");
+        return;
+      }
+
+      setAccessChecked(true);
+    };
+
+    void checkAccountAccess();
+  }, [router]);
 
   const toPercentScore = (scoreOutOf40: number) =>
     Math.round((Math.max(0, Math.min(40, scoreOutOf40)) / 40) * 100);
@@ -391,14 +418,14 @@ export default function InterviewPage() {
     }
   };
 
-  if (stage === "setup" || stage === "terms") {
-    if (directStarting) {
+  if (!accessChecked || stage === "setup" || stage === "terms") {
+    if (!accessChecked || directStarting) {
       return (
         <div className="flex min-h-screen items-center justify-center bg-white px-6">
           <div className="text-center">
             <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-2 border-[#D7ECFF] border-t-[#0084FF]" />
             <p className="font-inter text-sm font-bold text-text">
-              Opening your interview room...
+              {accessChecked ? "Opening your interview room..." : "Checking your account..."}
             </p>
           </div>
         </div>

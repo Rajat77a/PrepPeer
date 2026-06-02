@@ -20,7 +20,9 @@ export function SessionScoreCard({
   const isAccountResult = report.source === "account";
   const hasLiveRank =
     !rankLocked && report.currentRank > 0 && report.totalCandidates > 0;
-  const practiceHref = isAccountResult ? "/interview?mode=account" : "/interview";
+  const practiceHref = isAccountResult
+    ? "/interview?mode=account"
+    : "/login?next=%2Finterview%3Fmode%3Daccount";
   const leaderboardHref =
     isAccountResult || hasLiveRank ? "/dashboard/leaderboard" : "/leaderboard";
   const accountPracticePath = "%2Finterview%3Fmode%3Daccount";
@@ -67,10 +69,10 @@ export function SessionScoreCard({
                 </div>
                 <p className="flex items-center gap-2 font-inter text-[13px] font-bold text-white/78">
                   <LockKeyhole size={14} />
-                  Rank locked for demo mode
+                  Sign in to continue
                 </p>
                 <p className="mt-2 max-w-[260px] font-inter text-[12px] leading-5 text-white/58">
-                  Sign in or create an account to place this score on the live board.
+                  Create an account or sign in to save interviews and enter the live board.
                 </p>
               </div>
             ) : (
@@ -120,7 +122,7 @@ export function SessionScoreCard({
             </Link>
           )}
           <Link
-            href={rankLocked ? "/login?next=%2Fresults%3FunlockRank%3D1" : leaderboardHref}
+            href={rankLocked ? "/login?next=%2Fdashboard%2Fleaderboard" : leaderboardHref}
             target={rankLocked ? "_blank" : undefined}
             rel={rankLocked ? "noopener noreferrer" : undefined}
             className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.08)] font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
@@ -129,7 +131,7 @@ export function SessionScoreCard({
           </Link>
           {rankLocked && (
             <Link
-              href="/login?next=%2Fresults%3FunlockRank%3D1&mode=signup"
+              href="/login?next=%2Finterview%3Fmode%3Daccount&mode=signup"
               target="_blank"
               rel="noopener noreferrer"
               className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,132,255,0.18)] bg-[rgba(0,132,255,0.06)] font-inter font-semibold text-[13px] text-blue hover:scale-[1.02] transition-transform cursor-pointer"
@@ -164,7 +166,7 @@ export function SessionScoreCard({
                 </div>
                 <div>
                   <p className="font-inter text-[11px] font-extrabold uppercase tracking-[0.22em] text-blue">
-                    Demo completed
+                    Account required
                   </p>
                   <h2
                     id="practice-gate-title"
@@ -175,9 +177,9 @@ export function SessionScoreCard({
                 </div>
               </div>
               <p className="font-inter text-[15px] leading-7 text-muted">
-                The free landing-page interview is a one-time preview. Sign in or
-                create an account to start the next interview, save each session,
-                and track your rank on the live board.
+                Interviews now run inside your PrepPeer account. Sign in or
+                create an account to start a session, save every result, and track
+                your rank on the live board.
               </p>
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 <Link

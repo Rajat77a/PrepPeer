@@ -119,7 +119,7 @@ export function Pricing() {
 
               {plan.featured ? (
                 <Button
-                  href="/interview"
+                  href="/login?next=%2Finterview%3Fmode%3Daccount"
                   className="w-full justify-center !bg-blue !text-white shadow-[0_8px_24px_rgba(0,132,255,0.4)]"
                 >
                   {plan.cta}

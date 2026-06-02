@@ -90,7 +90,7 @@ export function ScoreCardSection() {
               ))}
               <div className="flex gap-2.5 pt-2">
                 <Link
-                  href="/interview"
+                  href="/login?next=%2Finterview%3Fmode%3Daccount"
                   className="flex-1 text-center py-2.5 rounded-[10px] bg-blue text-white font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
                 >
                   Practice Again
