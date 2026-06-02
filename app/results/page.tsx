@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { TouchEvent, WheelEvent } from "react";
 import Link from "next/link";
-import { BookOpenText, ChevronRight, ListChecks, X } from "lucide-react";
+import { BookOpenText, ChevronRight, Home, ListChecks, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { SessionScoreCard } from "@/components/results/SessionScoreCard";
 import { QuestionBreakdownChart } from "@/components/results/QuestionBreakdownChart";
@@ -457,14 +457,24 @@ export default function ResultsPage() {
 
       <div className="max-w-[900px] mx-auto px-6 py-20">
         <div className="mb-8">
-          <div>
-            <h1 className="font-fustat font-extrabold text-3xl text-text mb-2">
-              Session Report
-            </h1>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h1 className="font-fustat font-extrabold text-3xl text-text mb-2">
+                Session Report
+              </h1>
 
-            <p className="font-inter text-muted">
-              Your complete score card, per-question breakdown, and session review.
-            </p>
+              <p className="font-inter text-muted">
+                Your complete score card, per-question breakdown, and session review.
+              </p>
+            </div>
+
+            <Link
+              href="/dashboard"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-2xl border border-[rgba(0,132,255,0.16)] bg-white px-4 py-2.5 font-inter text-sm font-extrabold text-text shadow-[0_14px_36px_rgba(0,132,255,0.08)] transition hover:-translate-y-0.5 hover:border-blue/35 hover:text-blue hover:shadow-[0_18px_44px_rgba(0,132,255,0.14)]"
+            >
+              <Home size={16} strokeWidth={2.2} />
+              Dashboard
+            </Link>
           </div>
 
           <motion.button
