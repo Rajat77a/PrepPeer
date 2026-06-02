@@ -440,46 +440,69 @@ function ReturningDashboard({
   };
 
   return (
-    <div className="mx-auto max-w-6xl p-5 sm:p-8">
-      <div className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+    <div className="relative mx-auto max-w-6xl p-5 sm:p-8">
+      <div className="pointer-events-none absolute right-0 top-4 h-52 w-52 rounded-full bg-[#7dffd9]/24 blur-[84px]" />
+      <div className="pointer-events-none absolute left-1/3 top-28 h-64 w-64 rounded-full bg-[#006cff]/12 blur-[96px]" />
+      <div className="pointer-events-none absolute bottom-12 right-1/4 h-40 w-40 rounded-full bg-[#ffbe3d]/10 blur-[70px]" />
+
+      <div className="relative z-10 mb-10 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="font-inter text-3xl font-black tracking-[-0.03em] text-[#07111f]">
+          <p className="mb-2 font-inter text-xs font-black uppercase tracking-[0.22em] text-[#006cff]">
+            Live practice room
+          </p>
+          <h1 className="font-inter text-3xl font-black tracking-[-0.03em] text-[#07111f] sm:text-4xl">
             Welcome back, {firstName}
           </h1>
           <p className="mt-1 font-inter font-medium text-[#64748b]">
             Here is where you stand today.
           </p>
         </div>
+        <motion.div
+          whileHover={{ y: -3, scale: 1.015 }}
+          whileTap={{ scale: 0.98 }}
+        >
         <Link
           href={practiceAgainHref}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-[#006cff] px-6 py-2.5 font-inter text-sm font-bold text-white transition hover:bg-[#0057cc] hover:shadow-[0_0_16px_rgba(0,108,255,0.4)]"
+          className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[linear-gradient(135deg,#07111f_0%,#006cff_48%,#20c4ff_100%)] px-8 py-3.5 font-inter text-sm font-black text-white shadow-[0_20px_50px_rgba(0,108,255,0.30)] transition"
         >
+          <span className="absolute inset-y-0 left-[-45%] w-1/3 rotate-12 bg-white/35 blur-md transition duration-700 group-hover:left-[120%]" />
           Practice again
           <ArrowRight className="h-4 w-4" />
         </Link>
+        </motion.div>
       </div>
 
-      <div className="mb-6 grid gap-4 xl:grid-cols-3">
+      <div className="relative z-10 mb-6 grid gap-4 xl:grid-cols-3">
         <motion.div
-          whileHover={{ scale: 1.01 }}
-          className="relative overflow-hidden rounded-2xl border border-[#006cff]/16 bg-white/88 p-6 shadow-[0_24px_80px_rgba(0,108,255,0.12)] backdrop-blur-xl xl:col-span-2 xl:p-8"
+          whileHover={{
+            y: -8,
+            rotateX: 2.2,
+            rotateY: -3.2,
+            scale: 1.012,
+            transition: { duration: 0.32, ease: "easeOut" },
+          }}
+          style={{ transformPerspective: 1200, transformStyle: "preserve-3d" }}
+          className="group relative overflow-hidden rounded-[30px] border border-[#006cff]/18 bg-[linear-gradient(135deg,rgba(255,255,255,0.94)_0%,rgba(231,245,255,0.90)_46%,rgba(232,255,248,0.78)_100%)] p-6 shadow-[0_34px_100px_rgba(0,108,255,0.18)] backdrop-blur-xl xl:col-span-2 xl:p-8"
         >
-          <div className="pointer-events-none absolute right-0 top-0 h-80 w-80 rounded-full bg-[#006cff]/10 blur-[100px]" />
+          <div className="pointer-events-none absolute -right-16 -top-20 h-80 w-80 rounded-full bg-[#006cff]/18 blur-[90px] transition duration-500 group-hover:scale-110" />
+          <div className="pointer-events-none absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-[#7dffd9]/22 blur-[90px] transition duration-500 group-hover:translate-x-8" />
+          <div className="pointer-events-none absolute right-8 top-8 h-24 w-24 rotate-12 rounded-[28px] border border-[#006cff]/14 bg-white/40 shadow-[0_18px_50px_rgba(0,108,255,0.10)] transition duration-500 group-hover:rotate-[20deg]" />
+          <div className="pointer-events-none absolute bottom-9 right-32 h-12 w-12 rounded-full bg-[#ffbe3d]/18 blur-sm transition duration-500 group-hover:-translate-y-2" />
           <div
             className="pointer-events-none absolute inset-0 opacity-15"
             style={{
               backgroundImage:
                 "radial-gradient(circle, rgba(0,132,255,0.10) 1px, transparent 1px)",
-              backgroundSize: "18px 18px",
+              backgroundSize: "20px 20px",
             }}
           />
-          <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between">
+          <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between" style={{ transform: "translateZ(34px)" }}>
             <div>
               <p className="mb-3 font-inter text-sm font-bold text-[#64748b]">
                 Your current rank
               </p>
               <div className="mb-3 flex items-end gap-3">
-                <span className="font-inter text-7xl font-black leading-none tracking-[-0.05em] text-[#07111f] sm:text-8xl">
+                <span className="bg-[linear-gradient(135deg,#07111f_0%,#006cff_78%)] bg-clip-text font-inter text-7xl font-black leading-none tracking-[-0.05em] text-transparent sm:text-8xl">
                   #{rankSummary.rank}
                 </span>
                 <span className="mb-3 font-inter text-xl font-bold text-[#64748b]">
@@ -500,7 +523,7 @@ function ReturningDashboard({
             </div>
             <PercentileRing value={recentSessionScore} />
           </div>
-          <div className="relative z-10 mt-6">
+          <div className="relative z-10 mt-6" style={{ transform: "translateZ(28px)" }}>
             <button
               type="button"
               onClick={shareRankCard}
@@ -513,11 +536,22 @@ function ReturningDashboard({
           </div>
         </motion.div>
 
-        <div className="flex flex-col justify-between rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/88 p-6 shadow-[0_18px_60px_rgba(0,108,255,0.08)] backdrop-blur-xl">
+        <motion.div
+          whileHover={{
+            y: -7,
+            rotateX: 2,
+            rotateY: 3,
+            transition: { duration: 0.3, ease: "easeOut" },
+          }}
+          style={{ transformPerspective: 1000, transformStyle: "preserve-3d" }}
+          className="relative flex flex-col justify-between overflow-hidden rounded-[28px] border border-[rgba(0,132,255,0.16)] bg-[linear-gradient(145deg,rgba(255,255,255,0.92),rgba(231,244,255,0.84))] p-6 shadow-[0_24px_70px_rgba(0,108,255,0.12)] backdrop-blur-xl"
+        >
+          <div className="pointer-events-none absolute -right-16 top-10 h-40 w-40 rounded-full bg-[#60b1ff]/24 blur-[52px]" />
+          <div className="pointer-events-none absolute bottom-0 left-0 h-1 w-full bg-[linear-gradient(90deg,#006cff,#7dffd9,#ffbe3d)]" />
           <p className="mb-5 font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#64748b]">
             Score breakdown
           </p>
-          <div className="flex-1 space-y-4">
+          <div className="relative z-10 flex-1 space-y-4" style={{ transform: "translateZ(24px)" }}>
             {dimensions.map((dim) => (
               <div key={dim.label}>
                 <div className="mb-1.5 flex justify-between">
@@ -528,12 +562,12 @@ function ReturningDashboard({
                     {dim.value}
                   </span>
                 </div>
-                <div className="h-1 overflow-hidden rounded-full bg-[#e6eff8]">
+                <div className="h-1.5 overflow-hidden rounded-full bg-[#dceeff]">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${dim.value}%` }}
                     transition={{ duration: 1, delay: 0.3 }}
-                    className="h-full rounded-full bg-[#006cff]"
+                    className="h-full rounded-full bg-[linear-gradient(90deg,#006cff,#60b1ff,#7dffd9)]"
                   />
                 </div>
               </div>
@@ -544,10 +578,10 @@ function ReturningDashboard({
               Weakest: <span className="text-[#07111f]">Structure</span>
             </p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="relative z-10 grid gap-4 xl:grid-cols-2">
         <Panel title="Recent sessions" href="/dashboard/sessions">
           {sessions.slice(0, 3).map((session) => (
             <Link
@@ -633,14 +667,21 @@ function PercentileRing({ value }: { value: number }) {
   const circumference = 2 * Math.PI * 38;
 
   return (
-    <div className="relative h-28 w-28 shrink-0">
-      <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+    <motion.div
+      animate={{ y: [0, -4, 0] }}
+      transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
+      className="relative h-32 w-32 shrink-0"
+      style={{ transform: "translateZ(44px)" }}
+    >
+      <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_160deg,rgba(0,108,255,0.20),rgba(125,255,217,0.24),rgba(255,255,255,0.78),rgba(0,108,255,0.20))] shadow-[0_20px_45px_rgba(0,108,255,0.18)]" />
+      <div className="absolute inset-3 rounded-full bg-white/78 backdrop-blur-xl" />
+      <svg viewBox="0 0 100 100" className="relative h-full w-full -rotate-90">
         <circle
           cx="50"
           cy="50"
           r="38"
           fill="none"
-          stroke="rgba(0,108,255,0.10)"
+          stroke="rgba(0,108,255,0.12)"
           strokeWidth="8"
         />
         <circle
@@ -660,7 +701,7 @@ function PercentileRing({ value }: { value: number }) {
           recent score
         </span>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -674,7 +715,18 @@ function Panel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/88 p-6 shadow-[0_18px_60px_rgba(0,108,255,0.08)] backdrop-blur-xl">
+    <motion.div
+      whileHover={{
+        y: -6,
+        rotateX: 1.4,
+        rotateY: 1.8,
+        transition: { duration: 0.28, ease: "easeOut" },
+      }}
+      style={{ transformPerspective: 1000, transformStyle: "preserve-3d" }}
+      className="relative overflow-hidden rounded-[28px] border border-[rgba(0,132,255,0.13)] bg-[linear-gradient(145deg,rgba(255,255,255,0.93),rgba(239,248,255,0.84)_62%,rgba(238,255,250,0.72))] p-6 shadow-[0_24px_76px_rgba(0,108,255,0.12)] backdrop-blur-xl"
+    >
+      <div className="pointer-events-none absolute -right-10 -top-14 h-36 w-36 rounded-full bg-[#006cff]/12 blur-[46px]" />
+      <div className="pointer-events-none absolute left-8 top-0 h-px w-1/2 bg-[linear-gradient(90deg,transparent,#006cff66,transparent)]" />
       <div className="mb-5 flex items-center justify-between">
         <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#64748b]">
           {title}
@@ -686,7 +738,7 @@ function Panel({
           View all
         </Link>
       </div>
-      <div className="space-y-1">{children}</div>
-    </div>
+      <div className="relative z-10 space-y-1" style={{ transform: "translateZ(20px)" }}>{children}</div>
+    </motion.div>
   );
 }

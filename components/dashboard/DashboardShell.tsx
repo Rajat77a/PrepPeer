@@ -60,13 +60,18 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
   }, [router]);
 
   return (
-    <div className="min-h-screen bg-[#f7fbff] text-[#07111f]">
+    <div className="min-h-screen overflow-hidden bg-[#f7fbff] text-[#07111f]">
       <div
-        className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(0,132,255,0.12),transparent_28%),radial-gradient(circle_at_88%_46%,rgba(96,177,255,0.14),transparent_34%),linear-gradient(180deg,#ffffff_0%,#eef7ff_54%,#ffffff_100%)]"
+        className="pointer-events-none fixed inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(0,108,255,0.18),transparent_26%),radial-gradient(circle_at_82%_18%,rgba(125,255,217,0.18),transparent_24%),radial-gradient(circle_at_78%_82%,rgba(255,190,61,0.12),transparent_28%),linear-gradient(180deg,#ffffff_0%,#edf7ff_48%,#ffffff_100%)]"
         aria-hidden="true"
       />
-      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[240px] border-r border-[rgba(0,132,255,0.12)] bg-white/82 px-4 py-5 shadow-[18px_0_60px_rgba(0,108,255,0.06)] backdrop-blur-xl lg:block">
-        <div className="pointer-events-none absolute left-0 top-0 h-32 w-full bg-[#006cff]/8 blur-2xl" />
+      <div
+        className="pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(0,108,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(0,108,255,0.035)_1px,transparent_1px)] bg-[size:54px_54px]"
+        aria-hidden="true"
+      />
+      <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[240px] border-r border-[rgba(0,132,255,0.14)] bg-white/76 px-4 py-5 shadow-[24px_0_80px_rgba(0,108,255,0.10)] backdrop-blur-2xl lg:block">
+        <div className="pointer-events-none absolute -left-16 top-0 h-56 w-56 rounded-full bg-[#006cff]/13 blur-[70px]" />
+        <div className="pointer-events-none absolute bottom-20 right-[-70px] h-48 w-48 rounded-full bg-[#7dffd9]/16 blur-[72px]" />
         <div className="relative z-10">
           <Logo size="md" href={null} />
         </div>
@@ -86,9 +91,9 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
                 onMouseEnter={() => router.prefetch(item.href)}
                 onFocus={() => router.prefetch(item.href)}
                 className={cn(
-                  "flex items-center gap-3 rounded-lg border-l-2 border-transparent px-3 py-3 font-inter text-sm font-bold text-[#5f6b7d] transition duration-200 hover:bg-[#eef7ff] hover:text-[#07111f]",
+                  "flex items-center gap-3 rounded-xl border border-transparent px-3 py-3 font-inter text-sm font-bold text-[#5f6b7d] transition duration-200 hover:-translate-y-0.5 hover:border-[#006cff]/12 hover:bg-white/82 hover:text-[#07111f] hover:shadow-[0_14px_34px_rgba(0,108,255,0.10)]",
                   active &&
-                    "border-[#006cff] bg-[#eaf5ff] text-[#07111f] shadow-[0_10px_40px_rgba(0,108,255,0.10)]"
+                    "border-[#006cff]/18 bg-[linear-gradient(135deg,rgba(234,245,255,0.96),rgba(255,255,255,0.78))] text-[#07111f] shadow-[0_14px_42px_rgba(0,108,255,0.13)]"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -99,7 +104,9 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
         </nav>
 
         <div className="absolute bottom-5 left-4 right-4">
-          <div className="flex items-center gap-3 rounded-xl border border-[rgba(0,132,255,0.12)] bg-white/70 p-3 shadow-[0_12px_32px_rgba(0,108,255,0.07)]">
+          <div className="relative overflow-hidden rounded-2xl border border-[rgba(0,132,255,0.14)] bg-white/78 p-3 shadow-[0_18px_44px_rgba(0,108,255,0.12)] backdrop-blur-xl">
+            <div className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#006cff]/12 blur-2xl" />
+            <div className="relative z-10 flex items-center gap-3">
             {user.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -120,6 +127,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
                 {user.email}
               </p>
             </div>
+            </div>
           </div>
           <button
             type="button"
@@ -134,7 +142,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
 
       <main className="relative z-10 min-h-screen pb-24 lg:ml-[240px] lg:pb-0">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 border-t border-[rgba(0,132,255,0.12)] bg-white/92 px-3 py-2 shadow-[0_-18px_50px_rgba(0,108,255,0.08)] backdrop-blur-xl lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 border-t border-[rgba(0,132,255,0.12)] bg-white/88 px-3 py-2 shadow-[0_-18px_50px_rgba(0,108,255,0.12)] backdrop-blur-2xl lg:hidden">
         {navItems.map((item) => {
           const active =
             pathname === item.href ||
