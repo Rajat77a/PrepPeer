@@ -92,6 +92,25 @@ export function Navbar({
             ))}
           </div>
 
+          <div className="grid grid-cols-2 gap-2 sm:hidden">
+            <Link
+              href="/login"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-[#07111f]/10 bg-white/72 px-4 py-2.5 text-center font-inter text-sm font-extrabold tracking-[-0.02em] text-[#07111f] shadow-[0_10px_24px_rgba(0,108,255,0.10)] backdrop-blur-xl transition active:scale-[0.98]"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/login?mode=signup"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-full border border-[#006cff]/20 bg-[#07111f] px-4 py-2.5 text-center font-inter text-sm font-extrabold tracking-[-0.02em] text-white shadow-[0_12px_30px_rgba(7,17,31,0.16)] transition active:scale-[0.98]"
+            >
+              Sign up
+            </Link>
+          </div>
+
           <div className="shrink-0 hidden sm:block">
             <div className="flex items-center">
               <Link
