@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { ArrowRight } from "lucide-react";
 import { Logo } from "./Logo";
-import { Button } from "./Button";
 import { NavSectionLink } from "./NavSectionLink";
 import { NavSparkles } from "./NavSparkles";
 import { NAV_LINKS } from "@/lib/mockData";
@@ -79,21 +77,11 @@ export function Navbar({
       >
         <NavSparkles />
         <div className="relative z-[1] flex w-full flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
-          <div className="flex items-center justify-between gap-3 sm:contents">
+          <div className="flex items-center justify-center gap-3 sm:contents">
             <Logo />
-
-            <Link
-              href="/login?next=%2Finterview%3Fmode%3Daccount"
-              className="relative z-[1] inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[rgba(0,132,255,0.18)] bg-white/55 px-3 py-1.5 font-inter text-[12px] font-extrabold text-blue shadow-[inset_0_1px_1px_rgba(255,255,255,0.75),0_8px_20px_rgba(0,132,255,0.12)] backdrop-blur-md transition active:scale-[0.98] sm:hidden"
-            >
-              Start
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue text-white">
-                <ArrowRight size={12} strokeWidth={2.6} />
-              </span>
-            </Link>
           </div>
 
-          <div className="flex min-w-0 flex-wrap items-center justify-center gap-x-3 gap-y-1.5 sm:flex-1 sm:flex-nowrap sm:gap-4 sm:overflow-x-auto md:gap-6 scrollbar-none">
+          <div className="flex min-w-0 flex-wrap items-center justify-center gap-x-3 gap-y-1.5 sm:flex-1 sm:flex-nowrap sm:gap-4 sm:overflow-x-auto md:gap-7 scrollbar-none">
             {NAV_LINKS.map((link) => (
               <NavSectionLink
                 key={link.label}
@@ -105,18 +93,15 @@ export function Navbar({
           </div>
 
           <div className="shrink-0 hidden sm:block">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <Link
                 href="/login"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-inter text-sm font-semibold text-text transition hover:bg-white/10"
+                className="rounded-full border border-[#07111f]/10 bg-[#07111f] px-5 py-2.5 font-inter text-sm font-extrabold tracking-[-0.02em] text-white shadow-[0_12px_30px_rgba(7,17,31,0.16)] transition hover:-translate-y-0.5 hover:bg-[#006cff] hover:shadow-[0_16px_34px_rgba(0,108,255,0.22)]"
               >
                 Sign in
               </Link>
-              <Button href="/login?next=%2Finterview%3Fmode%3Daccount" variant="glass" showArrow>
-                Start Free
-              </Button>
             </div>
           </div>
         </div>

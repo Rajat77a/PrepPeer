@@ -60,11 +60,11 @@ export function NavSectionLink({
     >
       <motion.span
         className={cn(
-          "font-inter font-medium block",
-          compact ? "text-xs sm:text-sm" : "text-sm",
-          active ? "text-text" : "text-muted"
+          "block font-inter font-bold tracking-[-0.025em]",
+          compact ? "text-xs sm:text-[15px]" : "text-sm",
+          active ? "text-[#07111f]" : "text-[#5f6b7d]"
         )}
-        whileHover={{ color: "#0A0A0F" }}
+        whileHover={{ color: "#07111f" }}
         transition={{ duration: 0.2 }}
       >
         {item.label}
