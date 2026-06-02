@@ -92,6 +92,38 @@ const normalizeScoreBreakdown = (
   }));
 };
 
+const getAverageScoreBreakdown = (
+  sessions: InterviewSessionRow[]
+): ScoreDimension[] => {
+  const validBreakdowns = sessions
+    .map((session) =>
+      normalizeScoreBreakdown(
+        session.dimensions,
+        Number(session.composite_score ?? 0)
+      )
+    )
+    .filter((dimensions) =>
+      dimensions.some((dimension) => Number(dimension.value) > 0)
+    );
+
+  if (validBreakdowns.length === 0) {
+    return zeroDimensions;
+  }
+
+  return zeroDimensions.map((baseDimension, index) => {
+    const average =
+      validBreakdowns.reduce(
+        (total, dimensions) => total + Number(dimensions[index]?.value ?? 0),
+        0
+      ) / validBreakdowns.length;
+
+    return {
+      ...baseDimension,
+      value: Number(average.toFixed(1)),
+    };
+  });
+};
+
 export default async function DashboardPage() {
   const cookieStore = await cookies();
   const user = await getCurrentUser();
@@ -160,10 +192,7 @@ export default async function DashboardPage() {
 
   const userRank = unifiedRank;
   const latestScore = Number(latestUserSession?.composite_score ?? 0);
-  const latestDimensions = normalizeScoreBreakdown(
-    latestUserSession?.dimensions,
-    latestScore
-  );
+  const averageDimensions = getAverageScoreBreakdown(userSessions);
 
   const dashboardSessions: DashboardSession[] = userSessions
     .slice(0, 10)
@@ -206,7 +235,7 @@ export default async function DashboardPage() {
               role: profileRole,
               companyType: profileCompanyType,
               experience: profileExperience,
-              dimensions: latestDimensions,
+              dimensions: averageDimensions,
             }
           : null
       }
