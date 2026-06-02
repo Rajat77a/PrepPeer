@@ -11,8 +11,14 @@ import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 import { createClient } from "@/utils/supabase/client";
-import type { QuestionReview } from "@/lib/types";
-import { AlertTriangle, ArrowRight, Clock, LockKeyhole, ShieldCheck } from "lucide-react";
+import type { DimensionScore, QuestionReview } from "@/lib/types";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Clock,
+  LockKeyhole,
+  ShieldCheck,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { EASE_OUT } from "@/lib/motion";
 
@@ -26,6 +32,33 @@ type SetupData = {
 
 type Stage = "setup" | "terms" | "interview" | "feedback";
 
+const zeroDimensions: DimensionScore[] = [
+  {
+    label: "Communication",
+    value: 0,
+    color: "#0084FF",
+    reason: "No valid answer was submitted.",
+  },
+  {
+    label: "Problem Solving",
+    value: 0,
+    color: "#319AFF",
+    reason: "No valid answer was submitted.",
+  },
+  {
+    label: "Specificity",
+    value: 0,
+    color: "#FF6B3D",
+    reason: "No valid answer was submitted.",
+  },
+  {
+    label: "Accuracy",
+    value: 0,
+    color: "#0084FF",
+    reason: "No valid answer was submitted.",
+  },
+];
+
 export default function InterviewPage() {
   const router = useRouter();
   const [accessChecked, setAccessChecked] = useState(false);
@@ -37,10 +70,18 @@ export default function InterviewPage() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
   const [evaluating, setEvaluating] = useState(false);
-  const [aiDetected, setAiDetected] = useState<{ isAI: boolean; confidence: number; reason: string } | null>(null);
-  const [questionScores, setQuestionScores] = useState<{ question: string; score: number }[]>([]);
+  const [aiDetected, setAiDetected] = useState<{
+    isAI: boolean;
+    confidence: number;
+    reason: string;
+  } | null>(null);
+  const [questionScores, setQuestionScores] = useState<
+    { question: string; score: number }[]
+  >([]);
   const [questionReviews, setQuestionReviews] = useState<QuestionReview[]>([]);
-  const [dimensionHistory, setDimensionHistory] = useState<typeof MOCK_FEEDBACK.dimensions[]>([]);
+  const [dimensionHistory, setDimensionHistory] = useState<
+    typeof MOCK_FEEDBACK.dimensions[]
+  >([]);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -85,75 +126,65 @@ export default function InterviewPage() {
     void checkAccountAccess();
   }, [router]);
 
-  const toPercentScore = (scoreOutOf40: number) =>
-    Math.round((Math.max(0, Math.min(40, scoreOutOf40)) / 40) * 100);
-
   const saveResults = async (
     reviews: QuestionReview[],
     completionReason: "completed" | "autoSubmitted"
   ) => {
-    const allReviews = Array.from({ length: TOTAL }, (_, i) => {
-      const questionLabel = `Q${i + 1}`;
+    const allReviews = Array.from({ length: TOTAL }, (_, index) => {
+      const questionLabel = `Q${index + 1}`;
       const existing = reviews.find((item) => item.question === questionLabel);
 
-      return existing ?? {
-        question: questionLabel,
-        prompt: questions[i] ?? "Question not available",
-        score: 0,
-        status: "autoSkipped" as const,
-        reason: "The session ended before this question was answered.",
-      };
+      return (
+        existing ?? {
+          question: questionLabel,
+          prompt: questions[index] ?? "Question not available",
+          score: 0,
+          status: "autoSkipped" as const,
+          reason: "The session ended before this question was answered.",
+        }
+      );
     });
+
+    const answeredReviews = allReviews.filter(
+      (item) => item.status === "answered"
+    );
+
+    const attemptedCount = answeredReviews.length;
+
+    const attemptedAverage =
+      attemptedCount > 0
+        ? answeredReviews.reduce((sum, item) => sum + Number(item.score ?? 0), 0) /
+          attemptedCount
+        : 0;
+
+    const completionFactor =
+      attemptedCount > 0 ? 0.5 + 0.5 * (attemptedCount / TOTAL) : 0;
+
+    const compositeScore = Math.round(attemptedAverage * completionFactor);
 
     const allQuestionScores = allReviews.map((item) => ({
       question: item.question,
       score: item.score,
     }));
 
-    const compositeScore = Math.round(
-      allReviews.reduce((sum, item) => sum + item.score, 0) / TOTAL
-    );
-
-    const zeroDimensions = [
-      {
-        label: "Communication",
-        value: 0,
-        color: "#0084FF",
-        reason: "No valid answer was submitted.",
-      },
-      {
-        label: "Problem Solving",
-        value: 0,
-        color: "#319AFF",
-        reason: "No valid answer was submitted.",
-      },
-      {
-        label: "Specificity",
-        value: 0,
-        color: "#FF6B3D",
-        reason: "No valid answer was submitted.",
-      },
-      {
-        label: "Accuracy",
-        value: 0,
-        color: "#0084FF",
-        reason: "No valid answer was submitted.",
-      },
-    ];
-
     const resultDimensions =
-      dimensionHistory.length > 0
+      dimensionHistory.length > 0 && attemptedCount > 0
         ? zeroDimensions.map((fallbackDimension, index) => {
-            const sourceDimension = dimensionHistory[0]?.[index] ?? fallbackDimension;
+            const sourceDimension =
+              dimensionHistory[0]?.[index] ?? fallbackDimension;
 
             const total = dimensionHistory.reduce(
               (sum, item) => sum + (item[index]?.value ?? 0),
               0
             );
 
+            const attemptedDimensionAverage = total / attemptedCount;
+
             return {
               ...sourceDimension,
-              value: Number((total / TOTAL).toFixed(1)),
+              value: Number(
+                (attemptedDimensionAverage * completionFactor).toFixed(1)
+              ),
             };
           })
         : zeroDimensions;
@@ -180,10 +211,15 @@ export default function InterviewPage() {
 
     const summary = {
       completionReason,
+      attemptedQuestions: attemptedCount,
+      totalQuestions: TOTAL,
+      completionFactor,
       overallSummary:
         aiSummary?.overallSummary ?? "AI summary could not be generated right now.",
       needsImprovement:
-        aiSummary?.needsImprovement ?? ["Write clear, specific answers with real examples."],
+        aiSummary?.needsImprovement ?? [
+          "Write clear, specific answers with real examples.",
+        ],
       questionReviews: allReviews.map((item) => {
         const aiReview = aiSummary?.questionReviews?.find(
           (review) => review.question === item.question
@@ -233,7 +269,11 @@ export default function InterviewPage() {
   }, [shouldAutoSubmit, router, questionReviews, dimensionHistory]);
 
   const handleStart = async (profileSetup = setup) => {
-    if (!profileSetup.domain || !profileSetup.experience || !profileSetup.companyType) {
+    if (
+      !profileSetup.domain ||
+      !profileSetup.experience ||
+      !profileSetup.companyType
+    ) {
       setError("Please fill in all fields.");
       return;
     }
@@ -294,8 +334,6 @@ export default function InterviewPage() {
     setPendingSetup(nextSetup);
     setSetup(nextSetup);
     void handleStart(nextSetup);
-    // Dashboard practice passes the full interview context in the URL; this
-    // effect should run once so it can skip the setup screen cleanly.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
 
@@ -373,7 +411,7 @@ export default function InterviewPage() {
           },
         ]);
       } else if (evalData.feedback) {
-        const score = toPercentScore(evalData.feedback.compositeScore);
+        const score = Number(evalData.feedback.compositeScore ?? 0);
 
         setFeedback(evalData.feedback);
         setDimensionHistory((prev) => [...prev, evalData.feedback.dimensions]);
@@ -391,7 +429,10 @@ export default function InterviewPage() {
             status: "answered",
             reason:
               evalData.feedback.dimensions
-                ?.map((d: { label: string; reason?: string }) => `${d.label}: ${d.reason}`)
+                ?.map(
+                  (dimension: { label: string; reason?: string }) =>
+                    `${dimension.label}: ${dimension.reason}`
+                )
                 .join(" ") ?? "",
           },
         ]);
@@ -399,7 +440,27 @@ export default function InterviewPage() {
 
       if (detectData) setAiDetected(detectData);
     } catch {
-      // fallback
+      const zeroFeedback = createZeroFeedback(
+        "This answer could not be evaluated because the scoring service failed."
+      );
+
+      setFeedback(zeroFeedback);
+      setAiDetected(null);
+      setQuestionScores((prev) => [
+        ...prev,
+        { question: `Q${current}`, score: 0 },
+      ]);
+      setQuestionReviews((prev) => [
+        ...prev,
+        {
+          question: `Q${current}`,
+          prompt: questions[current - 1],
+          answer,
+          score: 0,
+          status: "answered",
+          reason: "The scoring service failed.",
+        },
+      ]);
     } finally {
       setEvaluating(false);
       setStage("feedback");
@@ -426,7 +487,9 @@ export default function InterviewPage() {
           <div className="text-center">
             <div className="mx-auto mb-5 h-12 w-12 animate-spin rounded-full border-2 border-[#D7ECFF] border-t-[#0084FF]" />
             <p className="font-inter text-sm font-bold text-text">
-              {accessChecked ? "Opening your interview room..." : "Checking your account..."}
+              {accessChecked
+                ? "Opening your interview room..."
+                : "Checking your account..."}
             </p>
           </div>
         </div>
@@ -588,11 +651,16 @@ export default function InterviewPage() {
 
               {aiDetected?.isAI ? (
                 <div className="mt-6 flex items-start gap-3 bg-red-50 border border-red-200 rounded-2xl px-5 py-6">
-                  <AlertTriangle className="mt-1 shrink-0" size={24} color="#ef4444" />
+                  <AlertTriangle
+                    className="mt-1 shrink-0"
+                    size={24}
+                    color="#ef4444"
+                  />
 
                   <div>
                     <p className="font-inter font-bold text-base text-red-700">
-                      AI-generated answer detected ({aiDetected.confidence}% confidence)
+                      AI-generated answer detected ({aiDetected.confidence}%
+                      confidence)
                     </p>
 
                     <p className="font-inter text-sm text-red-600 mt-1 mb-4">
@@ -600,7 +668,8 @@ export default function InterviewPage() {
                     </p>
 
                     <p className="font-inter text-sm text-red-700 font-medium">
-                      This answer will receive 0 score and will be included in your final summary.
+                      This answer will receive 0 score and will be included in
+                      your final summary.
                     </p>
 
                     <button
@@ -650,7 +719,10 @@ function IntegrityTermsModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        style={{ background: "rgba(10,10,15,0.52)", backdropFilter: "blur(5px)" }}
+        style={{
+          background: "rgba(10,10,15,0.52)",
+          backdropFilter: "blur(5px)",
+        }}
       >
         <motion.div
           initial={{ scale: 0.94, opacity: 0, y: 10 }}
@@ -679,20 +751,38 @@ function IntegrityTermsModal({
             </div>
 
             <p className="mt-6 font-inter text-[15px] leading-7 text-muted">
-              To ensure honest participation and fair scoring, this interview session will run with anti-cheating controls enabled.
+              To ensure honest participation and fair scoring, this interview
+              session will run with anti-cheating controls enabled.
             </p>
 
             <ul className="mt-5 list-disc space-y-3 pl-5 font-inter text-sm leading-6 text-text">
-              <li>Ctrl/Cmd + C, Ctrl/Cmd + V, Ctrl/Cmd + A, copy, cut, paste, and right click are disabled across the interview page.</li>
-              <li>Switching tabs or leaving the application once or twice will give you a warning.</li>
-              <li>On the third tab or application switch, the session will be marked as completed automatically.</li>
-              <li>A session completed due to this rule will exhaust one available session.</li>
+              <li>
+                Ctrl/Cmd + C, Ctrl/Cmd + V, Ctrl/Cmd + A, copy, cut, paste,
+                and right click are disabled across the interview page.
+              </li>
+              <li>
+                Switching tabs or leaving the application once or twice will
+                give you a warning.
+              </li>
+              <li>
+                On the third tab or application switch, the session will be
+                marked as completed automatically.
+              </li>
+              <li>
+                A session completed due to this rule will exhaust one available
+                session.
+              </li>
             </ul>
 
             <div className="mt-5 flex items-start gap-3 border-t border-[rgba(0,0,0,0.08)] pt-5">
-              <AlertTriangle className="mt-0.5 shrink-0" size={18} color="#996600" />
+              <AlertTriangle
+                className="mt-0.5 shrink-0"
+                size={18}
+                color="#996600"
+              />
               <p className="font-inter text-sm font-semibold leading-6 text-[#664400]">
-                Continue only when you are ready to stay on this page until the session ends.
+                Continue only when you are ready to stay on this page until the
+                session ends.
               </p>
             </div>
 
