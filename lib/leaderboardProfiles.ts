@@ -5,6 +5,10 @@ type LeaderboardProfileRow = {
   user_id: string;
   name: string | null;
   college?: string | null;
+  target_role?: string | null;
+  role?: string | null;
+  target_company_type?: string | null;
+  company_type?: string | null;
 };
 
 export const getLeaderboardUserProfiles = async (
@@ -23,6 +27,9 @@ export const getLeaderboardUserProfiles = async (
     profiles[row.user_id] = {
       name: row.name?.trim() || undefined,
       college: row.college?.trim() || undefined,
+      role: (row.target_role ?? row.role)?.trim() || undefined,
+      companyType:
+        (row.target_company_type ?? row.company_type)?.trim() || undefined,
     };
 
     return profiles;

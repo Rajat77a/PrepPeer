@@ -101,6 +101,11 @@ export default async function DashboardPage() {
     "PrepPeer user";
 
   const firstName = name.split(" ")[0] ?? "there";
+  const profileRole = String(user.user_metadata?.target_role ?? "Interview");
+  const profileExperience = String(user.user_metadata?.experience_level ?? "Not set");
+  const profileCompanyType = String(
+    user.user_metadata?.target_company_type ?? "General"
+  );
   const supabase = createClient(cookieStore);
 
   const { data: rows } = await supabase
@@ -112,6 +117,13 @@ export default async function DashboardPage() {
     .limit(1000);
 
   const userProfiles = await getLeaderboardUserProfiles(supabase);
+  userProfiles[user.id] = {
+    ...(userProfiles[user.id] ?? {}),
+    name,
+    college: String(user.user_metadata?.college ?? ""),
+    role: profileRole,
+    companyType: profileCompanyType,
+  };
 
   const allSessions = (rows ?? []) as InterviewSessionRow[];
   const userSessions = allSessions.filter((session) => session.user_id === user.id);
@@ -171,11 +183,9 @@ export default async function DashboardPage() {
                 rankSummary.totalCandidates
               ),
               rankChange: rankSummary.rankChange,
-              role: latestUserSession?.role ?? rankSummary.role ?? "Interview",
-              companyType:
-                latestUserSession?.company_type ??
-                rankSummary.company_type ??
-                "General",
+              role: profileRole,
+              companyType: profileCompanyType,
+              experience: profileExperience,
               dimensions: latestDimensions,
             }
           : null

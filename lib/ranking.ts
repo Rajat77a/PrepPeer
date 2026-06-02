@@ -24,6 +24,8 @@ export type RankedSession = InterviewSessionRow & {
 export type LeaderboardUserProfile = {
   name?: string;
   college?: string;
+  role?: string;
+  companyType?: string;
 };
 
 const BENCHMARK_WINDOW_MS = 5 * 60 * 1000;
@@ -354,15 +356,20 @@ export const toLeaderboardEntries = (
             "PrepPeer user",
       subtitle:
         session.user_id === currentUserId
-          ? `${currentUserName}${currentUserCollege ? ` - ${currentUserCollege}` : ""}`
+          ? `${currentUserName}${currentUserCollege ? ` - ${currentUserCollege}` : ""} - ${
+              realUserProfile?.role ?? session.role ?? "Interview"
+            } - ${realUserProfile?.companyType ?? session.company_type ?? "General"}`
           : `${
               realUserProfile?.college ??
               benchmarkProfile?.college ??
               session.role ??
               "Interview"
-            } - ${session.company_type ?? "General"}`,
-      role: session.role ?? undefined,
-      companyType: session.company_type ?? undefined,
+            } - ${
+              realUserProfile?.role ?? session.role ?? "Interview"
+            } - ${realUserProfile?.companyType ?? session.company_type ?? "General"}`,
+      role: realUserProfile?.role ?? session.role ?? undefined,
+      companyType:
+        realUserProfile?.companyType ?? session.company_type ?? undefined,
       score: session.score,
       sessions: sessionsCount,
       delta: getRankChangeLabel(session.rank, previousRank),

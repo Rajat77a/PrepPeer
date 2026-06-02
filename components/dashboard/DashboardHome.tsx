@@ -34,6 +34,7 @@ export type DashboardRankSummary = {
   rankChange: string;
   role: string;
   companyType: string;
+  experience?: string;
   dimensions?: DimensionScore[];
 };
 
@@ -378,10 +379,10 @@ function ReturningDashboard({
       }));
   const latestSession = sessions[0];
   const practiceAgainHref = `/interview?mode=account&autostart=1&role=${encodeURIComponent(
-    latestSession?.role ?? rankSummary.role
+    rankSummary.role
   )}&experience=${encodeURIComponent(
-    latestSession?.experience ?? "Not set"
-  )}&company=${encodeURIComponent(latestSession?.company ?? rankSummary.companyType)}`;
+    rankSummary.experience ?? latestSession?.experience ?? "Not set"
+  )}&company=${encodeURIComponent(rankSummary.companyType)}`;
   const shareLabel =
     shareState === "creating"
       ? "Creating card..."

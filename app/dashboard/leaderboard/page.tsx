@@ -26,6 +26,15 @@ export default async function DashboardLeaderboardPage() {
     .order("created_at", { ascending: false })
     .limit(1000);
   const userProfiles = await getLeaderboardUserProfiles(supabase);
+  if (user?.id) {
+    userProfiles[user.id] = {
+      ...(userProfiles[user.id] ?? {}),
+      name: String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? "You"),
+      college: String(user.user_metadata?.college ?? ""),
+      role: String(user.user_metadata?.target_role ?? "Interview"),
+      companyType: String(user.user_metadata?.target_company_type ?? "General"),
+    };
+  }
 
   const entries = toLeaderboardEntries(
     (rows ?? []) as InterviewSessionRow[],
