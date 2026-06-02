@@ -16,6 +16,7 @@ import {
   toLiveLeaderboardEntries,
   type SupabaseLeaderboardRow,
 } from "@/lib/liveLeaderboard";
+import { createOptionalAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
 
@@ -143,6 +144,7 @@ export default async function DashboardPage() {
     user.user_metadata?.target_company_type ?? "General"
   );
   const supabase = createClient(cookieStore);
+  const leaderboardSupabase = createOptionalAdminClient() ?? supabase;
 
   const { data: rows } = await supabase
     .from("interview_sessions")
@@ -151,12 +153,12 @@ export default async function DashboardPage() {
     )
     .order("created_at", { ascending: false })
     .limit(1000);
-  const { data: leaderboardRows } = await supabase.rpc("get_leaderboard", {
+  const { data: leaderboardRows } = await leaderboardSupabase.rpc("get_leaderboard", {
     p_role: null,
     p_company_type: null,
   });
 
-  const userProfiles = await getLeaderboardUserProfiles(supabase);
+  const userProfiles = await getLeaderboardUserProfiles(leaderboardSupabase);
   userProfiles[user.id] = {
     ...(userProfiles[user.id] ?? {}),
     name,

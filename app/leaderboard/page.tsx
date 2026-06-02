@@ -4,6 +4,7 @@ import { Navbar } from "@/components/ui/Navbar";
 import { LeaderboardFilters } from "@/components/leaderboard/LeaderboardFilters";
 import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
 import { createClient } from "@/utils/supabase/server";
+import { createOptionalAdminClient } from "@/utils/supabase/admin";
 import { FULL_LEADERBOARD } from "@/lib/mockData";
 import { getRankChangeLabel } from "@/lib/ranking";
 import type { LeaderboardEntry } from "@/lib/types";
@@ -120,10 +121,11 @@ const mergeDemoAndRealEntries = (
 export default async function LeaderboardPage() {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
+  const leaderboardSupabase = createOptionalAdminClient() ?? supabase;
 
   const { data: userData } = await supabase.auth.getUser();
 
-  const { data } = await supabase.rpc("get_leaderboard", {
+  const { data } = await leaderboardSupabase.rpc("get_leaderboard", {
     p_role: null,
     p_company_type: null,
   });
