@@ -16,6 +16,7 @@ export type SupabaseLeaderboardRow = {
 };
 
 type InternalLeaderboardEntry = LeaderboardEntry & {
+  originalRank?: number;
   previousScore?: number | null;
   userId?: string;
 };
@@ -32,7 +33,13 @@ const sortEntries = (entries: InternalLeaderboardEntry[]) =>
         return Number(b.score) - Number(a.score);
       }
 
-      return (a.sessions ?? 999) - (b.sessions ?? 999);
+      const sessionDiff = (b.sessions ?? 0) - (a.sessions ?? 0);
+      if (sessionDiff !== 0) return sessionDiff;
+
+      const rankDiff = (a.originalRank ?? 9999) - (b.originalRank ?? 9999);
+      if (rankDiff !== 0) return rankDiff;
+
+      return a.name.localeCompare(b.name);
     })
     .map((entry, index) => ({
       ...entry,
@@ -61,6 +68,7 @@ const toRealEntry = (
     isYou: currentUserId === row.user_id,
     trend: "flat",
     source: "real",
+    originalRank: row.rank,
     userId: row.user_id,
     previousScore: row.previous_score,
   };
@@ -100,6 +108,7 @@ export const toLiveLeaderboardEntries = (
     (entry) => ({
       ...entry,
       isYou: false,
+      originalRank: entry.rank,
       source: "demo",
     })
   );

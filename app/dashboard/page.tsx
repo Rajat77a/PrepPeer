@@ -137,7 +137,7 @@ export default async function DashboardPage() {
   const userSessions = allSessions.filter((session) => session.user_id === user.id);
   const latestUserSession = userSessions[0] ?? null;
 
-  const rankSummary = getRankSummary(allSessions, user.id);
+  const sessionRankSummary = getRankSummary(allSessions, user.id);
   const fallbackLeaderboardEntries = toLeaderboardEntries(
     allSessions,
     user.id,
@@ -151,8 +151,14 @@ export default async function DashboardPage() {
         user.id
       )
     : fallbackLeaderboardEntries;
+  const liveUserEntry = leaderboardEntries.find((entry) => entry.isYou);
+  const unifiedRank = liveUserEntry?.rank ?? sessionRankSummary?.rank;
+  const unifiedTotalCandidates =
+    leaderboardEntries.length || sessionRankSummary?.totalCandidates || 0;
+  const unifiedRankChange =
+    liveUserEntry?.delta ?? sessionRankSummary?.rankChange ?? "new entry";
 
-  const userRank = rankSummary?.rank;
+  const userRank = unifiedRank;
   const latestScore = Number(latestUserSession?.composite_score ?? 0);
   const latestDimensions = normalizeScoreBreakdown(
     latestUserSession?.dimensions,
@@ -177,7 +183,7 @@ export default async function DashboardPage() {
       company: session.company_type ?? "General",
       score: Number(session.composite_score ?? 0),
       rank: index === 0 ? userRank : undefined,
-      delta: index === 0 ? rankSummary?.rankChange : undefined,
+      delta: index === 0 ? unifiedRankChange : undefined,
     }));
 
   return (
@@ -187,16 +193,16 @@ export default async function DashboardPage() {
       leaderboardEntries={leaderboardEntries}
       recentSessionScore={latestUserSession ? latestScore : null}
       rankSummary={
-        rankSummary
+        unifiedRank
           ? {
-              rank: rankSummary.rank,
-              totalCandidates: rankSummary.totalCandidates,
+              rank: unifiedRank,
+              totalCandidates: unifiedTotalCandidates,
               score: latestScore,
               percentile: getRankPercentileLabel(
-                rankSummary.rank,
-                rankSummary.totalCandidates
+                unifiedRank,
+                unifiedTotalCandidates
               ),
-              rankChange: rankSummary.rankChange,
+              rankChange: unifiedRankChange,
               role: profileRole,
               companyType: profileCompanyType,
               experience: profileExperience,
