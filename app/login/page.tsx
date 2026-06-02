@@ -245,7 +245,10 @@ export default function LoginPage() {
     "!h-14 !w-12 rounded-xl !border-[#26334b] !bg-[#0b1020] text-xl !text-white shadow-[0_16px_34px_rgba(3,10,28,0.28),inset_0_1px_1px_rgba(255,255,255,0.08)] transition-all duration-300 data-[filled=true]:!border-[#35506f] data-[filled=true]:!bg-[#111827] data-[active=true]:!border-[#ff6b6b] data-[active=true]:!shadow-[0_0_0_2px_rgba(255,107,107,0.32),0_0_24px_rgba(255,107,107,0.26),0_16px_34px_rgba(3,10,28,0.28)]";
 
   const getAuthRedirectUrl = (nextPath: string) => {
-    const next = nextPath.startsWith("/") ? nextPath : "/dashboard";
+    const next =
+      nextPath.startsWith("/dashboard") && !nextPath.startsWith("//")
+        ? nextPath
+        : "/dashboard";
     return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}&mode=${mode}`;
   };
 
@@ -253,7 +256,9 @@ export default function LoginPage() {
     const params = new URLSearchParams(window.location.search);
     const next = params.get("next");
 
-    return next?.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+    return next?.startsWith("/dashboard") && !next.startsWith("//")
+      ? next
+      : "/dashboard";
   };
 
   const resetForMode = (nextMode: AuthMode) => {

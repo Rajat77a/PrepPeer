@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 import { getSupabaseConfig } from "@/utils/supabase/config";
 
 const safeNextPath = (next: string | null) => {
-  if (!next || !next.startsWith("/") || next.startsWith("//")) {
+  if (!next || !next.startsWith("/dashboard") || next.startsWith("//")) {
     return "/dashboard";
   }
 
