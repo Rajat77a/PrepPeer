@@ -2,10 +2,9 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { LeaderboardClient } from "@/components/dashboard/LeaderboardClient";
 import {
-  toLeaderboardEntries,
-  type InterviewSessionRow,
-} from "@/lib/ranking";
-import { getLeaderboardUserProfiles } from "@/lib/leaderboardProfiles";
+  toLiveLeaderboardEntries,
+  type SupabaseLeaderboardRow,
+} from "@/lib/liveLeaderboard";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
 
@@ -18,30 +17,14 @@ export default async function DashboardLeaderboardPage() {
   const supabase = createClient(cookieStore);
   const user = await getCurrentUser();
 
-  const { data: rows } = await supabase
-    .from("interview_sessions")
-    .select(
-      "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
-    )
-    .order("created_at", { ascending: false })
-    .limit(1000);
-  const userProfiles = await getLeaderboardUserProfiles(supabase);
-  if (user?.id) {
-    userProfiles[user.id] = {
-      ...(userProfiles[user.id] ?? {}),
-      name: String(user.user_metadata?.full_name ?? user.user_metadata?.name ?? "You"),
-      college: String(user.user_metadata?.college ?? ""),
-      role: String(user.user_metadata?.target_role ?? "Interview"),
-      companyType: String(user.user_metadata?.target_company_type ?? "General"),
-    };
-  }
+  const { data } = await supabase.rpc("get_leaderboard", {
+    p_role: null,
+    p_company_type: null,
+  });
 
-  const entries = toLeaderboardEntries(
-    (rows ?? []) as InterviewSessionRow[],
-    user?.id,
-    String(user?.user_metadata?.full_name ?? user?.user_metadata?.name ?? "You"),
-    String(user?.user_metadata?.college ?? ""),
-    userProfiles
+  const entries = toLiveLeaderboardEntries(
+    (data ?? []) as SupabaseLeaderboardRow[],
+    user?.id
   );
 
   return <LeaderboardClient entries={entries} />;

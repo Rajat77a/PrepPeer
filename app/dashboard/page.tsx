@@ -12,6 +12,10 @@ import {
   type InterviewSessionRow,
 } from "@/lib/ranking";
 import { getLeaderboardUserProfiles } from "@/lib/leaderboardProfiles";
+import {
+  toLiveLeaderboardEntries,
+  type SupabaseLeaderboardRow,
+} from "@/lib/liveLeaderboard";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
 
@@ -115,6 +119,10 @@ export default async function DashboardPage() {
     )
     .order("created_at", { ascending: false })
     .limit(1000);
+  const { data: leaderboardRows } = await supabase.rpc("get_leaderboard", {
+    p_role: null,
+    p_company_type: null,
+  });
 
   const userProfiles = await getLeaderboardUserProfiles(supabase);
   userProfiles[user.id] = {
@@ -130,13 +138,19 @@ export default async function DashboardPage() {
   const latestUserSession = userSessions[0] ?? null;
 
   const rankSummary = getRankSummary(allSessions, user.id);
-  const leaderboardEntries = toLeaderboardEntries(
+  const fallbackLeaderboardEntries = toLeaderboardEntries(
     allSessions,
     user.id,
     name,
     String(user.user_metadata?.college ?? ""),
     userProfiles
   );
+  const leaderboardEntries = leaderboardRows
+    ? toLiveLeaderboardEntries(
+        (leaderboardRows ?? []) as SupabaseLeaderboardRow[],
+        user.id
+      )
+    : fallbackLeaderboardEntries;
 
   const userRank = rankSummary?.rank;
   const latestScore = Number(latestUserSession?.composite_score ?? 0);
