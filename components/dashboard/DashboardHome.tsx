@@ -486,7 +486,8 @@ function ReturningDashboard({
         >
           <div className="pointer-events-none absolute -right-16 -top-20 h-80 w-80 rounded-full bg-[#006cff]/18 blur-[90px] transition duration-500 group-hover:scale-110" />
           <div className="pointer-events-none absolute -bottom-24 left-1/3 h-72 w-72 rounded-full bg-[#7dffd9]/22 blur-[90px] transition duration-500 group-hover:translate-x-8" />
-          <div className="pointer-events-none absolute right-8 top-8 h-24 w-24 rotate-12 rounded-[28px] border border-[#006cff]/14 bg-white/40 shadow-[0_18px_50px_rgba(0,108,255,0.10)] transition duration-500 group-hover:rotate-[20deg]" />
+          <div className="pointer-events-none absolute right-10 top-8 h-28 w-28 rounded-full border border-[#006cff]/10 bg-[radial-gradient(circle_at_34%_30%,rgba(255,255,255,0.88),rgba(0,108,255,0.08)_48%,transparent_72%)] blur-[0.3px] transition duration-500 group-hover:scale-110" />
+          <div className="pointer-events-none absolute right-20 top-16 h-16 w-32 -rotate-12 rounded-full border-t border-[#7dffd9]/35 transition duration-500 group-hover:-translate-y-2 group-hover:rotate-[-18deg]" />
           <div className="pointer-events-none absolute bottom-9 right-32 h-12 w-12 rounded-full bg-[#ffbe3d]/18 blur-sm transition duration-500 group-hover:-translate-y-2" />
           <div
             className="pointer-events-none absolute inset-0 opacity-15"
@@ -668,13 +669,17 @@ function PercentileRing({ value }: { value: number }) {
 
   return (
     <motion.div
-      animate={{ y: [0, -4, 0] }}
+      animate={{ y: [0, -5, 0], rotateZ: [0, 1.4, 0] }}
       transition={{ duration: 3.4, repeat: Infinity, ease: "easeInOut" }}
-      className="relative h-32 w-32 shrink-0"
+      whileHover={{ scale: 1.06, rotateZ: -2 }}
+      className="group relative h-32 w-32 shrink-0"
       style={{ transform: "translateZ(44px)" }}
     >
-      <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_160deg,rgba(0,108,255,0.20),rgba(125,255,217,0.24),rgba(255,255,255,0.78),rgba(0,108,255,0.20))] shadow-[0_20px_45px_rgba(0,108,255,0.18)]" />
-      <div className="absolute inset-3 rounded-full bg-white/78 backdrop-blur-xl" />
+      <div className="absolute -inset-5 rounded-full bg-[radial-gradient(circle,rgba(0,108,255,0.22),rgba(125,255,217,0.12)_42%,transparent_70%)] blur-2xl transition duration-500 group-hover:scale-110" />
+      <div className="absolute inset-0 rounded-full bg-[conic-gradient(from_160deg,rgba(0,108,255,0.24),rgba(32,196,255,0.22),rgba(125,255,217,0.30),rgba(255,255,255,0.82),rgba(0,108,255,0.24))] shadow-[0_24px_55px_rgba(0,108,255,0.20)]" />
+      <div className="absolute inset-2 rounded-full bg-[linear-gradient(145deg,rgba(255,255,255,0.90),rgba(231,245,255,0.66))] backdrop-blur-xl" />
+      <div className="absolute left-7 top-5 h-7 w-12 -rotate-12 rounded-full bg-white/70 blur-md" />
+      <div className="absolute -right-1 top-5 h-3 w-3 rounded-full bg-[#006cff] shadow-[0_0_18px_rgba(0,108,255,0.75)]" />
       <svg viewBox="0 0 100 100" className="relative h-full w-full -rotate-90">
         <circle
           cx="50"
@@ -689,11 +694,18 @@ function PercentileRing({ value }: { value: number }) {
           cy="50"
           r="38"
           fill="none"
-          stroke="#006cff"
+          stroke="url(#scoreRingGradient)"
           strokeWidth="8"
           strokeDasharray={`${(value / 100) * circumference} ${circumference}`}
           strokeLinecap="round"
         />
+        <defs>
+          <linearGradient id="scoreRingGradient" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stopColor="#006cff" />
+            <stop offset="58%" stopColor="#20c4ff" />
+            <stop offset="100%" stopColor="#7dffd9" />
+          </linearGradient>
+        </defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="font-inter text-xl font-black text-[#07111f]">{value}</span>
