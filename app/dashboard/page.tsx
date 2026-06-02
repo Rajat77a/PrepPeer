@@ -20,8 +20,76 @@ export const metadata: Metadata = {
   description: "Track your interview sessions, scores, and rank improvement over time.",
 };
 
+type ScoreDimension = {
+  label: string;
+  value: number;
+  color?: string;
+  reason?: string;
+};
+
+const zeroDimensions: ScoreDimension[] = [
+  { label: "Communication", value: 0 },
+  { label: "Problem Solving", value: 0 },
+  { label: "Specificity", value: 0 },
+  { label: "Accuracy", value: 0 },
+];
+
+const normalizeScoreBreakdown = (
+  dimensions: unknown,
+  compositeScore: number
+): ScoreDimension[] => {
+  if (!Array.isArray(dimensions) || compositeScore <= 0) {
+    return zeroDimensions;
+  }
+
+  const orderedDimensions = zeroDimensions.map((fallbackDimension) => {
+    const existing = dimensions.find((dimension): dimension is ScoreDimension => {
+      if (
+        typeof dimension !== "object" ||
+        dimension === null ||
+        !("label" in dimension)
+      ) {
+        return false;
+      }
+
+      return (
+        String(dimension.label).toLowerCase() ===
+        fallbackDimension.label.toLowerCase()
+      );
+    });
+
+    return {
+      ...fallbackDimension,
+      ...existing,
+      value:
+        typeof existing?.value === "number" && Number.isFinite(existing.value)
+          ? existing.value
+          : 0,
+    };
+  });
+
+  const currentDimensionTotal = orderedDimensions.reduce(
+    (sum, dimension) => sum + dimension.value,
+    0
+  );
+
+  if (currentDimensionTotal <= 0) {
+    return zeroDimensions;
+  }
+
+  const expectedDimensionTotal = (compositeScore / 100) * 40;
+  const scale = expectedDimensionTotal / currentDimensionTotal;
+
+  return orderedDimensions.map((dimension) => ({
+    ...dimension,
+    value: Number(
+      Math.max(0, Math.min(10, dimension.value * scale)).toFixed(1)
+    ),
+  }));
+};
+
 export default async function DashboardPage() {
-  cookies();
+  const cookieStore = await cookies();
   const user = await getCurrentUser();
 
   if (!user) redirect("/login");
@@ -31,8 +99,10 @@ export default async function DashboardPage() {
     user.user_metadata?.name ??
     user.email?.split("@")[0] ??
     "PrepPeer user";
+
   const firstName = name.split(" ")[0] ?? "there";
-  const supabase = createClient(cookies());
+  const supabase = createClient(cookieStore);
+
   const { data: rows } = await supabase
     .from("interview_sessions")
     .select(
@@ -40,9 +110,13 @@ export default async function DashboardPage() {
     )
     .order("created_at", { ascending: false })
     .limit(1000);
+
   const userProfiles = await getLeaderboardUserProfiles(supabase);
 
   const allSessions = (rows ?? []) as InterviewSessionRow[];
+  const userSessions = allSessions.filter((session) => session.user_id === user.id);
+  const latestUserSession = userSessions[0] ?? null;
+
   const rankSummary = getRankSummary(allSessions, user.id);
   const leaderboardEntries = toLeaderboardEntries(
     allSessions,
@@ -53,8 +127,13 @@ export default async function DashboardPage() {
   );
 
   const userRank = rankSummary?.rank;
-  const dashboardSessions: DashboardSession[] = allSessions
-    .filter((session) => session.user_id === user.id)
+  const latestScore = Number(latestUserSession?.composite_score ?? 0);
+  const latestDimensions = normalizeScoreBreakdown(
+    latestUserSession?.dimensions,
+    latestScore
+  );
+
+  const dashboardSessions: DashboardSession[] = userSessions
     .slice(0, 10)
     .map((session, index) => ({
       id: session.id,
@@ -80,21 +159,24 @@ export default async function DashboardPage() {
       firstName={firstName}
       sessions={dashboardSessions}
       leaderboardEntries={leaderboardEntries}
-      recentSessionScore={dashboardSessions[0]?.score ?? null}
+      recentSessionScore={latestUserSession ? latestScore : null}
       rankSummary={
         rankSummary
           ? {
               rank: rankSummary.rank,
               totalCandidates: rankSummary.totalCandidates,
-              score: rankSummary.score,
+              score: latestScore,
               percentile: getRankPercentileLabel(
                 rankSummary.rank,
                 rankSummary.totalCandidates
               ),
               rankChange: rankSummary.rankChange,
-              role: rankSummary.role ?? "Interview",
-              companyType: rankSummary.company_type ?? "General",
-              dimensions: rankSummary.dimensions ?? undefined,
+              role: latestUserSession?.role ?? rankSummary.role ?? "Interview",
+              companyType:
+                latestUserSession?.company_type ??
+                rankSummary.company_type ??
+                "General",
+              dimensions: latestDimensions,
             }
           : null
       }
