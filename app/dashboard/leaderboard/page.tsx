@@ -24,10 +24,30 @@ export default async function DashboardLeaderboardPage() {
     p_company_type: null,
   });
 
-  const entries = toLiveLeaderboardEntries(
+  const rawEntries = toLiveLeaderboardEntries(
     (data ?? []) as SupabaseLeaderboardRow[],
     user?.id
   );
+
+  const profileRole = String(user?.user_metadata?.target_role ?? "").trim();
+  const profileCompanyType = String(
+    user?.user_metadata?.target_company_type ?? ""
+  ).trim();
+  const profileCollege = String(user?.user_metadata?.college ?? "").trim();
+
+  const entries = rawEntries.map((entry) => {
+    if (!entry.isYou) return entry;
+
+    const role = profileRole || entry.role || "Interview";
+    const companyType = profileCompanyType || entry.companyType || "General";
+
+    return {
+      ...entry,
+      role,
+      companyType,
+      subtitle: `${profileCollege ? `${profileCollege} - ` : ""}${role} - ${companyType}`,
+    };
+  });
 
   return <LeaderboardClient entries={entries} />;
 }
