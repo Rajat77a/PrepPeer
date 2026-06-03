@@ -11,7 +11,7 @@ const safeNextPath = (next?: string | string[]) => {
   const value = Array.isArray(next) ? next[0] : next;
 
   if (!value || !value.startsWith("/dashboard") || value.startsWith("//")) {
-    return "/dashboard/profile";
+    return "/dashboard";
   }
 
   return value;
@@ -24,8 +24,14 @@ const hasCompletedAccountSetup = (
     metadata?.full_name ?? metadata?.name ?? ""
   ).trim();
   const college = String(metadata?.college ?? "").trim();
+  const role = String(metadata?.target_role ?? "").trim();
+  const experience = String(metadata?.experience_level ?? "").trim();
+  const company = String(metadata?.target_company_type ?? "").trim();
 
-  return metadata?.onboarding_complete === true || Boolean(fullName && college);
+  return (
+    metadata?.onboarding_complete === true &&
+    Boolean(fullName && college && role && experience && company)
+  );
 };
 
 export default async function OnboardingPage({
