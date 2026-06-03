@@ -123,7 +123,8 @@ const seededJitter = (seed: number) => {
   return x - Math.floor(x);
 };
 
-const getBenchmarkWindow = () => Math.floor(Date.now() / BENCHMARK_WINDOW_MS);
+const getBenchmarkWindow = (time = Date.now()) =>
+  Math.floor(time / BENCHMARK_WINDOW_MS);
 
 const getGeneratedBenchmarkProfile = (index: number) => {
   const firstName = benchmarkFirstNames[index % benchmarkFirstNames.length];
@@ -152,7 +153,10 @@ const getBenchmarkScore = (index: number, windowId: number) => {
   );
 };
 
-const getBenchmarkSessions = (windowId = getBenchmarkWindow()): InterviewSessionRow[] =>
+const getBenchmarkSessions = (
+  windowId = getBenchmarkWindow(),
+  referenceTime = Date.now()
+): InterviewSessionRow[] =>
   Array.from({ length: 250 }, (_, index) => {
     const profile = getGeneratedBenchmarkProfile(index);
 
@@ -164,7 +168,7 @@ const getBenchmarkSessions = (windowId = getBenchmarkWindow()): InterviewSession
         index % 3 === 0 ? "0-1 years" : index % 3 === 1 ? "1-3 years" : "3-6 years",
       company_type: profile.company,
       composite_score: getBenchmarkScore(index, windowId),
-      created_at: new Date(Date.now() - index * 3600000).toISOString(),
+      created_at: new Date(referenceTime - index * 3600000).toISOString(),
       summary: {
         name: profile.name,
         college: profile.college,
@@ -211,9 +215,10 @@ const getBestByUser = (sessions: InterviewSessionRow[]) => {
 
 const withBenchmarkSessions = (
   sessions: InterviewSessionRow[],
-  windowId = getBenchmarkWindow()
+  windowId = getBenchmarkWindow(),
+  referenceTime = Date.now()
 ) => [
-  ...getBenchmarkSessions(windowId),
+  ...getBenchmarkSessions(windowId, referenceTime),
   ...sessions,
 ];
 
@@ -316,6 +321,76 @@ export const getRankSummary = (
     previousRank,
     rankChange: getRankChangeLabel(current.rank, previousRank),
   };
+};
+
+const getSessionTime = (session: InterviewSessionRow) => {
+  const time = new Date(session.created_at ?? 0).getTime();
+  return Number.isNaN(time) ? 0 : time;
+};
+
+const getRankAfterSession = (
+  realSessions: InterviewSessionRow[],
+  userId: string,
+  session: InterviewSessionRow
+) => {
+  const sessionTime = getSessionTime(session) || Date.now();
+  const sessionsAtThatTime = realSessions.filter(
+    (item) => getSessionTime(item) <= sessionTime
+  );
+  const rankedSessions = rankSessions(
+    getBestByUser(
+      withBenchmarkSessions(
+        sessionsAtThatTime,
+        getBenchmarkWindow(sessionTime),
+        sessionTime
+      )
+    )
+  );
+  const current = rankedSessions.find((item) => item.user_id === userId);
+
+  if (!current) return null;
+
+  return {
+    rank: current.rank,
+    totalCandidates: rankedSessions.length,
+  };
+};
+
+export type SessionRankSnapshot = {
+  rank: number;
+  totalCandidates: number;
+  previousRank: number | null;
+  rankChange: string;
+};
+
+export const getSessionRankHistory = (
+  allSessions: InterviewSessionRow[],
+  userId?: string
+): Record<string, SessionRankSnapshot> => {
+  if (!userId) return {};
+
+  const realSessions = allSessions.filter(
+    (session) => !session.user_id.startsWith("benchmark-")
+  );
+  const userSessions = realSessions
+    .filter((session) => session.user_id === userId)
+    .sort((a, b) => getSessionTime(a) - getSessionTime(b));
+  const history: Record<string, SessionRankSnapshot> = {};
+  let previousRank: number | null = null;
+
+  userSessions.forEach((session) => {
+    const snapshot = getRankAfterSession(realSessions, userId, session);
+    if (!snapshot) return;
+
+    history[session.id] = {
+      ...snapshot,
+      previousRank,
+      rankChange: getRankChangeLabel(snapshot.rank, previousRank),
+    };
+    previousRank = snapshot.rank;
+  });
+
+  return history;
 };
 
 export const getRankPercentileLabel = (rank: number, total: number) => {

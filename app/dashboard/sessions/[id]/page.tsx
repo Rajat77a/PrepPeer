@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import {
-  getRankSummary,
+  getSessionRankHistory,
   type InterviewSessionRow,
 } from "@/lib/ranking";
 import { scoreDimensions } from "@/components/dashboard/DashboardData";
@@ -30,7 +30,7 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
 
   if (!session) notFound();
 
-  const rankSummary = getRankSummary(allSessions, user?.id);
+  const sessionRank = getSessionRankHistory(allSessions, user?.id)[session.id];
   const dimensions = session.dimensions?.length
     ? session.dimensions
     : scoreDimensions.map((dimension) => ({
@@ -69,8 +69,8 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <Stat label="Score" value={`${Number(session.composite_score ?? 0)}/100`} />
-            <Stat label="Current rank" value={rankSummary ? `#${rankSummary.rank}` : "-"} />
-            <Stat label="Movement" value={rankSummary?.rankChange ?? "-"} />
+            <Stat label="Rank then" value={sessionRank ? `#${sessionRank.rank}` : "-"} />
+            <Stat label="Movement" value={sessionRank?.rankChange ?? "-"} />
           </div>
         </div>
       </section>

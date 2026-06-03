@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { ArrowUpRight } from "lucide-react";
 import { RefreshTableButton } from "@/components/dashboard/RefreshTableButton";
 import {
-  getRankSummary,
+  getSessionRankHistory,
   type InterviewSessionRow,
 } from "@/lib/ranking";
 import { createClient } from "@/utils/supabase/server";
@@ -29,7 +29,7 @@ export default async function DashboardSessionsPage() {
 
   const allSessions = (rows ?? []) as InterviewSessionRow[];
   const userSessions = allSessions.filter((session) => session.user_id === user?.id);
-  const rankSummary = getRankSummary(allSessions, user?.id);
+  const sessionRankHistory = getSessionRankHistory(allSessions, user?.id);
 
   return (
     <div className="mx-auto max-w-6xl p-5 sm:p-8">
@@ -69,8 +69,8 @@ export default async function DashboardSessionsPage() {
             </div>
           )}
 
-          {userSessions.map((session, index) => {
-            const isLatest = index === 0;
+          {userSessions.map((session) => {
+            const sessionRank = sessionRankHistory[session.id];
 
             return (
               <Link
@@ -104,10 +104,10 @@ export default async function DashboardSessionsPage() {
                   {Number(session.composite_score ?? 0)}
                 </span>
                 <span className="font-inter text-sm font-bold text-[#41516a]">
-                  {isLatest && rankSummary ? `#${rankSummary.rank}` : "-"}
+                  {sessionRank ? `#${sessionRank.rank}` : "-"}
                 </span>
                 <span className="font-inter text-sm font-bold text-[#64748b]">
-                  {isLatest && rankSummary ? rankSummary.rankChange : "-"}
+                  {sessionRank ? sessionRank.rankChange : "-"}
                 </span>
                 <ArrowUpRight className="hidden h-4 w-4 text-[#8ba0b8] lg:block" />
               </Link>
