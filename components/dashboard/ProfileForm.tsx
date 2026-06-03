@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronRight, Loader2, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 
@@ -44,8 +45,17 @@ const selectorFields: {
     id: "role",
     label: "Target role",
     title: "Choose target role",
-    description: "This role will be used to generate your next interview questions.",
-    options: ["SDE", "Product Manager", "Operations", "MBA", "Consulting", "Data Analyst"],
+    description:
+      "This role will be used to generate your next interview questions.",
+    options: [
+      "SDE",
+      "SDE Fresher",
+      "Product Manager",
+      "Operations",
+      "MBA",
+      "Consulting",
+      "Data Analyst",
+    ],
   },
   {
     id: "experience",
@@ -59,11 +69,25 @@ const selectorFields: {
     label: "Target company type",
     title: "Choose company type",
     description: "This changes the style and benchmark of your next interview.",
-    options: ["FAANG", "Product startup", "Consulting firm", "PSU / Govt", "Mid-size tech"],
+    options: [
+      "FAANG",
+      "Product startup",
+      "Product Company",
+      "Service Company",
+      "Consulting firm",
+      "PSU / Govt",
+      "Mid-size tech",
+      "Marketplace",
+      "Fintech",
+      "Consumer App",
+      "Logistics",
+    ],
   },
 ];
 
 export function ProfileForm({ user }: ProfileFormProps) {
+  const router = useRouter();
+
   const [values, setValues] = useState<ProfileValues>({
     fullName: user.name,
     college: user.college ?? "",
@@ -99,7 +123,14 @@ export function ProfileForm({ user }: ProfileFormProps) {
     });
 
     setSaving(false);
-    setMessage(error ? error.message : "Profile saved.");
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setMessage("Profile saved.");
+    router.refresh();
   };
 
   return (
@@ -123,6 +154,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           className="relative overflow-hidden rounded-2xl border border-[#006cff]/16 bg-white/88 p-7 shadow-[0_24px_80px_rgba(0,108,255,0.12)] backdrop-blur-xl"
         >
           <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-[#006cff]/10 blur-[90px]" />
+
           <div className="relative z-10">
             {user.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -150,6 +182,18 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 {values.college}
               </p>
             )}
+
+            <div className="mt-6 space-y-2">
+              <p className="inline-flex rounded-full border border-[rgba(0,132,255,0.14)] bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
+                {values.role}
+              </p>
+              <p className="inline-flex rounded-full border border-[rgba(0,132,255,0.14)] bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
+                {values.experience}
+              </p>
+              <p className="inline-flex rounded-full border border-[rgba(0,132,255,0.14)] bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
+                {values.company}
+              </p>
+            </div>
           </div>
         </motion.section>
 
@@ -165,6 +209,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
                   {field.label}
                 </span>
+
                 <input
                   value={values[field.id]}
                   onChange={(event) =>
@@ -183,6 +228,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
                   {field.label}
                 </span>
+
                 <button
                   type="button"
                   onClick={() => setActiveSelector(field.id)}
@@ -241,9 +287,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
                   <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#006cff]">
                     Update profile
                   </p>
+
                   <h2 className="mt-3 font-inter text-2xl font-black tracking-[-0.04em] text-[#07111f]">
                     {activeSelectorConfig.title}
                   </h2>
+
                   <p className="mt-2 font-inter text-sm font-semibold leading-6 text-[#64748b]">
                     {activeSelectorConfig.description}
                   </p>
