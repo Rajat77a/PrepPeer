@@ -13,6 +13,13 @@ type DashboardHomeProps = {
   leaderboardEntries: LeaderboardEntry[];
   rankSummary: DashboardRankSummary | null;
   recentSessionScore: number | null;
+  profileContext: DashboardProfileContext;
+};
+
+type DashboardProfileContext = {
+  role: string;
+  experience: string;
+  companyType: string;
 };
 
 export type DashboardSession = {
@@ -200,12 +207,14 @@ export function DashboardHome({
   leaderboardEntries,
   rankSummary,
   recentSessionScore,
+  profileContext,
 }: DashboardHomeProps) {
   if (sessions.length === 0 || !rankSummary) {
     return (
       <NewUserDashboard
         firstName={firstName}
         topEntries={leaderboardEntries.slice(0, 3)}
+        profileContext={profileContext}
       />
     );
   }
@@ -224,10 +233,18 @@ export function DashboardHome({
 function NewUserDashboard({
   firstName,
   topEntries,
+  profileContext,
 }: {
   firstName: string;
   topEntries: LeaderboardEntry[];
+  profileContext: DashboardProfileContext;
 }) {
+  const startInterviewHref = `/interview?mode=account&autostart=1&role=${encodeURIComponent(
+    profileContext.role || "Interview"
+  )}&experience=${encodeURIComponent(
+    profileContext.experience || "Not set"
+  )}&company=${encodeURIComponent(profileContext.companyType || "General")}`;
+
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-6 sm:p-8">
       <div className="pointer-events-none fixed inset-0">
@@ -281,13 +298,26 @@ function NewUserDashboard({
           <h2 className="font-inter text-[clamp(30px,5vw,48px)] font-black leading-tight tracking-[-0.04em] text-[#07111f]">
             Start your first mock interview
           </h2>
-          <p className="mb-8 mt-4 max-w-lg font-inter text-base font-medium leading-7 text-[#64748b]">
+          <p className="mb-5 mt-4 max-w-lg font-inter text-base font-medium leading-7 text-[#64748b]">
             Five real questions. Scored on clarity, structure, confidence, and
             depth. See your rank among role-matched peers instantly.
           </p>
+
+          <div className="mb-8 flex flex-wrap gap-2">
+            <span className="rounded-full border border-[#006cff]/14 bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
+              {profileContext.role}
+            </span>
+            <span className="rounded-full border border-[#006cff]/14 bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
+              {profileContext.experience}
+            </span>
+            <span className="rounded-full border border-[#006cff]/14 bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
+              {profileContext.companyType}
+            </span>
+          </div>
+
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <Link
-              href="/interview?mode=account"
+              href={startInterviewHref}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-[#006cff] px-8 py-3 font-inter text-sm font-bold text-white transition-all hover:bg-[#0057cc] hover:shadow-[0_0_20px_rgba(0,108,255,0.4)]"
             >
               Start Interview
@@ -461,14 +491,14 @@ function ReturningDashboard({
           whileHover={{ y: -3, scale: 1.015 }}
           whileTap={{ scale: 0.98 }}
         >
-        <Link
-          href={practiceAgainHref}
-          className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[linear-gradient(135deg,#07111f_0%,#006cff_48%,#20c4ff_100%)] px-8 py-3.5 font-inter text-sm font-black text-white shadow-[0_20px_50px_rgba(0,108,255,0.30)] transition"
-        >
-          <span className="absolute inset-y-0 left-[-45%] w-1/3 rotate-12 bg-white/35 blur-md transition duration-700 group-hover:left-[120%]" />
-          Practice again
-          <ArrowRight className="h-4 w-4" />
-        </Link>
+          <Link
+            href={practiceAgainHref}
+            className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[linear-gradient(135deg,#07111f_0%,#006cff_48%,#20c4ff_100%)] px-8 py-3.5 font-inter text-sm font-black text-white shadow-[0_20px_50px_rgba(0,108,255,0.30)] transition"
+          >
+            <span className="absolute inset-y-0 left-[-45%] w-1/3 rotate-12 bg-white/35 blur-md transition duration-700 group-hover:left-[120%]" />
+            Practice again
+            <ArrowRight className="h-4 w-4" />
+          </Link>
         </motion.div>
       </div>
 
@@ -494,7 +524,10 @@ function ReturningDashboard({
               backgroundSize: "20px 20px",
             }}
           />
-          <div className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between" style={{ transform: "translateZ(34px)" }}>
+          <div
+            className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between"
+            style={{ transform: "translateZ(34px)" }}
+          >
             <div>
               <p className="mb-3 font-inter text-sm font-bold text-[#64748b]">
                 Your current rank
@@ -591,7 +624,9 @@ function ReturningDashboard({
                 <p className="font-inter text-sm font-bold text-[#07111f]">
                   {session.date}
                 </p>
-                <p className="font-inter text-xs font-semibold text-[#64748b]">{session.role}</p>
+                <p className="font-inter text-xs font-semibold text-[#64748b]">
+                  {session.role}
+                </p>
               </div>
               <div className="flex items-center gap-4 font-inter text-sm">
                 <span className="font-semibold text-[#07111f]">Score: {session.score}</span>
@@ -701,7 +736,9 @@ function PercentileRing({ value }: { value: number }) {
         </defs>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-inter text-xl font-black text-[#07111f]">{value}</span>
+        <span className="font-inter text-xl font-black text-[#07111f]">
+          {value}
+        </span>
         <span className="font-inter text-xs font-semibold text-[#64748b]">
           recent score
         </span>
@@ -743,7 +780,12 @@ function Panel({
           View all
         </Link>
       </div>
-      <div className="relative z-10 space-y-1" style={{ transform: "translateZ(20px)" }}>{children}</div>
+      <div
+        className="relative z-10 space-y-1"
+        style={{ transform: "translateZ(20px)" }}
+      >
+        {children}
+      </div>
     </motion.div>
   );
 }
