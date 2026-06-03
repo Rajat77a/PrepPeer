@@ -1,7 +1,7 @@
 "use client";
 
-import { ArrowRight, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { ArrowRight, Check, ChevronRight, Loader2, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { Logo } from "@/components/ui/Logo";
@@ -13,18 +13,97 @@ type OnboardingFormProps = {
   postSubmitPath?: string;
 };
 
+type SelectorKey = "role" | "experience" | "company";
+
+const selectorFields: {
+  id: SelectorKey;
+  label: string;
+  title: string;
+  description: string;
+  options: string[];
+}[] = [
+  {
+    id: "role",
+    label: "Target role",
+    title: "Choose target role",
+    description:
+      "This role will be used to generate your first interview questions.",
+    options: [
+      "SDE",
+      "SDE Fresher",
+      "Product Manager",
+      "Operations",
+      "MBA",
+      "Consulting",
+      "Data Analyst",
+    ],
+  },
+  {
+    id: "experience",
+    label: "Experience level",
+    title: "Choose experience level",
+    description: "This helps PrepPeer set the right difficulty and expectations.",
+    options: ["Fresher", "0-1 years", "1-3 years", "3-6 years", "6+ years"],
+  },
+  {
+    id: "company",
+    label: "Target company type",
+    title: "Choose company type",
+    description: "This changes the style and benchmark of your interview.",
+    options: [
+      "FAANG",
+      "Product startup",
+      "Product Company",
+      "Service Company",
+      "Consulting firm",
+      "PSU / Govt",
+      "Mid-size tech",
+      "Marketplace",
+      "Fintech",
+      "Consumer App",
+      "Logistics",
+    ],
+  },
+];
+
 export function OnboardingForm({
   initialName,
   initialCollege,
   postSubmitPath,
 }: OnboardingFormProps) {
   const router = useRouter();
+
   const [fullName, setFullName] = useState(initialName);
   const [college, setCollege] = useState(initialCollege);
+  const [role, setRole] = useState("SDE Fresher");
+  const [experience, setExperience] = useState("0-1 years");
+  const [company, setCompany] = useState("Product startup");
+  const [activeSelector, setActiveSelector] = useState<SelectorKey | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const canSubmit = fullName.trim().length >= 2 && college.trim().length >= 2;
+  const activeSelectorConfig = selectorFields.find(
+    (field) => field.id === activeSelector
+  );
+
+  const selectedValues = {
+    role,
+    experience,
+    company,
+  };
+
+  const canSubmit =
+    fullName.trim().length >= 2 &&
+    college.trim().length >= 2 &&
+    role.trim().length > 0 &&
+    experience.trim().length > 0 &&
+    company.trim().length > 0;
+
+  const setSelectorValue = (key: SelectorKey, value: string) => {
+    if (key === "role") setRole(value);
+    if (key === "experience") setExperience(value);
+    if (key === "company") setCompany(value);
+  };
 
   const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -39,6 +118,9 @@ export function OnboardingForm({
         full_name: fullName.trim(),
         name: fullName.trim(),
         college: college.trim(),
+        target_role: role.trim(),
+        experience_level: experience.trim(),
+        target_company_type: company.trim(),
         onboarding_complete: true,
       },
     });
@@ -53,7 +135,7 @@ export function OnboardingForm({
     const nextPath =
       sessionStorage.getItem("preppeer_post_onboarding_next") ??
       postSubmitPath ??
-      "/dashboard/profile";
+      "/dashboard";
     sessionStorage.removeItem("preppeer_post_onboarding_next");
 
     router.replace(nextPath);
@@ -79,16 +161,19 @@ export function OnboardingForm({
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45, ease: "easeOut" }}
-          className="w-full max-w-[620px] rounded-[34px] border border-white/80 bg-white/72 p-6 text-center shadow-[0_30px_110px_rgba(0,108,255,0.16),inset_0_1px_2px_rgba(255,255,255,0.96)] backdrop-blur-2xl sm:p-9"
+          className="w-full max-w-[680px] rounded-[34px] border border-white/80 bg-white/72 p-6 text-center shadow-[0_30px_110px_rgba(0,108,255,0.16),inset_0_1px_2px_rgba(255,255,255,0.96)] backdrop-blur-2xl sm:p-9"
         >
           <p className="font-inter text-xs font-black uppercase tracking-[0.24em] text-[#0084ff]">
             Finish your profile
           </p>
+
           <h1 className="mt-4 font-inter text-[clamp(42px,7vw,76px)] font-black leading-[0.92] tracking-[-0.06em] text-[#07111f]">
             Tell us who is preparing.
           </h1>
-          <p className="mx-auto mt-5 max-w-[460px] font-inter text-lg font-medium leading-7 text-[#64748b]">
-            This keeps your dashboard and account page personal to you.
+
+          <p className="mx-auto mt-5 max-w-[500px] font-inter text-lg font-medium leading-7 text-[#64748b]">
+            These details help PrepPeer generate sharper interview questions for
+            your first session.
           </p>
 
           <div className="mt-9 space-y-4 text-left">
@@ -123,6 +208,26 @@ export function OnboardingForm({
                 className="mt-2 h-14 w-full rounded-2xl border border-[#d8ebff] bg-white/80 px-5 font-inter text-base font-bold text-[#07111f] outline-none transition placeholder:text-[#a5b4c8] focus:border-[#0084ff]/70 focus:shadow-[0_0_0_4px_rgba(0,132,255,0.12)]"
               />
             </label>
+
+            {selectorFields.map((field) => (
+              <div key={field.id}>
+                <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
+                  {field.label}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setError("");
+                    setActiveSelector(field.id);
+                  }}
+                  className="mt-2 flex h-14 w-full items-center justify-between rounded-2xl border border-[#d8ebff] bg-white/80 px-5 text-left font-inter text-base font-bold text-[#07111f] outline-none transition hover:border-[#0084ff]/60 hover:bg-white hover:shadow-[0_0_0_4px_rgba(0,132,255,0.08)]"
+                >
+                  <span>{selectedValues[field.id]}</span>
+                  <ChevronRight className="h-5 w-5 text-[#64748b]" />
+                </button>
+              </div>
+            ))}
           </div>
 
           {error && (
@@ -140,13 +245,83 @@ export function OnboardingForm({
               <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <>
-                Continue to account
+                Continue to dashboard
                 <ArrowRight className="h-5 w-5" />
               </>
             )}
           </button>
         </motion.form>
       </section>
+
+      <AnimatePresence>
+        {activeSelectorConfig && (
+          <motion.div
+            className="fixed inset-0 z-[80] flex justify-end bg-[#07111f]/35 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setActiveSelector(null)}
+          >
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 320, damping: 32 }}
+              onClick={(event) => event.stopPropagation()}
+              className="h-full w-full max-w-md overflow-y-auto border-l border-[rgba(0,132,255,0.18)] bg-white p-6 shadow-[-24px_0_80px_rgba(0,108,255,0.18)]"
+            >
+              <div className="mb-8 flex items-start justify-between gap-5">
+                <div>
+                  <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#006cff]">
+                    Account setup
+                  </p>
+                  <h2 className="mt-3 font-inter text-2xl font-black tracking-[-0.04em] text-[#07111f]">
+                    {activeSelectorConfig.title}
+                  </h2>
+                  <p className="mt-2 font-inter text-sm font-semibold leading-6 text-[#64748b]">
+                    {activeSelectorConfig.description}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveSelector(null)}
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[rgba(0,132,255,0.14)] bg-[#f7fbff] text-[#64748b] transition hover:border-[#006cff]/35 hover:text-[#006cff]"
+                  aria-label="Close selector"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="grid gap-3">
+                {activeSelectorConfig.options.map((option) => {
+                  const selected =
+                    selectedValues[activeSelectorConfig.id] === option;
+
+                  return (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => {
+                        setSelectorValue(activeSelectorConfig.id, option);
+                        setActiveSelector(null);
+                      }}
+                      className={
+                        selected
+                          ? "flex min-h-14 items-center justify-between rounded-2xl border border-[#006cff] bg-[#006cff] px-5 py-3 text-left font-inter text-sm font-black text-white shadow-[0_14px_34px_rgba(0,108,255,0.20)]"
+                          : "flex min-h-14 items-center justify-between rounded-2xl border border-[rgba(0,132,255,0.12)] bg-[#f7fbff] px-5 py-3 text-left font-inter text-sm font-bold text-[#07111f] transition hover:border-[#006cff]/45 hover:bg-white hover:text-[#006cff]"
+                      }
+                    >
+                      <span>{option}</span>
+                      {selected && <Check className="h-4 w-4" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.aside>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
