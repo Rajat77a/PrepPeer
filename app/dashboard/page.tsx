@@ -139,10 +139,13 @@ export default async function DashboardPage() {
 
   const firstName = name.split(" ")[0] ?? "there";
   const profileRole = String(user.user_metadata?.target_role ?? "Interview");
-  const profileExperience = String(user.user_metadata?.experience_level ?? "Not set");
+  const profileExperience = String(
+    user.user_metadata?.experience_level ?? "Not set"
+  );
   const profileCompanyType = String(
     user.user_metadata?.target_company_type ?? "General"
   );
+
   const supabase = createClient(cookieStore);
   const leaderboardSupabase = createOptionalAdminClient() ?? supabase;
 
@@ -153,12 +156,17 @@ export default async function DashboardPage() {
     )
     .order("created_at", { ascending: false })
     .limit(1000);
-  const { data: leaderboardRows } = await leaderboardSupabase.rpc("get_leaderboard", {
-    p_role: null,
-    p_company_type: null,
-  });
+
+  const { data: leaderboardRows } = await leaderboardSupabase.rpc(
+    "get_leaderboard",
+    {
+      p_role: null,
+      p_company_type: null,
+    }
+  );
 
   const userProfiles = await getLeaderboardUserProfiles(leaderboardSupabase);
+
   userProfiles[user.id] = {
     ...(userProfiles[user.id] ?? {}),
     name,
@@ -168,10 +176,13 @@ export default async function DashboardPage() {
   };
 
   const allSessions = (rows ?? []) as InterviewSessionRow[];
-  const userSessions = allSessions.filter((session) => session.user_id === user.id);
+  const userSessions = allSessions.filter(
+    (session) => session.user_id === user.id
+  );
   const latestUserSession = userSessions[0] ?? null;
 
   const sessionRankSummary = getRankSummary(allSessions, user.id);
+
   const fallbackLeaderboardEntries = toLeaderboardEntries(
     allSessions,
     user.id,
@@ -179,12 +190,14 @@ export default async function DashboardPage() {
     String(user.user_metadata?.college ?? ""),
     userProfiles
   );
+
   const leaderboardEntries = leaderboardRows
     ? toLiveLeaderboardEntries(
         (leaderboardRows ?? []) as SupabaseLeaderboardRow[],
         user.id
       )
     : fallbackLeaderboardEntries;
+
   const liveUserEntry = leaderboardEntries.find((entry) => entry.isYou);
   const unifiedRank = liveUserEntry?.rank ?? sessionRankSummary?.rank;
   const unifiedTotalCandidates =
@@ -223,6 +236,11 @@ export default async function DashboardPage() {
       sessions={dashboardSessions}
       leaderboardEntries={leaderboardEntries}
       recentSessionScore={latestUserSession ? latestScore : null}
+      profileContext={{
+        role: profileRole,
+        experience: profileExperience,
+        companyType: profileCompanyType,
+      }}
       rankSummary={
         unifiedRank
           ? {
