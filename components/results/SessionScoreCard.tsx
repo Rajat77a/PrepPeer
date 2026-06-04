@@ -12,6 +12,20 @@ interface SessionScoreCardProps {
   rankLocked?: boolean;
 }
 
+const getRankAudienceLabel = (role: string) => {
+  const normalizedRole = role.trim();
+
+  if (!normalizedRole || normalizedRole.toLowerCase() === "interview") {
+    return "candidates";
+  }
+
+  if (normalizedRole.toLowerCase() === "sde") {
+    return "SDE peers";
+  }
+
+  return `${normalizedRole} peers`;
+};
+
 export function SessionScoreCard({
   report,
   rankLocked = false,
@@ -81,7 +95,7 @@ export function SessionScoreCard({
                   {report.percentile}
                 </p>
                 <p className="font-inter text-[13px] text-white/65">
-                  of {report.totalCandidates} SDE freshers
+                  of {report.totalCandidates} {getRankAudienceLabel(report.role)}
                 </p>
                 <p className="mt-2">
                   <DeltaText size="xs" type="light">

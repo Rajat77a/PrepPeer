@@ -132,6 +132,44 @@ export default function ResultsPage() {
     const loadLatestAccountResult = async () => {
       if (hasLockedDemoResult()) return;
 
+      const applyAccountResult = (accountResult: StoredResult) => {
+        sessionStorage.setItem(RESULTS_KEY, JSON.stringify(accountResult));
+        setRankLocked(false);
+        setReport((prev) => ({
+          ...prev,
+          name: accountResult.name ?? prev.name,
+          role: accountResult.role ?? prev.role,
+          companyType: accountResult.companyType ?? prev.companyType,
+          source: "account",
+          compositeScore: accountResult.compositeScore ?? prev.compositeScore,
+          percentile: accountResult.percentile ?? prev.percentile,
+          rankDelta: accountResult.rankDelta ?? prev.rankDelta,
+          previousRank: accountResult.previousRank ?? prev.previousRank,
+          currentRank: accountResult.currentRank ?? prev.currentRank,
+          totalCandidates: accountResult.totalCandidates ?? prev.totalCandidates,
+          dimensions: accountResult.dimensions?.length
+            ? accountResult.dimensions
+            : prev.dimensions,
+          questionScores: accountResult.questionScores?.length
+            ? accountResult.questionScores
+            : prev.questionScores,
+          summary: accountResult.summary ?? prev.summary,
+        }));
+      };
+
+      try {
+        const response = await fetch("/api/account-result", {
+          cache: "no-store",
+        });
+
+        if (response.ok) {
+          applyAccountResult((await response.json()) as StoredResult);
+          return;
+        }
+      } catch {
+        // Fall back to the browser Supabase client below.
+      }
+
       const supabase = createClient();
       const {
         data: { user },
@@ -178,28 +216,7 @@ export default function ResultsPage() {
             : undefined,
       };
 
-      sessionStorage.setItem(RESULTS_KEY, JSON.stringify(accountResult));
-      setRankLocked(false);
-      setReport((prev) => ({
-        ...prev,
-        name: accountResult.name ?? prev.name,
-        role: accountResult.role ?? prev.role,
-        companyType: accountResult.companyType ?? prev.companyType,
-        source: "account",
-        compositeScore: accountResult.compositeScore ?? prev.compositeScore,
-        percentile: accountResult.percentile ?? prev.percentile,
-        rankDelta: accountResult.rankDelta ?? prev.rankDelta,
-        previousRank: accountResult.previousRank ?? prev.previousRank,
-        currentRank: accountResult.currentRank ?? prev.currentRank,
-        totalCandidates: accountResult.totalCandidates ?? prev.totalCandidates,
-        dimensions: accountResult.dimensions?.length
-          ? accountResult.dimensions
-          : prev.dimensions,
-        questionScores: accountResult.questionScores?.length
-          ? accountResult.questionScores
-          : prev.questionScores,
-        summary: accountResult.summary ?? prev.summary,
-      }));
+      applyAccountResult(accountResult);
     };
 
     void loadLatestAccountResult();
