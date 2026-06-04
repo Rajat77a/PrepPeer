@@ -79,15 +79,14 @@ function LoginNavOrb() {
   }, []);
 
   return (
-    <span className="login-nav-orb relative block h-[46px] w-[46px]" aria-hidden="true">
-      <span className="login-nav-orb-fallback absolute inset-0" />
+    <span className="login-nav-orb relative block h-[52px] w-[52px]" aria-hidden="true">
       {canPlayOrbVideo && !videoFailed && (
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="absolute inset-[-12%] z-[2] h-[124%] w-[124%] object-cover"
+          className="absolute bottom-[-13%] right-[-13%] z-[2] h-[126%] w-[126%] object-cover"
           onError={() => setVideoFailed(true)}
         >
           <source
@@ -96,34 +95,41 @@ function LoginNavOrb() {
           />
         </video>
       )}
+      {(!canPlayOrbVideo || videoFailed) && (
+        <span className="login-nav-orb-fallback absolute inset-[8%]" />
+      )}
       <style jsx>{`
         .login-nav-orb {
           overflow: hidden;
           isolation: isolate;
-          border-radius: 42% 58% 47% 53% / 46% 41% 59% 54%;
-          clip-path: ellipse(48% 48% at 50% 50%);
+          border-radius: 36% 64% 45% 55% / 43% 35% 65% 57%;
           background: transparent;
-          filter: drop-shadow(0 12px 22px rgba(0, 108, 255, 0.34));
-          transform: rotate(-8deg);
+          filter: drop-shadow(0 12px 24px rgba(0, 108, 255, 0.34));
+          -webkit-mask-image: radial-gradient(ellipse 58% 55% at 52% 52%, #000 0 70%, transparent 78%);
+          mask-image: radial-gradient(ellipse 58% 55% at 52% 52%, #000 0 70%, transparent 78%);
         }
 
         .login-nav-orb-fallback {
           z-index: 1;
-          border-radius: 42% 58% 47% 53% / 46% 41% 59% 54%;
+          border-radius: 39% 61% 46% 54% / 48% 36% 64% 52%;
           background:
-            radial-gradient(ellipse at 31% 24%, rgba(255, 255, 255, 0.95) 0 12%, rgba(255, 255, 255, 0.26) 24%, transparent 35%),
-            radial-gradient(ellipse at 52% 45%, #72efff 0%, #17b8ff 28%, #0074ff 52%, transparent 70%),
-            radial-gradient(ellipse at 84% 64%, rgba(1, 8, 55, 0.94) 0 12%, transparent 25%),
-            radial-gradient(ellipse at 22% 82%, rgba(2, 8, 68, 0.88) 0 13%, transparent 27%),
-            conic-gradient(from 226deg, #03083e, #0077ff, #5fdfff, #0575f0, #07115d, #03083e);
+            radial-gradient(ellipse at 31% 25%, rgba(255, 255, 255, 0.96) 0 9%, rgba(255, 255, 255, 0.34) 17%, transparent 31%),
+            radial-gradient(ellipse at 53% 45%, #8af7ff 0%, #28d0ff 28%, #0086ff 50%, transparent 68%),
+            radial-gradient(ellipse at 84% 62%, rgba(2, 8, 58, 0.92) 0 10%, transparent 23%),
+            radial-gradient(ellipse at 24% 82%, rgba(0, 8, 72, 0.88) 0 11%, transparent 26%),
+            radial-gradient(ellipse at 73% 16%, rgba(4, 19, 95, 0.76) 0 10%, transparent 24%),
+            conic-gradient(from 228deg, #03083e, #0077ff, #5fdfff, #0575f0, #07115d, #03083e);
           box-shadow:
-            inset 9px 10px 16px rgba(255, 255, 255, 0.3),
-            inset -14px -16px 22px rgba(0, 13, 85, 0.62);
+            0 18px 44px rgba(0, 132, 255, 0.24),
+            0 0 36px rgba(96, 177, 255, 0.28),
+            inset 12px 14px 24px rgba(255, 255, 255, 0.3),
+            inset -18px -20px 30px rgba(0, 17, 86, 0.56);
+          transform: rotate(-7deg) scale(1.04);
         }
 
         .login-nav-orb video {
           mix-blend-mode: screen;
-          filter: hue-rotate(-55deg) saturate(250%) brightness(1.18) contrast(1.08);
+          filter: hue-rotate(-55deg) saturate(250%) brightness(1.2) contrast(1.1);
         }
       `}</style>
     </span>
