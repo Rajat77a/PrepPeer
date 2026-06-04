@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Input } from "@/components/ui/input";
+import { OrbLogo } from "@/components/ui/OrbLogo";
 import {
   InputOTP,
   InputOTPGroup,
@@ -20,22 +21,26 @@ type AuthMode = "signin" | "signup";
 type AuthStep = "email" | "otp" | "password" | "success";
 
 const panelMotion = {
-  initial: { opacity: 0, x: 80 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -80 },
-  transition: { duration: 0.4, ease: "easeOut" },
+  initial: { opacity: 0, y: 18, filter: "blur(8px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  exit: { opacity: 0, y: -18, filter: "blur(8px)" },
+  transition: { duration: 0.36, ease: "easeOut" },
 } as const;
 
 const copy = {
   signin: {
-    title: "Welcome back",
-    subtitle: "Pick up your rank, sessions, and next practice round.",
+    title: "Know where you stand",
+    subtitle: "Run the interview. Read the rank. Improve the next answer.",
     emailButton: "Send sign-in code",
+    helper: "New to PrepPeer?",
+    helperAction: "Create account",
   },
   signup: {
-    title: "Create your PrepPeer account",
-    subtitle: "Save every interview, track your rank, and build a cleaner prep record.",
+    title: "Start with your rank",
+    subtitle: "Create a profile for scores, progress, and every new jump.",
     emailButton: "Send sign-up code",
+    helper: "Already have an account?",
+    helperAction: "Log in",
   },
 };
 
@@ -65,242 +70,34 @@ function GoogleIcon() {
   );
 }
 
-function LoginNavOrb() {
-  const [videoFailed, setVideoFailed] = useState(false);
-  const [canPlayOrbVideo, setCanPlayOrbVideo] = useState(false);
-
-  useEffect(() => {
-    const isIOSLike =
-      /iPad|iPhone|iPod/.test(window.navigator.userAgent) ||
-      (window.navigator.platform === "MacIntel" &&
-        window.navigator.maxTouchPoints > 1);
-
-    setCanPlayOrbVideo(!isIOSLike);
-  }, []);
-
+function LoginBackground() {
   return (
-    <span className="login-nav-orb relative block h-[52px] w-[52px]" aria-hidden="true">
-      {canPlayOrbVideo && !videoFailed && (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute bottom-[-10%] right-[-10%] z-[2] h-[120%] w-[120%] object-cover"
-          onError={() => setVideoFailed(true)}
-        >
-          <source
-            src="https://future.co/images/homepage/glassy-orb/orb-purple.webm"
-            type="video/webm"
-          />
-        </video>
-      )}
-      {(!canPlayOrbVideo || videoFailed) && (
-        <span className="login-nav-orb-fallback absolute inset-[8%]" />
-      )}
-      <style jsx>{`
-        .login-nav-orb {
-          overflow: hidden;
-          isolation: isolate;
-          border-radius: 36% 64% 45% 55% / 43% 35% 65% 57%;
-          background: transparent;
-          filter: drop-shadow(0 12px 24px rgba(0, 108, 255, 0.34));
-          -webkit-mask-image: radial-gradient(ellipse 42% 42% at 50% 52%, #000 0 78%, transparent 88%);
-          mask-image: radial-gradient(ellipse 42% 42% at 50% 52%, #000 0 78%, transparent 88%);
-        }
+    <div className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 bg-[#f7fbff]" />
 
-        .login-nav-orb-fallback {
-          z-index: 1;
-          border-radius: 39% 61% 46% 54% / 48% 36% 64% 52%;
-          background:
-            radial-gradient(ellipse at 31% 25%, rgba(255, 255, 255, 0.96) 0 9%, rgba(255, 255, 255, 0.34) 17%, transparent 31%),
-            radial-gradient(ellipse at 53% 45%, #8af7ff 0%, #28d0ff 28%, #0086ff 50%, transparent 68%),
-            radial-gradient(ellipse at 84% 62%, rgba(2, 8, 58, 0.92) 0 10%, transparent 23%),
-            radial-gradient(ellipse at 24% 82%, rgba(0, 8, 72, 0.88) 0 11%, transparent 26%),
-            radial-gradient(ellipse at 73% 16%, rgba(4, 19, 95, 0.76) 0 10%, transparent 24%),
-            conic-gradient(from 228deg, #03083e, #0077ff, #5fdfff, #0575f0, #07115d, #03083e);
-          box-shadow:
-            0 18px 44px rgba(0, 132, 255, 0.24),
-            0 0 36px rgba(96, 177, 255, 0.28),
-            inset 12px 14px 24px rgba(255, 255, 255, 0.3),
-            inset -18px -20px 30px rgba(0, 17, 86, 0.56);
-          transform: rotate(-7deg) scale(1.04);
-        }
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_24%,rgba(255,255,255,0.98)_0%,rgba(255,255,255,0.70)_34%,rgba(232,244,255,0.86)_72%,#ffffff_100%)]" />
 
-        .login-nav-orb video {
-          mix-blend-mode: normal;
-          filter: hue-rotate(-55deg) saturate(250%) brightness(1.2) contrast(1.1);
-        }
-      `}</style>
-    </span>
-  );
-}
+      <div className="absolute left-[-18%] top-[-20%] h-[620px] w-[620px] rounded-full bg-[#0084ff]/14 blur-[120px]" />
+      <div className="absolute right-[-16%] top-[8%] h-[540px] w-[540px] rounded-full bg-[#7dffd9]/18 blur-[120px]" />
+      <div className="absolute bottom-[-24%] left-[22%] h-[560px] w-[560px] rounded-full bg-[#60b1ff]/14 blur-[130px]" />
 
-function LoginOrb({ className }: { className?: string }) {
-  const [videoFailed, setVideoFailed] = useState(false);
-  const [canPlayOrbVideo, setCanPlayOrbVideo] = useState(false);
+      <div
+        className="absolute -left-32 bottom-[-18rem] h-[620px] w-[720px] rotate-[32deg] rounded-[42%] bg-[linear-gradient(145deg,rgba(0,132,255,0.18),rgba(255,255,255,0.14),rgba(125,255,217,0.16))] blur-[18px]"
+        aria-hidden="true"
+      />
+      <div
+        className="absolute -right-40 top-[-18rem] h-[660px] w-[760px] rotate-[28deg] rounded-[44%] bg-[linear-gradient(145deg,rgba(255,255,255,0.72),rgba(0,132,255,0.14),rgba(125,255,217,0.12))] blur-[14px]"
+        aria-hidden="true"
+      />
 
-  useEffect(() => {
-    const isIOSLike =
-      /iPad|iPhone|iPod/.test(window.navigator.userAgent) ||
-      (window.navigator.platform === "MacIntel" &&
-        window.navigator.maxTouchPoints > 1);
-
-    setCanPlayOrbVideo(!isIOSLike);
-  }, []);
-
-  return (
-    <div className={cn("login-orb absolute", className)} aria-hidden="true">
-      <div className="orb-fallback absolute inset-[5%] z-[1]" />
-      {canPlayOrbVideo && !videoFailed && (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="orb-video absolute inset-0 z-[2] h-full w-full object-cover"
-          onError={() => setVideoFailed(true)}
-        >
-          <source
-            src="https://future.co/images/homepage/glassy-orb/orb-purple.webm"
-            type="video/webm"
-          />
-        </video>
-      )}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,132,255,0.045)_1px,transparent_1px),linear-gradient(90deg,rgba(0,132,255,0.045)_1px,transparent_1px)] bg-[size:72px_72px] opacity-70" />
+      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-white to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-60 bg-gradient-to-t from-white to-transparent" />
     </div>
   );
 }
 
-function MatrixBackground() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[#06111f]" />
-      <div className="login-ambient absolute inset-0" aria-hidden="true" />
-      <div className="login-surface login-surface-one" aria-hidden="true" />
-      <div className="login-surface login-surface-two" aria-hidden="true" />
-      <LoginOrb className="login-orb-one" />
-      <LoginOrb className="login-orb-two" />
-      <LoginOrb className="login-orb-three" />
-      <div className="login-waves absolute inset-0" aria-hidden="true" />
-      <div className="login-vignette absolute inset-0" aria-hidden="true" />
-      <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#02050a] to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#02050a] to-transparent" />
-      <style jsx>{`
-        .login-ambient {
-          background:
-            radial-gradient(circle at 50% 32%, rgba(0, 108, 255, 0.24), transparent 34%),
-            radial-gradient(circle at 18% 18%, rgba(96, 177, 255, 0.12), transparent 30%),
-            radial-gradient(circle at 82% 72%, rgba(37, 99, 235, 0.18), transparent 32%),
-            linear-gradient(180deg, #081522 0%, #05101e 45%, #02050a 100%);
-        }
-
-        .login-surface {
-          position: absolute;
-          pointer-events: none;
-          border-radius: 999px;
-          filter: blur(0.2px);
-          opacity: 0.42;
-        }
-
-        .login-surface-one {
-          height: 470px;
-          right: -130px;
-          top: -120px;
-          transform: rotate(-28deg);
-          width: 620px;
-          background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02) 42%, rgba(0, 108, 255, 0.1)),
-            radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 34%);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 38px 110px rgba(0, 0, 0, 0.32);
-        }
-
-        .login-surface-two {
-          bottom: -170px;
-          height: 390px;
-          left: -150px;
-          transform: rotate(27deg);
-          width: 560px;
-          background:
-            linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(0, 108, 255, 0.08) 48%, rgba(255, 255, 255, 0.02)),
-            radial-gradient(circle at 58% 36%, rgba(255, 255, 255, 0.14), transparent 35%);
-          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 34px 90px rgba(0, 0, 0, 0.28);
-        }
-
-        .login-orb {
-          filter: drop-shadow(0 24px 60px rgba(0, 108, 255, 0.22));
-          pointer-events: none;
-          animation: loginOrbFloat 8s ease-in-out infinite;
-        }
-
-        .login-orb-one {
-          height: 190px;
-          opacity: 0.34;
-          right: 10%;
-          top: 18%;
-          width: 190px;
-        }
-
-        .login-orb-two {
-          animation-delay: -3s;
-          height: 106px;
-          left: 12%;
-          opacity: 0.2;
-          top: 66%;
-          width: 106px;
-        }
-
-        .login-orb-three {
-          animation-delay: -5.2s;
-          height: 82px;
-          opacity: 0.14;
-          right: 21%;
-          top: 73%;
-          width: 82px;
-        }
-
-        .login-waves {
-          background:
-            radial-gradient(ellipse at 20% 80%, rgba(0, 108, 255, 0.12) 0%, transparent 34%),
-            radial-gradient(ellipse at 76% 26%, rgba(96, 177, 255, 0.08) 0%, transparent 31%),
-            linear-gradient(135deg, transparent 0 43%, rgba(0, 108, 255, 0.035) 49%, transparent 55%),
-            linear-gradient(35deg, transparent 0 38%, rgba(244, 248, 255, 0.035) 48%, transparent 58%);
-          opacity: 0.8;
-        }
-
-        .login-vignette {
-          background:
-            radial-gradient(ellipse at center, transparent 0%, rgba(2, 5, 10, 0.08) 44%, rgba(2, 5, 10, 0.58) 100%),
-            linear-gradient(90deg, rgba(2, 5, 10, 0.46), transparent 25%, transparent 75%, rgba(2, 5, 10, 0.54));
-        }
-
-        @keyframes loginOrbFloat {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 0) rotate(-4deg) scale(1);
-          }
-          50% {
-            transform: translate3d(0, -18px, 0) rotate(5deg) scale(1.035);
-          }
-        }
-
-        @media (max-width: 760px) {
-          .login-orb-one {
-            height: 128px;
-            right: -18px;
-            top: 18%;
-            width: 128px;
-          }
-
-          .login-surface-one {
-            right: -230px;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
-
-function TopNav({
+function AuthModeSwitch({
   mode,
   onModeChange,
 }: {
@@ -308,42 +105,32 @@ function TopNav({
   onModeChange: (mode: AuthMode) => void;
 }) {
   return (
-    <header className="fixed left-1/2 top-7 z-30 w-[calc(100%-2rem)] max-w-[330px] -translate-x-1/2 rounded-full border border-[#28415f]/70 bg-[#081522]/82 px-3 py-2.5 shadow-[0_24px_78px_rgba(0,0,0,0.38),0_0_44px_rgba(0,108,255,0.14),inset_0_1px_1px_rgba(255,255,255,0.1)] backdrop-blur-2xl">
-      <div className="flex items-center justify-center gap-3">
-        <Link
-          href="/"
-          className="flex shrink-0 items-center justify-center rounded-full transition hover:opacity-80"
-          aria-label="Home"
-        >
-          <LoginNavOrb />
-        </Link>
-
-        <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#0c1726]/88 p-1 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
-          <button
-            onClick={() => onModeChange("signin")}
-            className={cn(
-              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition duration-300",
-              mode === "signin"
-                ? "bg-[#f4f8ff] text-[#06111f] shadow-[0_0_30px_rgba(244,248,255,0.16)]"
-                : "text-[#8ca0ba] hover:text-[#f4f8ff]"
-            )}
-          >
-            Sign in
-          </button>
-          <button
-            onClick={() => onModeChange("signup")}
-            className={cn(
-              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition duration-300",
-              mode === "signup"
-                ? "bg-[#f4f8ff] text-[#06111f] shadow-[0_0_30px_rgba(244,248,255,0.16)]"
-                : "text-[#8ca0ba] hover:text-[#f4f8ff]"
-            )}
-          >
-            Sign up
-          </button>
-        </div>
-      </div>
-    </header>
+    <div className="mx-auto flex w-fit items-center gap-1 rounded-full border border-white/70 bg-white/70 p-1 shadow-[0_18px_56px_rgba(0,108,255,0.14),inset_0_1px_2px_rgba(255,255,255,0.96)] backdrop-blur-xl">
+      <button
+        type="button"
+        onClick={() => onModeChange("signin")}
+        className={cn(
+          "rounded-full px-5 py-2.5 font-inter text-sm font-black transition",
+          mode === "signin"
+            ? "bg-[#eaf5ff] text-[#07111f] shadow-[0_10px_28px_rgba(0,108,255,0.10)]"
+            : "text-[#64748b] hover:text-[#07111f]"
+        )}
+      >
+        Sign in
+      </button>
+      <button
+        type="button"
+        onClick={() => onModeChange("signup")}
+        className={cn(
+          "rounded-full px-5 py-2.5 font-inter text-sm font-black transition",
+          mode === "signup"
+            ? "bg-white text-[#07111f] shadow-[0_10px_28px_rgba(15,23,42,0.10)]"
+            : "text-[#64748b] hover:text-[#07111f]"
+        )}
+      >
+        Sign up
+      </button>
+    </div>
   );
 }
 
@@ -359,15 +146,18 @@ export default function LoginPage() {
 
   const isSignUp = mode === "signup";
   const activeCopy = copy[mode];
+
   const otpSlotClass =
-    "!h-14 !w-12 rounded-xl !border-[#28415f] !bg-[#0b1422] text-xl !text-[#f4f8ff] shadow-[0_16px_34px_rgba(2,5,10,0.35),inset_0_1px_1px_rgba(255,255,255,0.08)] transition-all duration-300 data-[filled=true]:!border-[#4b6f9f] data-[filled=true]:!bg-[#132238] data-[active=true]:!border-[#9fcfff] data-[active=true]:!shadow-[0_0_0_2px_rgba(159,207,255,0.24),0_0_28px_rgba(0,108,255,0.28),0_16px_34px_rgba(2,5,10,0.35)]";
+    "!h-14 !w-12 rounded-xl !border-[#cfe7ff] !bg-white/88 text-xl !text-[#07111f] shadow-[0_16px_34px_rgba(0,108,255,0.10),inset_0_1px_1px_rgba(255,255,255,0.96)] transition-all duration-300 data-[filled=true]:!border-[#60b1ff] data-[filled=true]:!bg-[#f7fbff] data-[active=true]:!border-[#0084ff] data-[active=true]:!shadow-[0_0_0_3px_rgba(0,132,255,0.18),0_0_24px_rgba(0,132,255,0.18)]";
 
   const getAuthRedirectUrl = (nextPath: string) => {
     const next =
       nextPath.startsWith("/dashboard") && !nextPath.startsWith("//")
         ? nextPath
         : "/dashboard";
-    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}&mode=${mode}`;
+    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+      next
+    )}&mode=${mode}`;
   };
 
   const getPostAuthPath = () => {
@@ -388,11 +178,22 @@ export default function LoginPage() {
   };
 
   const friendlyAuthError = (message: string) => {
-    if (message.toLowerCase().includes("signups not allowed")) {
+    const normalized = message.toLowerCase();
+
+    if (normalized.includes("signups not allowed")) {
       return isSignUp
-        ? "Email sign-up is not enabled yet."
+        ? "Email sign-up is not enabled yet. Please continue with Google."
         : "No PrepPeer account was found for this email. Create an account first.";
     }
+
+    if (
+      normalized.includes("error sending confirmation email") ||
+      normalized.includes("email rate limit") ||
+      normalized.includes("smtp")
+    ) {
+      return "Email sign-up is temporarily unavailable. Please continue with Google.";
+    }
+
     return message;
   };
 
@@ -414,13 +215,16 @@ export default function LoginPage() {
         redirectTo: getAuthRedirectUrl(getPostAuthPath()),
       },
     });
+
     if (signInError) setError(friendlyAuthError(signInError.message));
   };
 
   const sendOtp = async () => {
     if (!email.trim()) return;
+
     setLoading(true);
     setError("");
+
     const supabase = createClient();
     const nextSignupNonce =
       isSignUp && typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -428,7 +232,9 @@ export default function LoginPage() {
         : isSignUp
           ? `${Date.now()}-${Math.random().toString(36).slice(2)}`
           : "";
+
     setSignupNonce(nextSignupNonce);
+
     const { error: otpError } = await supabase.auth.signInWithOtp({
       email: email.trim(),
       options: {
@@ -440,6 +246,7 @@ export default function LoginPage() {
           : undefined,
       },
     });
+
     setLoading(false);
 
     if (otpError) {
@@ -447,18 +254,22 @@ export default function LoginPage() {
       setError(friendlyAuthError(otpError.message));
       return;
     }
+
     setStep("otp");
   };
 
   const verifyOtp = async (code: string) => {
     setLoading(true);
     setError("");
+
     const supabase = createClient();
-    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
-      email: email.trim(),
-      token: code,
-      type: "email",
-    });
+    const { data: verifyData, error: verifyError } =
+      await supabase.auth.verifyOtp({
+        email: email.trim(),
+        token: code,
+        type: "email",
+      });
+
     setLoading(false);
 
     if (verifyError) {
@@ -467,17 +278,23 @@ export default function LoginPage() {
     }
 
     const nextPath = getPostAuthPath();
+
     if (isSignUp) {
       const hasCurrentSignupMarker =
         verifyData.user?.user_metadata?.preppeer_signup_nonce === signupNonce;
 
-      if (!hasCurrentSignupMarker || !isFreshSignupUser(verifyData.user?.created_at)) {
+      if (
+        !hasCurrentSignupMarker ||
+        !isFreshSignupUser(verifyData.user?.created_at)
+      ) {
         await supabase.auth.signOut();
         setMode("signin");
         setStep("email");
         setOtp("");
         setSignupNonce("");
-        setError("This email already has a PrepPeer account. Sign in instead to continue.");
+        setError(
+          "This email already has a PrepPeer account. Sign in instead to continue."
+        );
         return;
       }
 
@@ -492,14 +309,19 @@ export default function LoginPage() {
   const savePassword = async (password: string) => {
     setLoading(true);
     setError("");
+
     const supabase = createClient();
-    const { error: passwordError } = await supabase.auth.updateUser({ password });
+    const { error: passwordError } = await supabase.auth.updateUser({
+      password,
+    });
+
     setLoading(false);
 
     if (passwordError) {
       setError(friendlyAuthError(passwordError.message));
       return;
     }
+
     setStep("success");
   };
 
@@ -559,40 +381,69 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#06111f] text-[#f4f8ff]">
-      <MatrixBackground />
+    <main className="relative min-h-screen overflow-hidden bg-white text-[#07111f]">
+      <LoginBackground />
 
-      <TopNav mode={mode} onModeChange={resetForMode} />
+      <Link
+        href="/"
+        className="fixed left-6 top-6 z-30 inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/70 px-4 py-2 font-inter text-sm font-bold text-[#64748b] shadow-[0_16px_50px_rgba(0,108,255,0.10)] backdrop-blur-xl transition hover:text-[#006cff]"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Home
+      </Link>
 
-      <section className="relative z-10 flex min-h-screen items-center justify-center px-5 pb-12 pt-32">
-        <div className="w-full max-w-[620px] text-center">
+      <section className="relative z-10 flex min-h-screen items-center justify-center px-5 py-20">
+        <div className="w-full max-w-[620px]">
           <AnimatePresence mode="wait">
             {step === "email" && (
-              <motion.div key={`email-${mode}`} {...panelMotion}>
-                <p className="mb-5 font-inter text-xs font-bold uppercase tracking-[0.34em] text-[#60b1ff]">
-                  PrepPeer access
-                </p>
-                <h1 className="font-inter text-[clamp(46px,7vw,78px)] font-black leading-[0.94] tracking-[-0.055em] text-[#f4f8ff] drop-shadow-[0_18px_44px_rgba(0,108,255,0.2)]">
+              <motion.div
+                key={`email-${mode}`}
+                {...panelMotion}
+                className="text-center"
+              >
+                <div className="mb-6 flex justify-center">
+                  <div className="rounded-3xl border border-white/80 bg-white/70 p-3 shadow-[0_24px_70px_rgba(0,108,255,0.16),inset_0_1px_2px_rgba(255,255,255,0.98)] backdrop-blur-xl">
+                    <OrbLogo size={58} />
+                  </div>
+                </div>
+
+                <AuthModeSwitch mode={mode} onModeChange={resetForMode} />
+
+                <h1 className="mt-8 font-inter text-[clamp(48px,8vw,84px)] font-black leading-[0.9] tracking-[-0.07em] text-[#07111f] drop-shadow-[0_18px_36px_rgba(0,132,255,0.14)]">
                   {activeCopy.title}
                 </h1>
-                <p className="mx-auto mt-5 max-w-[600px] font-inter text-[clamp(19px,2.6vw,27px)] font-medium leading-tight tracking-[-0.035em] text-[#a8b5c7]">
+
+                <p className="mx-auto mt-5 max-w-[540px] font-inter text-xl font-semibold leading-8 tracking-[-0.035em] text-[#64748b]">
                   {activeCopy.subtitle}
                 </p>
 
-                <div className="mx-auto mt-10 max-w-[460px] space-y-5">
+                <p className="mt-4 font-inter text-sm font-bold text-[#64748b]">
+                  {activeCopy.helper}{" "}
+                  <button
+                    type="button"
+                    onClick={() => resetForMode(isSignUp ? "signin" : "signup")}
+                    className="text-[#006cff] transition hover:text-[#0057cc]"
+                  >
+                    {activeCopy.helperAction}
+                  </button>
+                </p>
+
+                <div className="mx-auto mt-9 max-w-[520px]">
                   <button
                     onClick={signInWithGoogle}
-                    className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-[#28415f]/70 bg-[#0d1828]/86 px-5 py-4 font-inter text-base font-bold text-[#f4f8ff] shadow-[0_24px_76px_rgba(0,0,0,0.34),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[#f4f8ff]/70 hover:bg-[#f4f8ff] hover:text-[#06111f] hover:shadow-[0_0_48px_rgba(244,248,255,0.24),0_24px_76px_rgba(0,0,0,0.42)]"
+                    className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/80 bg-white/76 px-5 font-inter text-base font-black text-[#07111f] shadow-[0_22px_70px_rgba(0,132,255,0.15),inset_0_1px_2px_rgba(255,255,255,0.98)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#0084ff]/30 hover:bg-white"
                   >
                     <GoogleIcon />
                     Sign in with Google
-                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/28 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
+                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-[#38bdf8]/28 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
                   </button>
 
-                  <div className="flex items-center gap-4">
-                    <span className="h-px flex-1 bg-[#28415f]/70" />
-                    <span className="font-inter text-sm font-semibold text-[#71839a]">or</span>
-                    <span className="h-px flex-1 bg-[#28415f]/70" />
+                  <div className="my-7 flex items-center gap-4">
+                    <span className="h-px flex-1 bg-[#cfe7ff]" />
+                    <span className="font-inter text-sm font-black text-[#7b8da3]">
+                      or
+                    </span>
+                    <span className="h-px flex-1 bg-[#cfe7ff]" />
                   </div>
 
                   <form
@@ -600,127 +451,155 @@ export default function LoginPage() {
                       event.preventDefault();
                       void sendOtp();
                     }}
+                    className="space-y-4 text-left"
                   >
-                    <div className="relative">
-                      <Input
-                        type="email"
-                        value={email}
-                        onChange={(event) => setEmail(event.target.value)}
-                        placeholder="you@example.com"
-                        autoComplete="email"
-                        required
-                        glowColor="#9fcfff"
-                        style={{
-                          backgroundColor: "rgba(9, 20, 36, 0.9)",
-                          borderColor: "rgba(96, 177, 255, 0.34)",
-                          color: "#f4f8ff",
-                        }}
-                        className="h-14 rounded-full px-16 text-center text-base font-semibold shadow-[0_24px_76px_rgba(0,0,0,0.34),0_0_28px_rgba(0,108,255,0.14),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-center placeholder:text-[#9fb0c6] group-hover/input:shadow-[0_0_0_1px_rgba(159,207,255,0.52),0_0_72px_rgba(159,207,255,0.34),0_24px_76px_rgba(0,0,0,0.38),inset_0_1px_1px_rgba(255,255,255,0.1)] focus:border-[#d8ecff]/90 focus:shadow-[0_0_0_3px_rgba(159,207,255,0.28),0_0_86px_rgba(159,207,255,0.44),0_24px_76px_rgba(0,0,0,0.38),inset_0_0_20px_rgba(96,177,255,0.1)]"
-                      />
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        aria-label={activeCopy.emailButton}
-                        className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full border border-[#28415f]/70 bg-[#132238] text-[#f4f8ff] shadow-[0_12px_30px_rgba(0,0,0,0.26)] transition duration-300 hover:scale-105 hover:border-[#f4f8ff]/70 hover:bg-[#f4f8ff] hover:text-[#06111f] hover:shadow-[0_0_32px_rgba(244,248,255,0.22)] disabled:opacity-50"
-                      >
-                        <ArrowRight size={17} />
-                      </button>
-                    </div>
+                    <label className="block">
+                      <span className="mb-2 block font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
+                        Email
+                      </span>
+                      <div className="relative">
+                        <Input
+                          type="email"
+                          value={email}
+                          onChange={(event) => {
+                            setError("");
+                            setEmail(event.target.value);
+                          }}
+                          placeholder="you@example.com"
+                          autoComplete="email"
+                          required
+                          className="h-14 rounded-2xl border-[#cfe7ff] bg-white/82 px-5 pr-14 text-left font-inter text-base font-bold text-[#07111f] shadow-[0_18px_48px_rgba(0,108,255,0.10)] placeholder:text-[#9aa9bb] focus:border-[#0084ff]/70 focus:shadow-[0_0_0_4px_rgba(0,132,255,0.12)]"
+                        />
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          aria-label={activeCopy.emailButton}
+                          className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-xl bg-[#0084ff] text-white shadow-[0_12px_28px_rgba(0,132,255,0.3)] transition hover:scale-105 hover:bg-[#006cff] disabled:opacity-50"
+                        >
+                          <ArrowRight size={17} />
+                        </button>
+                      </div>
+                    </label>
                   </form>
                 </div>
 
-                {error && <p className="mt-5 font-inter text-sm text-[#ff8a8a]">{error}</p>}
-                <p className="mx-auto mt-16 max-w-[420px] font-inter text-xs leading-5 text-[#71839a]">
+                {error && (
+                  <p className="mt-5 text-center font-inter text-sm font-bold text-[#dc2626]">
+                    {error}
+                  </p>
+                )}
+
+                <p className="mx-auto mt-12 max-w-[460px] text-center font-inter text-xs font-semibold leading-5 text-[#7b8da3]">
                   By continuing, you agree to PrepPeer&apos;s terms and privacy policy.
                 </p>
               </motion.div>
             )}
 
             {step === "otp" && (
-              <motion.div key="otp" {...panelMotion}>
+              <motion.div key="otp" {...panelMotion} className="text-center">
                 <button
                   onClick={() => {
                     setOtp("");
                     setStep("email");
                   }}
-                  className="mx-auto mb-8 flex items-center gap-2 font-inter text-sm font-semibold text-[#8ca0ba] transition hover:text-[#f4f8ff]"
+                  className="mx-auto mb-8 flex items-center gap-2 font-inter text-sm font-bold text-[#64748b] transition hover:text-[#0084ff]"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
-                <h1 className="font-inter text-[clamp(46px,7vw,74px)] font-black leading-none tracking-[-0.055em] text-[#f4f8ff]">
+
+                <div className="mb-6 flex justify-center">
+                  <div className="rounded-3xl border border-white/80 bg-white/70 p-3 shadow-[0_24px_70px_rgba(0,108,255,0.16),inset_0_1px_2px_rgba(255,255,255,0.98)] backdrop-blur-xl">
+                    <OrbLogo size={58} />
+                  </div>
+                </div>
+
+                <h1 className="font-inter text-[clamp(44px,7vw,76px)] font-black leading-[0.9] tracking-[-0.06em] text-[#07111f]">
                   Enter your code
                 </h1>
-                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-medium leading-8 text-[#a8b5c7]">
-                  We sent it to {email}.
+                <p className="mx-auto mt-5 max-w-[460px] font-inter text-lg font-semibold leading-8 text-[#64748b]">
+                  We sent a sign-in code to {email}.
                 </p>
 
-                <div className="mx-auto mt-10 max-w-[480px] rounded-[34px] border border-[#28415f]/70 bg-[#0d1828]/72 p-3 shadow-[0_26px_88px_rgba(0,0,0,0.34),0_0_58px_rgba(0,108,255,0.12),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-2xl">
-                  <div className="rounded-[26px] border border-[#28415f]/70 bg-[#06111f]/95 px-4 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_18px_42px_rgba(2,5,10,0.38)]">
-                  <InputOTP
-                    maxLength={6}
-                    value={otp}
-                    onChange={(value) => {
-                      setError("");
-                      setOtp(value);
-                    }}
-                    disabled={loading}
-                    containerClassName="justify-center gap-2 sm:gap-3"
-                  >
-                    <InputOTPGroup className="gap-2 sm:gap-3">
-                      {[0, 1, 2].map((index) => (
-                        <InputOTPSlot
-                          key={index}
-                          index={index}
-                          className={otpSlotClass}
-                        />
-                      ))}
-                    </InputOTPGroup>
-                    <InputOTPSeparator className="px-0 text-[#6f7f96]/60" />
-                    <InputOTPGroup className="gap-2 sm:gap-3">
-                      {[3, 4, 5].map((index) => (
-                        <InputOTPSlot
-                          key={index}
-                          index={index}
-                          className={otpSlotClass}
-                        />
-                      ))}
-                    </InputOTPGroup>
-                  </InputOTP>
+                <div className="mx-auto mt-10 max-w-[480px] rounded-[34px] border border-white/80 bg-white/66 p-3 shadow-[0_26px_88px_rgba(0,108,255,0.14),inset_0_1px_2px_rgba(255,255,255,0.95)] backdrop-blur-2xl">
+                  <div className="rounded-[26px] border border-[#cfe7ff] bg-white/78 px-4 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.96),0_18px_42px_rgba(0,108,255,0.10)]">
+                    <InputOTP
+                      maxLength={6}
+                      value={otp}
+                      onChange={(value) => {
+                        setError("");
+                        setOtp(value);
+                      }}
+                      disabled={loading}
+                      containerClassName="justify-center gap-2 sm:gap-3"
+                    >
+                      <InputOTPGroup className="gap-2 sm:gap-3">
+                        {[0, 1, 2].map((index) => (
+                          <InputOTPSlot
+                            key={index}
+                            index={index}
+                            className={otpSlotClass}
+                          />
+                        ))}
+                      </InputOTPGroup>
+                      <InputOTPSeparator className="px-0 text-[#6f7f96]/60" />
+                      <InputOTPGroup className="gap-2 sm:gap-3">
+                        {[3, 4, 5].map((index) => (
+                          <InputOTPSlot
+                            key={index}
+                            index={index}
+                            className={otpSlotClass}
+                          />
+                        ))}
+                      </InputOTPGroup>
+                    </InputOTP>
                   </div>
                 </div>
 
                 <button
                   onClick={sendOtp}
                   disabled={loading}
-                  className="mt-6 font-inter text-sm font-semibold text-[#60b1ff] transition hover:text-[#f4f8ff] disabled:opacity-50"
+                  className="mt-6 font-inter text-sm font-bold text-[#0084ff] transition hover:text-[#005bd3] disabled:opacity-50"
                 >
                   Resend code
                 </button>
-                {error && <p className="mt-5 font-inter text-sm text-[#ff8a8a]">{error}</p>}
+
+                {error && (
+                  <p className="mt-5 font-inter text-sm font-bold text-[#dc2626]">
+                    {error}
+                  </p>
+                )}
               </motion.div>
             )}
 
             {step === "password" && (
-              <motion.div key="password" {...panelMotion} className="mx-auto max-w-[500px] text-left">
+              <motion.div
+                key="password"
+                {...panelMotion}
+                className="mx-auto max-w-[520px] rounded-[34px] border border-white/80 bg-white/72 p-7 text-left shadow-[0_30px_110px_rgba(0,108,255,0.16),inset_0_1px_2px_rgba(255,255,255,0.96)] backdrop-blur-2xl sm:p-9"
+              >
                 <button
                   onClick={() => setStep("otp")}
-                  className="mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-[#8ca0ba] transition hover:text-[#f4f8ff]"
+                  className="mb-6 flex items-center gap-2 font-inter text-sm font-bold text-[#64748b] transition hover:text-[#0084ff]"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
+
                 <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#28415f]/70 bg-[#0d1828] text-[#60b1ff] shadow-[0_12px_28px_rgba(0,0,0,0.26)]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#0084ff]/20 bg-[#e7f4ff] text-[#0084ff] shadow-[0_12px_28px_rgba(0,132,255,0.12)]">
                     <ShieldCheck size={20} />
                   </div>
                   <div>
-                    <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#60b1ff]">
+                    <p className="font-inter text-xs font-black uppercase tracking-[0.2em] text-[#0084ff]">
                       Password
                     </p>
-                    <h1 className="font-inter text-3xl font-black tracking-[-0.04em] text-[#f4f8ff]">Create your password</h1>
+                    <h1 className="font-inter text-3xl font-black tracking-[-0.04em]">
+                      Create your password
+                    </h1>
                   </div>
                 </div>
+
                 <AssistedPasswordConfirmation
                   onSubmit={savePassword}
                   loading={loading}
@@ -730,24 +609,27 @@ export default function LoginPage() {
             )}
 
             {step === "success" && (
-              <motion.div key="success" {...panelMotion}>
+              <motion.div key="success" {...panelMotion} className="text-center">
                 <motion.div
-                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#28415f]/70 bg-[#0d1828]/86 text-[#60b1ff] shadow-[0_22px_70px_rgba(0,0,0,0.34),0_0_48px_rgba(0,108,255,0.16),inset_0_1px_1px_rgba(255,255,255,0.08)]"
+                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#0084ff]/20 bg-white/75 text-[#0084ff] shadow-[0_22px_70px_rgba(0,132,255,0.2),inset_0_1px_2px_rgba(255,255,255,0.95)]"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 280, damping: 18 }}
                 >
                   <Check size={34} strokeWidth={2.8} />
                 </motion.div>
-                <h1 className="mt-7 font-inter text-[clamp(46px,7vw,74px)] font-black leading-none tracking-[-0.055em] text-[#f4f8ff]">
+
+                <h1 className="mt-7 font-inter text-[clamp(44px,7vw,76px)] font-black leading-[0.9] tracking-[-0.06em]">
                   You&apos;re in
                 </h1>
-                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-medium leading-8 text-[#a8b5c7]">
+
+                <p className="mx-auto mt-5 max-w-[460px] font-inter text-lg font-semibold leading-8 text-[#64748b]">
                   Continue to your dashboard.
                 </p>
+
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="mt-10 w-full max-w-[460px] rounded-full border border-[#28415f]/70 bg-[#0d1828]/86 px-5 py-4 font-inter text-base font-bold text-[#f4f8ff] shadow-[0_24px_76px_rgba(0,0,0,0.34)] transition duration-300 hover:-translate-y-0.5 hover:border-[#f4f8ff]/70 hover:bg-[#f4f8ff] hover:text-[#06111f] hover:shadow-[0_0_48px_rgba(244,248,255,0.24),0_24px_76px_rgba(0,0,0,0.42)]"
+                  className="mt-10 h-14 w-full max-w-[460px] rounded-2xl bg-[#0084ff] px-5 font-inter text-base font-black text-white shadow-[0_18px_48px_rgba(0,132,255,0.28)] transition hover:-translate-y-0.5 hover:bg-[#006cff]"
                 >
                   Continue
                 </button>
