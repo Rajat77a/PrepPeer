@@ -395,14 +395,14 @@ export default function LoginPage() {
                   </button>
                 </p>
 
-                <div className="mx-auto mt-9 max-w-[460px]">
+                <div className="mx-auto mt-4 max-w-[460px]">
                   <button
                     onClick={signInWithGoogle}
-                    className="group relative flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/22 bg-white/14 px-5 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/18"
+                    className="group relative flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/22 bg-white/14 px-5 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-[#06142b] hover:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)]"
                   >
                     <GoogleIcon />
                     Sign in with Google
-                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/28 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
+                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/60 blur-sm transition-transform duration-700 group-hover:translate-x-[720%] group-hover:bg-[#eaf5ff]" />
                   </button>
 
                   <div className="my-5 flex items-center gap-4">
@@ -432,7 +432,8 @@ export default function LoginPage() {
                           placeholder="you@example.com"
                           autoComplete="email"
                           required
-                          className="h-12 rounded-2xl border-white/25 bg-white/14 px-5 pr-14 text-left font-inter text-base font-bold text-white shadow-[0_18px_48px_rgba(0,38,96,0.16)] placeholder:text-white/45 focus:border-white/70 focus:shadow-[0_0_0_4px_rgba(255,255,255,0.12)]"
+                          glowColor="#4bb8ff"
+                          className="h-12 rounded-full border-[#6cbcff]/45 bg-[#061b3e]/72 px-5 pr-14 text-left font-inter text-base font-bold text-white shadow-[inset_0_1px_2px_rgba(255,255,255,0.12),0_18px_48px_rgba(0,38,96,0.18)] placeholder:text-[#bad2ef]/72 focus:border-[#9fdaff] focus:bg-[#071f48]/84 focus:shadow-[0_0_0_3px_rgba(75,184,255,0.18),0_0_46px_rgba(75,184,255,0.24)]"
                         />
                         <button
                           type="submit"
