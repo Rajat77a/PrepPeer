@@ -66,11 +66,67 @@ function GoogleIcon() {
 }
 
 function LoginNavOrb() {
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [canPlayOrbVideo, setCanPlayOrbVideo] = useState(false);
+
+  useEffect(() => {
+    const isIOSLike =
+      /iPad|iPhone|iPod/.test(window.navigator.userAgent) ||
+      (window.navigator.platform === "MacIntel" &&
+        window.navigator.maxTouchPoints > 1);
+
+    setCanPlayOrbVideo(!isIOSLike);
+  }, []);
+
   return (
-    <span
-      className="orb-logo orb-logo-fallback block h-[42px] w-[42px] rounded-[47%_53%_45%_55%/44%_42%_58%_56%]"
-      aria-hidden="true"
-    />
+    <span className="login-nav-orb relative block h-[46px] w-[46px]" aria-hidden="true">
+      <span className="login-nav-orb-fallback absolute inset-0" />
+      {canPlayOrbVideo && !videoFailed && (
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-[-12%] z-[2] h-[124%] w-[124%] object-cover"
+          onError={() => setVideoFailed(true)}
+        >
+          <source
+            src="https://future.co/images/homepage/glassy-orb/orb-purple.webm"
+            type="video/webm"
+          />
+        </video>
+      )}
+      <style jsx>{`
+        .login-nav-orb {
+          overflow: hidden;
+          isolation: isolate;
+          border-radius: 42% 58% 47% 53% / 46% 41% 59% 54%;
+          clip-path: ellipse(48% 48% at 50% 50%);
+          background: transparent;
+          filter: drop-shadow(0 12px 22px rgba(0, 108, 255, 0.34));
+          transform: rotate(-8deg);
+        }
+
+        .login-nav-orb-fallback {
+          z-index: 1;
+          border-radius: 42% 58% 47% 53% / 46% 41% 59% 54%;
+          background:
+            radial-gradient(ellipse at 31% 24%, rgba(255, 255, 255, 0.95) 0 12%, rgba(255, 255, 255, 0.26) 24%, transparent 35%),
+            radial-gradient(ellipse at 52% 45%, #72efff 0%, #17b8ff 28%, #0074ff 52%, transparent 70%),
+            radial-gradient(ellipse at 84% 64%, rgba(1, 8, 55, 0.94) 0 12%, transparent 25%),
+            radial-gradient(ellipse at 22% 82%, rgba(2, 8, 68, 0.88) 0 13%, transparent 27%),
+            conic-gradient(from 226deg, #03083e, #0077ff, #5fdfff, #0575f0, #07115d, #03083e);
+          box-shadow:
+            inset 9px 10px 16px rgba(255, 255, 255, 0.3),
+            inset -14px -16px 22px rgba(0, 13, 85, 0.62);
+        }
+
+        .login-nav-orb video {
+          mix-blend-mode: screen;
+          filter: hue-rotate(-55deg) saturate(250%) brightness(1.18) contrast(1.08);
+        }
+      `}</style>
+    </span>
   );
 }
 
