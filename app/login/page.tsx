@@ -15,7 +15,6 @@ import {
   InputOTPSeparator,
 } from "@/components/ui/input-otp";
 import { AssistedPasswordConfirmation } from "@/components/ui/assisted-password-confirmation";
-import { cn } from "@/lib/utils";
 
 type AuthMode = "signin" | "signup";
 type AuthStep = "email" | "otp" | "password" | "success";
@@ -29,15 +28,13 @@ const panelMotion = {
 
 const copy = {
   signin: {
-    title: "Know where you stand",
-    subtitle: "Run the interview. Read the rank. Improve the next answer.",
+    title: "Welcome back",
     emailButton: "Send sign-in code",
     helper: "New to PrepPeer?",
     helperAction: "Create account",
   },
   signup: {
-    title: "Start with your rank",
-    subtitle: "Create a profile for scores, progress, and every new jump.",
+    title: "Create a PrepPeer account",
     emailButton: "Send sign-up code",
     helper: "Already have an account?",
     helperAction: "Log in",
@@ -111,43 +108,6 @@ function LoginBackground() {
       />
 
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-20" />
-    </div>
-  );
-}
-
-function AuthModeSwitch({
-  mode,
-  onModeChange,
-}: {
-  mode: AuthMode;
-  onModeChange: (mode: AuthMode) => void;
-}) {
-  return (
-    <div className="mx-auto flex w-fit items-center gap-1 rounded-full border border-white/20 bg-white/10 p-1 shadow-[0_18px_56px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.18)] backdrop-blur-xl">
-      <button
-        type="button"
-        onClick={() => onModeChange("signin")}
-        className={cn(
-          "rounded-full px-5 py-2.5 font-inter text-sm font-black transition",
-          mode === "signin"
-            ? "bg-white text-[#006cff] shadow-[0_10px_28px_rgba(0,0,0,0.14)]"
-            : "text-white/72 hover:text-white"
-        )}
-      >
-        Sign in
-      </button>
-      <button
-        type="button"
-        onClick={() => onModeChange("signup")}
-        className={cn(
-          "rounded-full px-5 py-2.5 font-inter text-sm font-black transition",
-          mode === "signup"
-            ? "bg-white text-[#006cff] shadow-[0_10px_28px_rgba(0,0,0,0.14)]"
-            : "text-white/72 hover:text-white"
-        )}
-      >
-        Sign up
-      </button>
     </div>
   );
 }
@@ -404,16 +364,8 @@ export default function LoginPage() {
     <main className="relative min-h-screen overflow-hidden bg-[#031b4f] text-white">
       <LoginBackground />
 
-      <Link
-        href="/"
-        className="fixed left-6 top-6 z-30 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 font-inter text-sm font-bold text-white/80 shadow-[0_16px_50px_rgba(0,0,0,0.12)] backdrop-blur-xl transition hover:bg-white/16 hover:text-white"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Home
-      </Link>
-
       <section className="relative z-10 flex min-h-svh items-center justify-center px-5 py-6 sm:py-8">
-        <div className="w-full max-w-[560px]">
+        <div className="w-full max-w-[500px]">
           <AnimatePresence mode="wait">
             {step === "email" && (
               <motion.div
@@ -421,34 +373,29 @@ export default function LoginPage() {
                 {...panelMotion}
                 className="text-center"
               >
-                <div className="mb-3 flex justify-center">
-                  <div className="rounded-[22px] border border-white/22 bg-white/12 p-2 shadow-[0_18px_52px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl">
-                    <OrbLogo size={44} />
-                  </div>
+                <div className="mb-8 flex items-center justify-center gap-3">
+                  <OrbLogo size={36} />
+                  <span className="font-inter text-lg font-black tracking-[-0.03em] text-white">
+                    PrepPeer
+                  </span>
                 </div>
 
-                <AuthModeSwitch mode={mode} onModeChange={resetForMode} />
-
-                <h1 className="mt-5 font-inter text-[clamp(40px,6.8vw,64px)] font-black leading-[0.9] tracking-[-0.07em] text-white drop-shadow-[0_18px_36px_rgba(0,38,96,0.22)]">
+                <h1 className="font-inter text-[clamp(38px,6vw,56px)] font-black leading-[0.95] tracking-[-0.06em] text-white drop-shadow-[0_18px_36px_rgba(0,38,96,0.22)]">
                   {activeCopy.title}
                 </h1>
 
-                <p className="mx-auto mt-3 max-w-[500px] font-inter text-base font-semibold leading-6 tracking-[-0.025em] text-white/76 sm:text-lg">
-                  {activeCopy.subtitle}
-                </p>
-
-                <p className="mt-3 font-inter text-sm font-bold text-white/72">
+                <p className="mt-4 font-inter text-sm font-semibold text-white/70">
                   {activeCopy.helper}{" "}
                   <button
                     type="button"
                     onClick={() => resetForMode(isSignUp ? "signin" : "signup")}
-                    className="text-white transition hover:text-[#d7ecff]"
+                    className="font-black text-white underline decoration-white/35 underline-offset-4 transition hover:text-[#d7ecff] hover:decoration-white"
                   >
                     {activeCopy.helperAction}
                   </button>
                 </p>
 
-                <div className="mx-auto mt-6 max-w-[520px]">
+                <div className="mx-auto mt-9 max-w-[460px]">
                   <button
                     onClick={signInWithGoogle}
                     className="group relative flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/22 bg-white/14 px-5 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/18"
@@ -458,7 +405,7 @@ export default function LoginPage() {
                     <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/28 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
                   </button>
 
-                  <div className="my-4 flex items-center gap-4">
+                  <div className="my-5 flex items-center gap-4">
                     <span className="h-px flex-1 bg-white/24" />
                     <span className="font-inter text-sm font-black text-white/70">
                       or
@@ -473,10 +420,7 @@ export default function LoginPage() {
                     }}
                     className="space-y-4 text-left"
                   >
-                    <label className="block">
-                      <span className="mb-2 block font-inter text-xs font-black uppercase tracking-[0.16em] text-white/70">
-                        Email
-                      </span>
+                    <label className="block" aria-label="Email">
                       <div className="relative">
                         <Input
                           type="email"
@@ -510,8 +454,21 @@ export default function LoginPage() {
                 )}
 
                 <p className="mx-auto mt-6 max-w-[460px] text-center font-inter text-xs font-semibold leading-5 text-white/62">
-                  By continuing, you agree to PrepPeer&apos;s terms and privacy
-                  policy.
+                  By signing up, you agree to our{" "}
+                  <Link
+                    href="#"
+                    className="underline decoration-white/35 underline-offset-4 transition hover:text-white hover:decoration-white"
+                  >
+                    Terms
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="#"
+                    className="underline decoration-white/35 underline-offset-4 transition hover:text-white hover:decoration-white"
+                  >
+                    Privacy Policy
+                  </Link>
+                  .
                 </p>
               </motion.div>
             )}
