@@ -432,8 +432,9 @@ export default function LoginPage() {
                           placeholder="you@example.com"
                           autoComplete="email"
                           required
-                          glowColor="#4bb8ff"
-                          className="h-12 rounded-full border-[#6cbcff]/45 bg-[#061b3e]/72 px-5 pr-14 text-left font-inter text-base font-bold text-white shadow-[inset_0_1px_2px_rgba(255,255,255,0.12),0_18px_48px_rgba(0,38,96,0.18)] placeholder:text-[#bad2ef]/72 focus:border-[#9fdaff] focus:bg-[#071f48]/84 focus:shadow-[0_0_0_3px_rgba(75,184,255,0.18),0_0_46px_rgba(75,184,255,0.24)]"
+                          variant="dark"
+                          glowColor="#7be7ff"
+                          className="h-12 px-5 pr-14 text-left text-base font-bold"
                         />
                         <button
                           type="submit"
