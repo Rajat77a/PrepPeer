@@ -64,8 +64,8 @@ export function AssistedPasswordConfirmation({
         if (passwordsMatch) void onSubmit(password);
       }}
     >
-      <div className="rounded-[22px] border border-white/80 bg-white/74 p-4 shadow-[0_22px_70px_rgba(0,132,255,0.12),inset_0_1px_2px_rgba(255,255,255,0.95)] backdrop-blur-xl">
-        <label className="mb-2 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#0084ff]">
+      <div className="rounded-[22px] border border-[#28415f]/70 bg-[#0d1828]/82 p-4 shadow-[0_24px_76px_rgba(0,0,0,0.32),0_0_48px_rgba(0,108,255,0.1),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-xl">
+        <label className="mb-2 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#60b1ff]">
           Password
         </label>
         <Input
@@ -77,17 +77,19 @@ export function AssistedPasswordConfirmation({
           }}
           placeholder="Create a strong password"
           autoComplete="new-password"
+          glowColor="#60b1ff"
+          className="border-[#28415f]/80 bg-[#0d1828]/88 text-[#f4f8ff] shadow-[0_18px_50px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-[#71839a] focus:border-[#9fcfff]/70 focus:bg-[#111f33]"
         />
 
-        <div className="mt-4 rounded-2xl border border-[#d9ecff] bg-[#f6fbff]/80 p-3">
-          <p className="mb-2 font-inter text-xs font-semibold text-[#64748b]">
+        <div className="mt-4 rounded-2xl border border-[#28415f]/70 bg-[#06111f]/72 p-3">
+          <p className="mb-2 font-inter text-xs font-semibold text-[#8ca0ba]">
             Confirmation trail
           </p>
           <motion.div
-            className="relative flex min-h-12 items-center overflow-hidden rounded-xl border border-[#d9ecff] bg-white px-3 shadow-[inset_0_1px_2px_rgba(255,255,255,0.95)]"
+            className="relative flex min-h-12 items-center overflow-hidden rounded-xl border border-[#28415f]/70 bg-[#0b1422] px-3 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]"
             animate={{
               x: shake ? [-9, 9, -7, 7, 0] : 0,
-              borderColor: passwordsMatch ? "rgba(22,163,74,0.85)" : "rgba(217,236,255,1)",
+              borderColor: passwordsMatch ? "rgba(96,177,255,0.85)" : "rgba(40,65,95,0.7)",
               scale: passwordsMatch ? [1, 1.015, 1] : 1,
             }}
             transition={{ duration: 0.38 }}
@@ -97,11 +99,11 @@ export function AssistedPasswordConfirmation({
                 password.split("").map((_, index) => (
                   <span
                     key={index}
-                    className="mx-[5px] h-1.5 w-1.5 rounded-full bg-[#0f172a]"
+                    className="mx-[5px] h-1.5 w-1.5 rounded-full bg-[#f4f8ff]"
                   />
                 ))
               ) : (
-                <span className="font-inter text-sm text-[#7b8da3]">
+                <span className="font-inter text-sm text-[#71839a]">
                   Match feedback appears here
                 </span>
               )}
@@ -125,7 +127,7 @@ export function AssistedPasswordConfirmation({
           </motion.div>
         </div>
 
-        <label className="mb-2 mt-4 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#0084ff]">
+        <label className="mb-2 mt-4 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#60b1ff]">
           Confirm password
         </label>
         <Input
@@ -134,36 +136,37 @@ export function AssistedPasswordConfirmation({
           onChange={handleConfirmPasswordChange}
           placeholder="Type it again"
           autoComplete="new-password"
-          glowColor={passwordsMatch ? "#16a34a" : "#38bdf8"}
+          glowColor={passwordsMatch ? "#16a34a" : "#60b1ff"}
+          className="border-[#28415f]/80 bg-[#0d1828]/88 text-[#f4f8ff] shadow-[0_18px_50px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-[#71839a] focus:border-[#9fcfff]/70 focus:bg-[#111f33]"
         />
       </div>
 
-      <div className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/70 p-3 shadow-[0_18px_48px_rgba(0,132,255,0.1)] backdrop-blur-xl">
+      <div className="flex items-center gap-3 rounded-2xl border border-[#28415f]/70 bg-[#0d1828]/78 p-3 shadow-[0_18px_48px_rgba(0,0,0,0.22)] backdrop-blur-xl">
         <motion.div
           className={cn(
             "flex h-10 w-10 items-center justify-center rounded-full border",
             passwordsMatch
-              ? "border-[#16a34a]/30 bg-[#dcfce7] text-[#16a34a]"
-              : "border-[#d9ecff] bg-[#f6fbff] text-[#94a3b8]"
+              ? "border-[#60b1ff]/35 bg-[#132238] text-[#9fcfff]"
+              : "border-[#28415f] bg-[#06111f] text-[#71839a]"
           )}
           animate={{ scale: passwordsMatch ? 1 : 0.92, rotate: passwordsMatch ? 0 : -8 }}
           transition={{ type: "spring", stiffness: 360, damping: 18 }}
         >
           <Check size={18} strokeWidth={2.8} />
         </motion.div>
-        <p className="font-inter text-sm text-[#64748b]">
+        <p className="font-inter text-sm text-[#a8b5c7]">
           {passwordsMatch
-            ? "Matched. Your account is ready to lock in."
-            : "Use 8+ characters. Green marks mean the confirm password is tracking correctly."}
+            ? "Matched. Your account is ready."
+            : "Use 8+ characters. The trail checks the confirm password as you type."}
         </p>
       </div>
 
-      {error && <p className="font-inter text-sm text-[#dc2626]">{error}</p>}
+      {error && <p className="font-inter text-sm text-[#ff8a8a]">{error}</p>}
 
       <button
         type="submit"
         disabled={!passwordsMatch || loading}
-        className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#0ea5e9] via-[#006cff] to-[#1d4ed8] px-5 py-3.5 font-inter text-sm font-bold text-white shadow-[0_18px_50px_rgba(0,108,255,0.34)] transition hover:shadow-[0_22px_70px_rgba(56,189,248,0.34)] disabled:cursor-not-allowed disabled:opacity-45"
+        className="group relative w-full overflow-hidden rounded-full border border-[#28415f]/70 bg-[#0d1828]/86 px-5 py-3.5 font-inter text-sm font-bold text-[#f4f8ff] shadow-[0_24px_76px_rgba(0,0,0,0.28)] transition duration-300 hover:border-[#f4f8ff]/70 hover:bg-[#f4f8ff] hover:text-[#06111f] hover:shadow-[0_0_48px_rgba(244,248,255,0.22),0_24px_76px_rgba(0,0,0,0.42)] disabled:cursor-not-allowed disabled:opacity-45"
       >
         <span className="relative z-10">{loading ? "Saving..." : "Create account"}</span>
         <span className="absolute inset-y-0 left-[-25%] w-[22%] skew-x-[-18deg] bg-white/28 blur-sm transition-transform duration-700 group-hover:translate-x-[620%]" />

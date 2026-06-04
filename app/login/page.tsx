@@ -29,13 +29,13 @@ const panelMotion = {
 
 const copy = {
   signin: {
-    title: "Know where you stand",
-    subtitle: "Run the interview. Read the rank. Improve the next answer.",
+    title: "Welcome back",
+    subtitle: "Pick up your rank, sessions, and next practice round.",
     emailButton: "Send sign-in code",
   },
   signup: {
-    title: "Start with your rank",
-    subtitle: "Create a profile for scores, progress, and every new jump.",
+    title: "Create your PrepPeer account",
+    subtitle: "Save every interview, track your rank, and build a cleaner prep record.",
     emailButton: "Send sign-up code",
   },
 };
@@ -104,50 +104,85 @@ function LoginOrb({ className }: { className?: string }) {
 function MatrixBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[#f7fbff]" />
+      <div className="absolute inset-0 bg-[#06111f]" />
       <div className="login-ambient absolute inset-0" aria-hidden="true" />
+      <div className="login-surface login-surface-one" aria-hidden="true" />
+      <div className="login-surface login-surface-two" aria-hidden="true" />
       <LoginOrb className="login-orb-one" />
       <LoginOrb className="login-orb-two" />
       <LoginOrb className="login-orb-three" />
       <div className="login-waves absolute inset-0" aria-hidden="true" />
       <div className="login-vignette absolute inset-0" aria-hidden="true" />
-      <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-white to-transparent" />
-      <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-t from-white to-transparent" />
+      <div className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#02050a] to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-[#02050a] to-transparent" />
       <style jsx>{`
         .login-ambient {
           background:
-            radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.94) 0 18%, rgba(255, 255, 255, 0.5) 36%, transparent 62%),
-            radial-gradient(circle at 18% 20%, rgba(0, 132, 255, 0.22), transparent 34%),
-            radial-gradient(circle at 82% 72%, rgba(45, 212, 191, 0.16), transparent 36%),
-            linear-gradient(180deg, #ffffff 0%, #eef7ff 48%, #ffffff 100%);
+            radial-gradient(circle at 50% 32%, rgba(0, 108, 255, 0.24), transparent 34%),
+            radial-gradient(circle at 18% 18%, rgba(96, 177, 255, 0.12), transparent 30%),
+            radial-gradient(circle at 82% 72%, rgba(37, 99, 235, 0.18), transparent 32%),
+            linear-gradient(180deg, #081522 0%, #05101e 45%, #02050a 100%);
+        }
+
+        .login-surface {
+          position: absolute;
+          pointer-events: none;
+          border-radius: 999px;
+          filter: blur(0.2px);
+          opacity: 0.42;
+        }
+
+        .login-surface-one {
+          height: 470px;
+          right: -130px;
+          top: -120px;
+          transform: rotate(-28deg);
+          width: 620px;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02) 42%, rgba(0, 108, 255, 0.1)),
+            radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.2), transparent 34%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 38px 110px rgba(0, 0, 0, 0.32);
+        }
+
+        .login-surface-two {
+          bottom: -170px;
+          height: 390px;
+          left: -150px;
+          transform: rotate(27deg);
+          width: 560px;
+          background:
+            linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(0, 108, 255, 0.08) 48%, rgba(255, 255, 255, 0.02)),
+            radial-gradient(circle at 58% 36%, rgba(255, 255, 255, 0.14), transparent 35%);
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 34px 90px rgba(0, 0, 0, 0.28);
         }
 
         .login-orb {
-          filter: drop-shadow(0 24px 60px rgba(0, 132, 255, 0.2));
+          filter: drop-shadow(0 24px 60px rgba(0, 108, 255, 0.22));
           pointer-events: none;
           animation: loginOrbFloat 8s ease-in-out infinite;
         }
 
         .login-orb-one {
-          height: 220px;
-          right: 8%;
-          top: 16%;
-          width: 220px;
+          height: 190px;
+          opacity: 0.34;
+          right: 10%;
+          top: 18%;
+          width: 190px;
         }
 
         .login-orb-two {
           animation-delay: -3s;
-          height: 126px;
-          left: 10%;
-          opacity: 0.5;
-          top: 64%;
-          width: 126px;
+          height: 106px;
+          left: 12%;
+          opacity: 0.2;
+          top: 66%;
+          width: 106px;
         }
 
         .login-orb-three {
           animation-delay: -5.2s;
           height: 82px;
-          opacity: 0.34;
+          opacity: 0.14;
           right: 21%;
           top: 73%;
           width: 82px;
@@ -155,17 +190,17 @@ function MatrixBackground() {
 
         .login-waves {
           background:
-            radial-gradient(ellipse at 22% 78%, rgba(0, 132, 255, 0.12) 0%, transparent 34%),
-            radial-gradient(ellipse at 78% 24%, rgba(125, 255, 217, 0.1) 0%, transparent 31%),
-            linear-gradient(135deg, transparent 0 42%, rgba(0, 132, 255, 0.045) 47%, transparent 54%),
-            linear-gradient(35deg, transparent 0 38%, rgba(96, 177, 255, 0.05) 48%, transparent 59%);
-          opacity: 0.9;
+            radial-gradient(ellipse at 20% 80%, rgba(0, 108, 255, 0.12) 0%, transparent 34%),
+            radial-gradient(ellipse at 76% 26%, rgba(96, 177, 255, 0.08) 0%, transparent 31%),
+            linear-gradient(135deg, transparent 0 43%, rgba(0, 108, 255, 0.035) 49%, transparent 55%),
+            linear-gradient(35deg, transparent 0 38%, rgba(244, 248, 255, 0.035) 48%, transparent 58%);
+          opacity: 0.8;
         }
 
         .login-vignette {
           background:
-            radial-gradient(ellipse at center, rgba(255, 255, 255, 0.74) 0%, rgba(255, 255, 255, 0.46) 34%, transparent 67%),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.7), transparent 24%, transparent 76%, rgba(255, 255, 255, 0.7));
+            radial-gradient(ellipse at center, transparent 0%, rgba(2, 5, 10, 0.08) 44%, rgba(2, 5, 10, 0.58) 100%),
+            linear-gradient(90deg, rgba(2, 5, 10, 0.46), transparent 25%, transparent 75%, rgba(2, 5, 10, 0.54));
         }
 
         @keyframes loginOrbFloat {
@@ -175,6 +210,19 @@ function MatrixBackground() {
           }
           50% {
             transform: translate3d(0, -18px, 0) rotate(5deg) scale(1.035);
+          }
+        }
+
+        @media (max-width: 760px) {
+          .login-orb-one {
+            height: 128px;
+            right: -18px;
+            top: 18%;
+            width: 128px;
+          }
+
+          .login-surface-one {
+            right: -230px;
           }
         }
       `}</style>
@@ -190,7 +238,7 @@ function TopNav({
   onModeChange: (mode: AuthMode) => void;
 }) {
   return (
-    <header className="fixed left-1/2 top-7 z-30 w-[calc(100%-2rem)] max-w-[330px] -translate-x-1/2 rounded-full border border-white/70 bg-white/70 px-3 py-2.5 shadow-[0_22px_70px_rgba(0,132,255,0.14),inset_0_1px_2px_rgba(255,255,255,0.9)] backdrop-blur-xl">
+    <header className="fixed left-1/2 top-7 z-30 w-[calc(100%-2rem)] max-w-[330px] -translate-x-1/2 rounded-full border border-[#28415f]/70 bg-[#081522]/82 px-3 py-2.5 shadow-[0_24px_78px_rgba(0,0,0,0.38),0_0_44px_rgba(0,108,255,0.14),inset_0_1px_1px_rgba(255,255,255,0.1)] backdrop-blur-2xl">
       <div className="flex items-center justify-center gap-3">
         <Link
           href="/"
@@ -200,14 +248,14 @@ function TopNav({
           <OrbLogo size={38} />
         </Link>
 
-        <div className="flex shrink-0 items-center gap-2 rounded-full bg-[#eef7ff]/80 p-1 shadow-[inset_0_1px_2px_rgba(255,255,255,0.9)]">
+        <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#0c1726]/88 p-1 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
           <button
             onClick={() => onModeChange("signin")}
             className={cn(
-              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition",
+              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition duration-300",
               mode === "signin"
-                ? "bg-[#006cff] text-white shadow-[0_10px_30px_rgba(0,108,255,0.34)]"
-                : "text-[#64748b] hover:text-[#0f172a]"
+                ? "bg-[#f4f8ff] text-[#06111f] shadow-[0_0_30px_rgba(244,248,255,0.16)]"
+                : "text-[#8ca0ba] hover:text-[#f4f8ff]"
             )}
           >
             Sign in
@@ -215,10 +263,10 @@ function TopNav({
           <button
             onClick={() => onModeChange("signup")}
             className={cn(
-              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition",
+              "rounded-full px-4 py-2 font-inter text-sm font-semibold transition duration-300",
               mode === "signup"
-                ? "bg-white text-[#0f172a] shadow-[0_14px_32px_rgba(15,23,42,0.12)]"
-                : "text-[#64748b] hover:text-[#0f172a]"
+                ? "bg-[#f4f8ff] text-[#06111f] shadow-[0_0_30px_rgba(244,248,255,0.16)]"
+                : "text-[#8ca0ba] hover:text-[#f4f8ff]"
             )}
           >
             Sign up
@@ -242,7 +290,7 @@ export default function LoginPage() {
   const isSignUp = mode === "signup";
   const activeCopy = copy[mode];
   const otpSlotClass =
-    "!h-14 !w-12 rounded-xl !border-[#26334b] !bg-[#0b1020] text-xl !text-white shadow-[0_16px_34px_rgba(3,10,28,0.28),inset_0_1px_1px_rgba(255,255,255,0.08)] transition-all duration-300 data-[filled=true]:!border-[#35506f] data-[filled=true]:!bg-[#111827] data-[active=true]:!border-[#ff6b6b] data-[active=true]:!shadow-[0_0_0_2px_rgba(255,107,107,0.32),0_0_24px_rgba(255,107,107,0.26),0_16px_34px_rgba(3,10,28,0.28)]";
+    "!h-14 !w-12 rounded-xl !border-[#28415f] !bg-[#0b1422] text-xl !text-[#f4f8ff] shadow-[0_16px_34px_rgba(2,5,10,0.35),inset_0_1px_1px_rgba(255,255,255,0.08)] transition-all duration-300 data-[filled=true]:!border-[#4b6f9f] data-[filled=true]:!bg-[#132238] data-[active=true]:!border-[#9fcfff] data-[active=true]:!shadow-[0_0_0_2px_rgba(159,207,255,0.24),0_0_28px_rgba(0,108,255,0.28),0_16px_34px_rgba(2,5,10,0.35)]";
 
   const getAuthRedirectUrl = (nextPath: string) => {
     const next =
@@ -441,7 +489,7 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-white text-[#07111f]">
+    <main className="relative min-h-screen overflow-hidden bg-[#06111f] text-[#f4f8ff]">
       <MatrixBackground />
 
       <TopNav mode={mode} onModeChange={resetForMode} />
@@ -451,27 +499,30 @@ export default function LoginPage() {
           <AnimatePresence mode="wait">
             {step === "email" && (
               <motion.div key={`email-${mode}`} {...panelMotion}>
-                <h1 className="font-inter text-[clamp(48px,7vw,82px)] font-black leading-[0.92] tracking-[-0.06em] text-[#07111f] drop-shadow-[0_18px_36px_rgba(0,132,255,0.16)]">
+                <p className="mb-5 font-inter text-xs font-bold uppercase tracking-[0.34em] text-[#60b1ff]">
+                  PrepPeer access
+                </p>
+                <h1 className="font-inter text-[clamp(46px,7vw,78px)] font-black leading-[0.94] tracking-[-0.055em] text-[#f4f8ff] drop-shadow-[0_18px_44px_rgba(0,108,255,0.2)]">
                   {activeCopy.title}
                 </h1>
-                <p className="mx-auto mt-5 max-w-[620px] font-inter text-[clamp(20px,3vw,31px)] font-medium leading-tight tracking-[-0.035em] text-[#5f6f84]">
+                <p className="mx-auto mt-5 max-w-[600px] font-inter text-[clamp(19px,2.6vw,27px)] font-medium leading-tight tracking-[-0.035em] text-[#a8b5c7]">
                   {activeCopy.subtitle}
                 </p>
 
                 <div className="mx-auto mt-10 max-w-[460px] space-y-5">
                   <button
                     onClick={signInWithGoogle}
-                    className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-white/80 bg-white/75 px-5 py-4 font-inter text-base font-bold text-[#07111f] shadow-[0_22px_70px_rgba(0,132,255,0.16),inset_0_1px_2px_rgba(255,255,255,0.95)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#0084ff]/30 hover:bg-white"
+                    className="group relative flex w-full items-center justify-center gap-3 overflow-hidden rounded-full border border-[#28415f]/70 bg-[#0d1828]/86 px-5 py-4 font-inter text-base font-bold text-[#f4f8ff] shadow-[0_24px_76px_rgba(0,0,0,0.34),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-[#f4f8ff]/70 hover:bg-[#f4f8ff] hover:text-[#06111f] hover:shadow-[0_0_48px_rgba(244,248,255,0.24),0_24px_76px_rgba(0,0,0,0.42)]"
                   >
                     <GoogleIcon />
                     Sign in with Google
-                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-[#38bdf8]/28 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
+                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/28 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
                   </button>
 
                   <div className="flex items-center gap-4">
-                    <span className="h-px flex-1 bg-[#cfe7ff]" />
-                    <span className="font-inter text-sm font-semibold text-[#7b8da3]">or</span>
-                    <span className="h-px flex-1 bg-[#cfe7ff]" />
+                    <span className="h-px flex-1 bg-[#28415f]/70" />
+                    <span className="font-inter text-sm font-semibold text-[#71839a]">or</span>
+                    <span className="h-px flex-1 bg-[#28415f]/70" />
                   </div>
 
                   <form
@@ -488,13 +539,14 @@ export default function LoginPage() {
                         placeholder="you@example.com"
                         autoComplete="email"
                         required
-                        className="h-14 rounded-full px-16 text-center text-base placeholder:text-center"
+                        glowColor="#60b1ff"
+                        className="h-14 rounded-full border-[#28415f]/80 bg-[#0d1828]/88 px-16 text-center text-base font-semibold text-[#f4f8ff] shadow-[0_24px_76px_rgba(0,0,0,0.22),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-center placeholder:text-[#71839a] focus:border-[#9fcfff]/70 focus:bg-[#111f33] focus:text-[#f4f8ff]"
                       />
                       <button
                         type="submit"
                         disabled={loading}
                         aria-label={activeCopy.emailButton}
-                        className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-[#0084ff] text-white shadow-[0_12px_28px_rgba(0,132,255,0.3)] transition hover:scale-105 hover:bg-[#006cff] disabled:opacity-50"
+                        className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full border border-[#28415f]/70 bg-[#132238] text-[#f4f8ff] shadow-[0_12px_30px_rgba(0,0,0,0.26)] transition duration-300 hover:scale-105 hover:border-[#f4f8ff]/70 hover:bg-[#f4f8ff] hover:text-[#06111f] hover:shadow-[0_0_32px_rgba(244,248,255,0.22)] disabled:opacity-50"
                       >
                         <ArrowRight size={17} />
                       </button>
@@ -502,8 +554,8 @@ export default function LoginPage() {
                   </form>
                 </div>
 
-                {error && <p className="mt-5 font-inter text-sm text-[#dc2626]">{error}</p>}
-                <p className="mx-auto mt-16 max-w-[420px] font-inter text-xs leading-5 text-[#7b8da3]">
+                {error && <p className="mt-5 font-inter text-sm text-[#ff8a8a]">{error}</p>}
+                <p className="mx-auto mt-16 max-w-[420px] font-inter text-xs leading-5 text-[#71839a]">
                   By continuing, you agree to PrepPeer&apos;s terms and privacy policy.
                 </p>
               </motion.div>
@@ -516,20 +568,20 @@ export default function LoginPage() {
                     setOtp("");
                     setStep("email");
                   }}
-                  className="mx-auto mb-8 flex items-center gap-2 font-inter text-sm font-semibold text-[#64748b] transition hover:text-[#0084ff]"
+                  className="mx-auto mb-8 flex items-center gap-2 font-inter text-sm font-semibold text-[#8ca0ba] transition hover:text-[#f4f8ff]"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
-                <h1 className="font-fustat text-[clamp(46px,7vw,74px)] font-extrabold leading-none tracking-[-0.03em]">
+                <h1 className="font-inter text-[clamp(46px,7vw,74px)] font-black leading-none tracking-[-0.055em] text-[#f4f8ff]">
                   Enter your code
                 </h1>
-                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-medium leading-8 text-[#64748b]">
+                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-medium leading-8 text-[#a8b5c7]">
                   We sent it to {email}.
                 </p>
 
-                <div className="mx-auto mt-10 max-w-[480px] rounded-[34px] border border-white/70 bg-white/55 p-3 shadow-[0_26px_88px_rgba(0,108,255,0.14),inset_0_1px_2px_rgba(255,255,255,0.95)] backdrop-blur-2xl">
-                  <div className="rounded-[26px] border border-[#17233a]/70 bg-[#090b12]/95 px-4 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_18px_42px_rgba(5,10,25,0.32)]">
+                <div className="mx-auto mt-10 max-w-[480px] rounded-[34px] border border-[#28415f]/70 bg-[#0d1828]/72 p-3 shadow-[0_26px_88px_rgba(0,0,0,0.34),0_0_58px_rgba(0,108,255,0.12),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-2xl">
+                  <div className="rounded-[26px] border border-[#28415f]/70 bg-[#06111f]/95 px-4 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08),0_18px_42px_rgba(2,5,10,0.38)]">
                   <InputOTP
                     maxLength={6}
                     value={otp}
@@ -566,11 +618,11 @@ export default function LoginPage() {
                 <button
                   onClick={sendOtp}
                   disabled={loading}
-                  className="mt-6 font-inter text-sm font-semibold text-[#0084ff] transition hover:text-[#005bd3] disabled:opacity-50"
+                  className="mt-6 font-inter text-sm font-semibold text-[#60b1ff] transition hover:text-[#f4f8ff] disabled:opacity-50"
                 >
                   Resend code
                 </button>
-                {error && <p className="mt-5 font-inter text-sm text-[#dc2626]">{error}</p>}
+                {error && <p className="mt-5 font-inter text-sm text-[#ff8a8a]">{error}</p>}
               </motion.div>
             )}
 
@@ -578,20 +630,20 @@ export default function LoginPage() {
               <motion.div key="password" {...panelMotion} className="mx-auto max-w-[500px] text-left">
                 <button
                   onClick={() => setStep("otp")}
-                  className="mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-[#64748b] transition hover:text-[#0084ff]"
+                  className="mb-6 flex items-center gap-2 font-inter text-sm font-semibold text-[#8ca0ba] transition hover:text-[#f4f8ff]"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
                 <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#0084ff]/20 bg-[#e7f4ff] text-[#0084ff] shadow-[0_12px_28px_rgba(0,132,255,0.12)]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#28415f]/70 bg-[#0d1828] text-[#60b1ff] shadow-[0_12px_28px_rgba(0,0,0,0.26)]">
                     <ShieldCheck size={20} />
                   </div>
                   <div>
-                    <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#0084ff]">
+                    <p className="font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#60b1ff]">
                       Password
                     </p>
-                    <h1 className="font-fustat text-3xl font-extrabold">Create your password</h1>
+                    <h1 className="font-inter text-3xl font-black tracking-[-0.04em] text-[#f4f8ff]">Create your password</h1>
                   </div>
                 </div>
                 <AssistedPasswordConfirmation
@@ -605,22 +657,22 @@ export default function LoginPage() {
             {step === "success" && (
               <motion.div key="success" {...panelMotion}>
                 <motion.div
-                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#0084ff]/20 bg-white/75 text-[#0084ff] shadow-[0_22px_70px_rgba(0,132,255,0.2),inset_0_1px_2px_rgba(255,255,255,0.95)]"
+                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#28415f]/70 bg-[#0d1828]/86 text-[#60b1ff] shadow-[0_22px_70px_rgba(0,0,0,0.34),0_0_48px_rgba(0,108,255,0.16),inset_0_1px_1px_rgba(255,255,255,0.08)]"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 280, damping: 18 }}
                 >
                   <Check size={34} strokeWidth={2.8} />
                 </motion.div>
-                <h1 className="mt-7 font-fustat text-[clamp(46px,7vw,74px)] font-extrabold leading-none tracking-[-0.03em]">
+                <h1 className="mt-7 font-inter text-[clamp(46px,7vw,74px)] font-black leading-none tracking-[-0.055em] text-[#f4f8ff]">
                   You&apos;re in
                 </h1>
-                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-medium leading-8 text-[#64748b]">
+                <p className="mx-auto mt-4 max-w-[460px] font-inter text-xl font-medium leading-8 text-[#a8b5c7]">
                   Continue to your dashboard.
                 </p>
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="mt-10 w-full max-w-[460px] rounded-full bg-[#0084ff] px-5 py-4 font-inter text-base font-semibold text-white shadow-[0_18px_48px_rgba(0,132,255,0.28)] transition hover:-translate-y-0.5 hover:bg-[#006cff]"
+                  className="mt-10 w-full max-w-[460px] rounded-full border border-[#28415f]/70 bg-[#0d1828]/86 px-5 py-4 font-inter text-base font-bold text-[#f4f8ff] shadow-[0_24px_76px_rgba(0,0,0,0.34)] transition duration-300 hover:-translate-y-0.5 hover:border-[#f4f8ff]/70 hover:bg-[#f4f8ff] hover:text-[#06111f] hover:shadow-[0_0_48px_rgba(244,248,255,0.24),0_24px_76px_rgba(0,0,0,0.42)]"
                 >
                   Continue
                 </button>
