@@ -412,8 +412,8 @@ export default function LoginPage() {
         Home
       </Link>
 
-      <section className="relative z-10 flex min-h-screen items-center justify-center px-5 py-20">
-        <div className="w-full max-w-[620px]">
+      <section className="relative z-10 flex min-h-svh items-center justify-center px-5 py-6 sm:py-8">
+        <div className="w-full max-w-[560px]">
           <AnimatePresence mode="wait">
             {step === "email" && (
               <motion.div
@@ -421,23 +421,23 @@ export default function LoginPage() {
                 {...panelMotion}
                 className="text-center"
               >
-                <div className="mb-6 flex justify-center">
-                  <div className="rounded-3xl border border-white/22 bg-white/12 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl">
-                    <OrbLogo size={58} />
+                <div className="mb-3 flex justify-center">
+                  <div className="rounded-[22px] border border-white/22 bg-white/12 p-2 shadow-[0_18px_52px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl">
+                    <OrbLogo size={44} />
                   </div>
                 </div>
 
                 <AuthModeSwitch mode={mode} onModeChange={resetForMode} />
 
-                <h1 className="mt-8 font-inter text-[clamp(48px,8vw,84px)] font-black leading-[0.9] tracking-[-0.07em] text-white drop-shadow-[0_18px_36px_rgba(0,38,96,0.22)]">
+                <h1 className="mt-5 font-inter text-[clamp(40px,6.8vw,64px)] font-black leading-[0.9] tracking-[-0.07em] text-white drop-shadow-[0_18px_36px_rgba(0,38,96,0.22)]">
                   {activeCopy.title}
                 </h1>
 
-                <p className="mx-auto mt-5 max-w-[540px] font-inter text-xl font-semibold leading-8 tracking-[-0.035em] text-white/76">
+                <p className="mx-auto mt-3 max-w-[500px] font-inter text-base font-semibold leading-6 tracking-[-0.025em] text-white/76 sm:text-lg">
                   {activeCopy.subtitle}
                 </p>
 
-                <p className="mt-4 font-inter text-sm font-bold text-white/72">
+                <p className="mt-3 font-inter text-sm font-bold text-white/72">
                   {activeCopy.helper}{" "}
                   <button
                     type="button"
@@ -448,17 +448,17 @@ export default function LoginPage() {
                   </button>
                 </p>
 
-                <div className="mx-auto mt-9 max-w-[520px]">
+                <div className="mx-auto mt-6 max-w-[520px]">
                   <button
                     onClick={signInWithGoogle}
-                    className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/22 bg-white/14 px-5 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/18"
+                    className="group relative flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/22 bg-white/14 px-5 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/18"
                   >
                     <GoogleIcon />
                     Sign in with Google
                     <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/28 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
                   </button>
 
-                  <div className="my-7 flex items-center gap-4">
+                  <div className="my-4 flex items-center gap-4">
                     <span className="h-px flex-1 bg-white/24" />
                     <span className="font-inter text-sm font-black text-white/70">
                       or
@@ -488,7 +488,7 @@ export default function LoginPage() {
                           placeholder="you@example.com"
                           autoComplete="email"
                           required
-                          className="h-14 rounded-2xl border-white/25 bg-white/14 px-5 pr-14 text-left font-inter text-base font-bold text-white shadow-[0_18px_48px_rgba(0,38,96,0.16)] placeholder:text-white/45 focus:border-white/70 focus:shadow-[0_0_0_4px_rgba(255,255,255,0.12)]"
+                          className="h-12 rounded-2xl border-white/25 bg-white/14 px-5 pr-14 text-left font-inter text-base font-bold text-white shadow-[0_18px_48px_rgba(0,38,96,0.16)] placeholder:text-white/45 focus:border-white/70 focus:shadow-[0_0_0_4px_rgba(255,255,255,0.12)]"
                         />
                         <button
                           type="submit"
@@ -509,7 +509,7 @@ export default function LoginPage() {
                   </p>
                 )}
 
-                <p className="mx-auto mt-12 max-w-[460px] text-center font-inter text-xs font-semibold leading-5 text-white/62">
+                <p className="mx-auto mt-6 max-w-[460px] text-center font-inter text-xs font-semibold leading-5 text-white/62">
                   By continuing, you agree to PrepPeer&apos;s terms and privacy
                   policy.
                 </p>
