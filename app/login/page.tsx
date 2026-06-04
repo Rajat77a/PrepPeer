@@ -73,161 +73,44 @@ function GoogleIcon() {
 function LoginBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
-      <div className="absolute inset-0 bg-[#0b4fb8]" />
+      <div className="absolute inset-0 bg-[#031b4f]" />
 
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(96,177,255,0.52)_0%,rgba(11,79,184,0.92)_40%,#06409a_100%)]" />
-
-      <div className="scene-3d absolute inset-0">
-        <div className="sheet sheet-top" />
-        <div className="sheet sheet-top-soft" />
-        <div className="sheet sheet-bottom" />
-        <div className="sheet sheet-bottom-soft" />
-      </div>
-
-      <div className="absolute left-[18%] top-[28%] h-[280px] w-[420px] animate-pulse rounded-full bg-white/14 blur-[110px]" />
-      <div className="absolute right-[18%] bottom-[24%] h-[260px] w-[360px] rounded-full bg-[#7dffd9]/12 blur-[100px]" />
-
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,38,96,0.08)_52%,rgba(0,38,96,0.24)_100%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(0,132,255,0.34)_0%,rgba(3,27,79,0.96)_38%,#01143d_100%)]" />
 
       <div
-        className="absolute inset-0 opacity-[0.10] mix-blend-soft-light"
+        className="absolute -right-[260px] -top-[260px] h-[620px] w-[720px] rotate-[28deg] rounded-[46%] bg-[radial-gradient(ellipse_at_35%_35%,rgba(255,255,255,0.96)_0%,rgba(235,246,255,0.82)_28%,rgba(182,215,245,0.52)_52%,rgba(255,255,255,0.18)_72%,transparent_100%)] opacity-95 blur-[2px]"
+        aria-hidden="true"
+      />
+
+      <div
+        className="absolute -right-[220px] -top-[210px] h-[560px] w-[650px] rotate-[29deg] rounded-[46%] bg-[linear-gradient(135deg,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.42)_24%,rgba(147,188,230,0.28)_48%,rgba(255,255,255,0.10)_72%,transparent_100%)] opacity-80 blur-[18px]"
+        aria-hidden="true"
+      />
+
+      <div
+        className="absolute -left-[280px] bottom-[-350px] h-[720px] w-[850px] rotate-[38deg] rounded-[44%] bg-[radial-gradient(ellipse_at_60%_35%,rgba(255,255,255,0.98)_0%,rgba(230,244,255,0.82)_24%,rgba(172,211,244,0.46)_48%,rgba(255,255,255,0.16)_72%,transparent_100%)] opacity-95 blur-[3px]"
+        aria-hidden="true"
+      />
+
+      <div
+        className="absolute -left-[240px] bottom-[-300px] h-[650px] w-[760px] rotate-[39deg] rounded-[44%] bg-[linear-gradient(135deg,transparent_0%,rgba(255,255,255,0.22)_34%,rgba(255,255,255,0.88)_56%,rgba(207,231,255,0.42)_74%,transparent_100%)] opacity-90 blur-[16px]"
+        aria-hidden="true"
+      />
+
+      <div className="absolute left-[18%] top-[28%] h-[280px] w-[420px] rounded-full bg-[#0084ff]/18 blur-[110px]" />
+      <div className="absolute right-[18%] bottom-[24%] h-[260px] w-[360px] rounded-full bg-[#7dffd9]/10 blur-[100px]" />
+
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,10,35,0.10)_52%,rgba(0,8,28,0.38)_100%)]" />
+
+      <div
+        className="absolute inset-0 opacity-[0.13] mix-blend-soft-light"
         style={{
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E\")",
         }}
       />
 
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:72px_72px] opacity-22" />
-
-      <style jsx>{`
-        .scene-3d {
-          perspective: 1100px;
-          transform-style: preserve-3d;
-        }
-
-        .sheet {
-          position: absolute;
-          border-radius: 46%;
-          transform-style: preserve-3d;
-          will-change: transform;
-        }
-
-        .sheet-top {
-          right: -260px;
-          top: -260px;
-          height: 620px;
-          width: 720px;
-          background: radial-gradient(
-            ellipse at 35% 35%,
-            rgba(255, 255, 255, 0.98) 0%,
-            rgba(240, 248, 255, 0.88) 28%,
-            rgba(198, 226, 250, 0.58) 52%,
-            rgba(255, 255, 255, 0.22) 72%,
-            transparent 100%
-          );
-          filter: blur(2px);
-          animation: floatTop 9s ease-in-out infinite;
-        }
-
-        .sheet-top-soft {
-          right: -220px;
-          top: -210px;
-          height: 560px;
-          width: 650px;
-          background: linear-gradient(
-            135deg,
-            rgba(255, 255, 255, 0.86) 0%,
-            rgba(255, 255, 255, 0.46) 24%,
-            rgba(173, 211, 242, 0.34) 48%,
-            rgba(255, 255, 255, 0.14) 72%,
-            transparent 100%
-          );
-          filter: blur(18px);
-          animation: floatTopSoft 12s ease-in-out infinite;
-        }
-
-        .sheet-bottom {
-          left: -280px;
-          bottom: -350px;
-          height: 720px;
-          width: 850px;
-          background: radial-gradient(
-            ellipse at 60% 35%,
-            rgba(255, 255, 255, 0.99) 0%,
-            rgba(238, 247, 255, 0.86) 24%,
-            rgba(195, 225, 250, 0.54) 48%,
-            rgba(255, 255, 255, 0.2) 72%,
-            transparent 100%
-          );
-          filter: blur(3px);
-          animation: floatBottom 10s ease-in-out infinite;
-        }
-
-        .sheet-bottom-soft {
-          left: -240px;
-          bottom: -300px;
-          height: 650px;
-          width: 760px;
-          background: linear-gradient(
-            135deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.28) 34%,
-            rgba(255, 255, 255, 0.92) 56%,
-            rgba(220, 239, 255, 0.5) 74%,
-            transparent 100%
-          );
-          filter: blur(16px);
-          animation: floatBottomSoft 13s ease-in-out infinite;
-        }
-
-        @keyframes floatTop {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 80px) rotateX(18deg) rotateY(-18deg)
-              rotateZ(28deg) scale(1);
-          }
-          50% {
-            transform: translate3d(-28px, 26px, 135px) rotateX(24deg)
-              rotateY(-10deg) rotateZ(32deg) scale(1.04);
-          }
-        }
-
-        @keyframes floatTopSoft {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 40px) rotateX(14deg) rotateY(-16deg)
-              rotateZ(29deg) scale(1);
-          }
-          50% {
-            transform: translate3d(-18px, 18px, 95px) rotateX(20deg)
-              rotateY(-8deg) rotateZ(35deg) scale(1.06);
-          }
-        }
-
-        @keyframes floatBottom {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 90px) rotateX(-18deg) rotateY(18deg)
-              rotateZ(38deg) scale(1);
-          }
-          50% {
-            transform: translate3d(30px, -24px, 145px) rotateX(-24deg)
-              rotateY(10deg) rotateZ(34deg) scale(1.04);
-          }
-        }
-
-        @keyframes floatBottomSoft {
-          0%,
-          100% {
-            transform: translate3d(0, 0, 42px) rotateX(-14deg) rotateY(16deg)
-              rotateZ(39deg) scale(1);
-          }
-          50% {
-            transform: translate3d(20px, -18px, 100px) rotateX(-20deg)
-              rotateY(8deg) rotateZ(35deg) scale(1.06);
-          }
-        }
-      `}</style>
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-20" />
     </div>
   );
 }
@@ -240,15 +123,15 @@ function AuthModeSwitch({
   onModeChange: (mode: AuthMode) => void;
 }) {
   return (
-    <div className="mx-auto flex w-fit items-center gap-1 rounded-full border border-white/25 bg-white/14 p-1 shadow-[0_18px_56px_rgba(0,38,96,0.16),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl">
+    <div className="mx-auto flex w-fit items-center gap-1 rounded-full border border-white/20 bg-white/10 p-1 shadow-[0_18px_56px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.18)] backdrop-blur-xl">
       <button
         type="button"
         onClick={() => onModeChange("signin")}
         className={cn(
           "rounded-full px-5 py-2.5 font-inter text-sm font-black transition",
           mode === "signin"
-            ? "bg-white text-[#006cff] shadow-[0_10px_28px_rgba(0,38,96,0.16)]"
-            : "text-white/78 hover:text-white"
+            ? "bg-white text-[#006cff] shadow-[0_10px_28px_rgba(0,0,0,0.14)]"
+            : "text-white/72 hover:text-white"
         )}
       >
         Sign in
@@ -259,8 +142,8 @@ function AuthModeSwitch({
         className={cn(
           "rounded-full px-5 py-2.5 font-inter text-sm font-black transition",
           mode === "signup"
-            ? "bg-white text-[#006cff] shadow-[0_10px_28px_rgba(0,38,96,0.16)]"
-            : "text-white/78 hover:text-white"
+            ? "bg-white text-[#006cff] shadow-[0_10px_28px_rgba(0,0,0,0.14)]"
+            : "text-white/72 hover:text-white"
         )}
       >
         Sign up
@@ -283,7 +166,7 @@ export default function LoginPage() {
   const activeCopy = copy[mode];
 
   const otpSlotClass =
-    "!h-14 !w-12 rounded-xl !border-white/30 !bg-white/18 text-xl !text-white shadow-[0_16px_34px_rgba(0,38,96,0.14),inset_0_1px_1px_rgba(255,255,255,0.22)] transition-all duration-300 data-[filled=true]:!border-white/60 data-[filled=true]:!bg-white/26 data-[active=true]:!border-white data-[active=true]:!shadow-[0_0_0_3px_rgba(255,255,255,0.18),0_0_24px_rgba(255,255,255,0.20)]";
+    "!h-14 !w-12 rounded-xl !border-white/25 !bg-white/14 text-xl !text-white shadow-[0_16px_34px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.18)] transition-all duration-300 data-[filled=true]:!border-white/55 data-[filled=true]:!bg-white/22 data-[active=true]:!border-white data-[active=true]:!shadow-[0_0_0_3px_rgba(255,255,255,0.18),0_0_24px_rgba(255,255,255,0.18)]";
 
   const getAuthRedirectUrl = (nextPath: string) => {
     const next =
@@ -518,12 +401,12 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#0b4fb8] text-white">
+    <main className="relative min-h-screen overflow-hidden bg-[#031b4f] text-white">
       <LoginBackground />
 
       <Link
         href="/"
-        className="fixed left-6 top-6 z-30 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/14 px-4 py-2 font-inter text-sm font-bold text-white/86 shadow-[0_16px_50px_rgba(0,38,96,0.14)] backdrop-blur-xl transition hover:bg-white/20 hover:text-white"
+        className="fixed left-6 top-6 z-30 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 font-inter text-sm font-bold text-white/80 shadow-[0_16px_50px_rgba(0,0,0,0.12)] backdrop-blur-xl transition hover:bg-white/16 hover:text-white"
       >
         <ArrowLeft className="h-4 w-4" />
         Home
@@ -539,7 +422,7 @@ export default function LoginPage() {
                 className="text-center"
               >
                 <div className="mb-6 flex justify-center">
-                  <div className="rounded-3xl border border-white/28 bg-white/18 p-3 shadow-[0_24px_70px_rgba(0,38,96,0.16),inset_0_1px_2px_rgba(255,255,255,0.26)] backdrop-blur-xl">
+                  <div className="rounded-3xl border border-white/22 bg-white/12 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl">
                     <OrbLogo size={58} />
                   </div>
                 </div>
@@ -550,11 +433,11 @@ export default function LoginPage() {
                   {activeCopy.title}
                 </h1>
 
-                <p className="mx-auto mt-5 max-w-[540px] font-inter text-xl font-semibold leading-8 tracking-[-0.035em] text-white/82">
+                <p className="mx-auto mt-5 max-w-[540px] font-inter text-xl font-semibold leading-8 tracking-[-0.035em] text-white/76">
                   {activeCopy.subtitle}
                 </p>
 
-                <p className="mt-4 font-inter text-sm font-bold text-white/78">
+                <p className="mt-4 font-inter text-sm font-bold text-white/72">
                   {activeCopy.helper}{" "}
                   <button
                     type="button"
@@ -568,19 +451,19 @@ export default function LoginPage() {
                 <div className="mx-auto mt-9 max-w-[520px]">
                   <button
                     onClick={signInWithGoogle}
-                    className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/28 bg-white/18 px-5 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.26)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/46 hover:bg-white/24"
+                    className="group relative flex h-14 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/22 bg-white/14 px-5 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/18"
                   >
                     <GoogleIcon />
                     Sign in with Google
-                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/32 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
+                    <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/28 blur-sm transition-transform duration-700 group-hover:translate-x-[720%]" />
                   </button>
 
                   <div className="my-7 flex items-center gap-4">
-                    <span className="h-px flex-1 bg-white/30" />
-                    <span className="font-inter text-sm font-black text-white/76">
+                    <span className="h-px flex-1 bg-white/24" />
+                    <span className="font-inter text-sm font-black text-white/70">
                       or
                     </span>
-                    <span className="h-px flex-1 bg-white/30" />
+                    <span className="h-px flex-1 bg-white/24" />
                   </div>
 
                   <form
@@ -591,7 +474,7 @@ export default function LoginPage() {
                     className="space-y-4 text-left"
                   >
                     <label className="block">
-                      <span className="mb-2 block font-inter text-xs font-black uppercase tracking-[0.16em] text-white/76">
+                      <span className="mb-2 block font-inter text-xs font-black uppercase tracking-[0.16em] text-white/70">
                         Email
                       </span>
                       <div className="relative">
@@ -605,7 +488,7 @@ export default function LoginPage() {
                           placeholder="you@example.com"
                           autoComplete="email"
                           required
-                          className="h-14 rounded-2xl border-white/30 bg-white/18 px-5 pr-14 text-left font-inter text-base font-bold text-white shadow-[0_18px_48px_rgba(0,38,96,0.16)] placeholder:text-white/52 focus:border-white/78 focus:shadow-[0_0_0_4px_rgba(255,255,255,0.14)]"
+                          className="h-14 rounded-2xl border-white/25 bg-white/14 px-5 pr-14 text-left font-inter text-base font-bold text-white shadow-[0_18px_48px_rgba(0,38,96,0.16)] placeholder:text-white/45 focus:border-white/70 focus:shadow-[0_0_0_4px_rgba(255,255,255,0.12)]"
                         />
                         <button
                           type="submit"
@@ -626,7 +509,7 @@ export default function LoginPage() {
                   </p>
                 )}
 
-                <p className="mx-auto mt-12 max-w-[460px] text-center font-inter text-xs font-semibold leading-5 text-white/68">
+                <p className="mx-auto mt-12 max-w-[460px] text-center font-inter text-xs font-semibold leading-5 text-white/62">
                   By continuing, you agree to PrepPeer&apos;s terms and privacy
                   policy.
                 </p>
@@ -640,14 +523,14 @@ export default function LoginPage() {
                     setOtp("");
                     setStep("email");
                   }}
-                  className="mx-auto mb-8 flex items-center gap-2 font-inter text-sm font-bold text-white/78 transition hover:text-white"
+                  className="mx-auto mb-8 flex items-center gap-2 font-inter text-sm font-bold text-white/72 transition hover:text-white"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
 
                 <div className="mb-6 flex justify-center">
-                  <div className="rounded-3xl border border-white/28 bg-white/18 p-3 shadow-[0_24px_70px_rgba(0,38,96,0.16),inset_0_1px_2px_rgba(255,255,255,0.26)] backdrop-blur-xl">
+                  <div className="rounded-3xl border border-white/22 bg-white/12 p-3 shadow-[0_24px_70px_rgba(0,0,0,0.14),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl">
                     <OrbLogo size={58} />
                   </div>
                 </div>
@@ -656,12 +539,12 @@ export default function LoginPage() {
                   Enter your code
                 </h1>
 
-                <p className="mx-auto mt-5 max-w-[460px] font-inter text-lg font-semibold leading-8 text-white/80">
+                <p className="mx-auto mt-5 max-w-[460px] font-inter text-lg font-semibold leading-8 text-white/74">
                   We sent a sign-in code to {email}.
                 </p>
 
-                <div className="mx-auto mt-10 max-w-[480px] rounded-[34px] border border-white/28 bg-white/16 p-3 shadow-[0_26px_88px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.24)] backdrop-blur-2xl">
-                  <div className="rounded-[26px] border border-white/22 bg-white/14 px-4 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.22),0_18px_42px_rgba(0,38,96,0.12)]">
+                <div className="mx-auto mt-10 max-w-[480px] rounded-[34px] border border-white/22 bg-white/12 p-3 shadow-[0_26px_88px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-2xl">
+                  <div className="rounded-[26px] border border-white/18 bg-white/10 px-4 py-5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.20),0_18px_42px_rgba(0,38,96,0.12)]">
                     <InputOTP
                       maxLength={6}
                       value={otp}
@@ -681,7 +564,7 @@ export default function LoginPage() {
                           />
                         ))}
                       </InputOTPGroup>
-                      <InputOTPSeparator className="px-0 text-white/56" />
+                      <InputOTPSeparator className="px-0 text-white/50" />
                       <InputOTPGroup className="gap-2 sm:gap-3">
                         {[3, 4, 5].map((index) => (
                           <InputOTPSlot
@@ -715,22 +598,22 @@ export default function LoginPage() {
               <motion.div
                 key="password"
                 {...panelMotion}
-                className="mx-auto max-w-[520px] rounded-[34px] border border-white/28 bg-white/18 p-7 text-left shadow-[0_30px_110px_rgba(0,38,96,0.20),inset_0_1px_2px_rgba(255,255,255,0.26)] backdrop-blur-2xl sm:p-9"
+                className="mx-auto max-w-[520px] rounded-[34px] border border-white/22 bg-white/14 p-7 text-left shadow-[0_30px_110px_rgba(0,38,96,0.20),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-2xl sm:p-9"
               >
                 <button
                   onClick={() => setStep("otp")}
-                  className="mb-6 flex items-center gap-2 font-inter text-sm font-bold text-white/78 transition hover:text-white"
+                  className="mb-6 flex items-center gap-2 font-inter text-sm font-bold text-white/72 transition hover:text-white"
                 >
                   <ArrowLeft size={16} />
                   Back
                 </button>
 
                 <div className="mb-6 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/26 bg-white/20 text-white shadow-[0_12px_28px_rgba(0,38,96,0.12)]">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/20 bg-white/16 text-white shadow-[0_12px_28px_rgba(0,38,96,0.12)]">
                     <ShieldCheck size={20} />
                   </div>
                   <div>
-                    <p className="font-inter text-xs font-black uppercase tracking-[0.2em] text-white/76">
+                    <p className="font-inter text-xs font-black uppercase tracking-[0.2em] text-white/70">
                       Password
                     </p>
                     <h1 className="font-inter text-3xl font-black tracking-[-0.04em] text-white">
@@ -750,7 +633,7 @@ export default function LoginPage() {
             {step === "success" && (
               <motion.div key="success" {...panelMotion} className="text-center">
                 <motion.div
-                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/28 bg-white/18 text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.26)]"
+                  className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/22 bg-white/14 text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)]"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 280, damping: 18 }}
@@ -762,7 +645,7 @@ export default function LoginPage() {
                   You&apos;re in
                 </h1>
 
-                <p className="mx-auto mt-5 max-w-[460px] font-inter text-lg font-semibold leading-8 text-white/80">
+                <p className="mx-auto mt-5 max-w-[460px] font-inter text-lg font-semibold leading-8 text-white/74">
                   Continue to your dashboard.
                 </p>
 
