@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Input } from "@/components/ui/input";
-import { OrbLogo } from "@/components/ui/OrbLogo";
 import {
   InputOTP,
   InputOTPGroup,
@@ -63,6 +62,15 @@ function GoogleIcon() {
         d="M12 5.31c1.83 0 3.06.7 3.76 1.28l2.75-2.35C16.82 2.86 14.63 2 12 2a9.97 9.97 0 0 0-8.78 5.36l3.24 2.5A5.88 5.88 0 0 1 12 5.31Z"
       />
     </svg>
+  );
+}
+
+function LoginNavOrb() {
+  return (
+    <span
+      className="orb-logo orb-logo-fallback block h-[42px] w-[42px] rounded-[47%_53%_45%_55%/44%_42%_58%_56%]"
+      aria-hidden="true"
+    />
   );
 }
 
@@ -245,7 +253,7 @@ function TopNav({
           className="flex shrink-0 items-center justify-center rounded-full transition hover:opacity-80"
           aria-label="Home"
         >
-          <OrbLogo size={38} />
+          <LoginNavOrb />
         </Link>
 
         <div className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#0c1726]/88 p-1 shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]">
@@ -539,8 +547,8 @@ export default function LoginPage() {
                         placeholder="you@example.com"
                         autoComplete="email"
                         required
-                        glowColor="#60b1ff"
-                        className="h-14 rounded-full border-[#28415f]/80 bg-[#0d1828]/88 px-16 text-center text-base font-semibold text-[#f4f8ff] shadow-[0_24px_76px_rgba(0,0,0,0.22),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-center placeholder:text-[#71839a] focus:border-[#9fcfff]/70 focus:bg-[#111f33] focus:text-[#f4f8ff]"
+                        glowColor="#2557ff"
+                        className="h-14 rounded-full !border-[#315579]/80 !bg-[#0b1728]/92 px-16 text-center text-base font-semibold !text-[#f4f8ff] shadow-[0_24px_76px_rgba(0,0,0,0.28),0_0_34px_rgba(0,108,255,0.08),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-center !placeholder:text-[#8ca0ba] focus:!border-[#7ca8ff]/80 focus:!bg-[#101f35] focus:!text-[#f4f8ff] focus:shadow-[0_0_0_3px_rgba(37,87,255,0.16),0_0_54px_rgba(37,87,255,0.26),0_24px_76px_rgba(0,0,0,0.34)]"
                       />
                       <button
                         type="submit"
