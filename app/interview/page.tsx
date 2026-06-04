@@ -145,16 +145,21 @@ export default function InterviewPage() {
       );
     });
 
-    const answeredReviews = allReviews.filter(
-      (item) => item.status === "answered"
+    const attemptedReviews = allReviews.filter(
+      (item) =>
+        item.status === "answered" ||
+        item.status === "gibberish" ||
+        item.status === "ai"
     );
 
-    const attemptedCount = answeredReviews.length;
+    const attemptedCount = attemptedReviews.length;
 
     const attemptedAverage =
       attemptedCount > 0
-        ? answeredReviews.reduce((sum, item) => sum + Number(item.score ?? 0), 0) /
-          attemptedCount
+        ? attemptedReviews.reduce(
+            (sum, item) => sum + Number(item.score ?? 0),
+            0
+          ) / attemptedCount
         : 0;
 
     const completionFactor =
