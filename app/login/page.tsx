@@ -86,7 +86,7 @@ function LoginNavOrb() {
           loop
           muted
           playsInline
-          className="absolute bottom-[-13%] right-[-13%] z-[2] h-[126%] w-[126%] object-cover"
+          className="absolute bottom-[-42%] right-[-42%] z-[2] h-[184%] w-[184%] object-cover"
           onError={() => setVideoFailed(true)}
         >
           <source
@@ -105,8 +105,8 @@ function LoginNavOrb() {
           border-radius: 36% 64% 45% 55% / 43% 35% 65% 57%;
           background: transparent;
           filter: drop-shadow(0 12px 24px rgba(0, 108, 255, 0.34));
-          -webkit-mask-image: radial-gradient(ellipse 58% 55% at 52% 52%, #000 0 70%, transparent 78%);
-          mask-image: radial-gradient(ellipse 58% 55% at 52% 52%, #000 0 70%, transparent 78%);
+          -webkit-mask-image: radial-gradient(ellipse 48% 47% at 51% 53%, #000 0 74%, transparent 83%);
+          mask-image: radial-gradient(ellipse 48% 47% at 51% 53%, #000 0 74%, transparent 83%);
         }
 
         .login-nav-orb-fallback {
