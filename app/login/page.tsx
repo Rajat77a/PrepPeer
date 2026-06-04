@@ -128,7 +128,7 @@ function LoginNavOrb() {
         }
 
         .login-nav-orb video {
-          mix-blend-mode: screen;
+          mix-blend-mode: normal;
           filter: hue-rotate(-55deg) saturate(250%) brightness(1.2) contrast(1.1);
         }
       `}</style>
