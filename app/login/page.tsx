@@ -609,13 +609,13 @@ export default function LoginPage() {
                         placeholder="you@example.com"
                         autoComplete="email"
                         required
-                        glowColor="#006cff"
+                        glowColor="#9fcfff"
                         style={{
-                          backgroundColor: "rgba(13, 36, 66, 0.96)",
-                          borderColor: "rgba(159, 207, 255, 0.72)",
+                          backgroundColor: "rgba(9, 20, 36, 0.9)",
+                          borderColor: "rgba(96, 177, 255, 0.34)",
                           color: "#f4f8ff",
                         }}
-                        className="h-14 rounded-full px-16 text-center text-base font-semibold shadow-[0_24px_76px_rgba(0,0,0,0.36),0_0_42px_rgba(0,108,255,0.2),inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_0_22px_rgba(96,177,255,0.1)] placeholder:text-center placeholder:text-[#b7c6da] focus:border-[#d8ecff]/90 focus:shadow-[0_0_0_3px_rgba(159,207,255,0.24),0_0_76px_rgba(0,108,255,0.42),0_24px_76px_rgba(0,0,0,0.38),inset_0_0_26px_rgba(96,177,255,0.16)]"
+                        className="h-14 rounded-full px-16 text-center text-base font-semibold shadow-[0_24px_76px_rgba(0,0,0,0.34),0_0_28px_rgba(0,108,255,0.14),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-center placeholder:text-[#9fb0c6] group-hover/input:shadow-[0_0_0_1px_rgba(159,207,255,0.52),0_0_72px_rgba(159,207,255,0.34),0_24px_76px_rgba(0,0,0,0.38),inset_0_1px_1px_rgba(255,255,255,0.1)] focus:border-[#d8ecff]/90 focus:shadow-[0_0_0_3px_rgba(159,207,255,0.28),0_0_86px_rgba(159,207,255,0.44),0_24px_76px_rgba(0,0,0,0.38),inset_0_0_20px_rgba(96,177,255,0.1)]"
                       />
                       <button
                         type="submit"
