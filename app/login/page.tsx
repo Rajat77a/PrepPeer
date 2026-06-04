@@ -609,8 +609,13 @@ export default function LoginPage() {
                         placeholder="you@example.com"
                         autoComplete="email"
                         required
-                        glowColor="#2557ff"
-                        className="h-14 rounded-full !border-[#315579]/80 !bg-[#0b1728]/92 px-16 text-center text-base font-semibold !text-[#f4f8ff] shadow-[0_24px_76px_rgba(0,0,0,0.28),0_0_34px_rgba(0,108,255,0.08),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-center !placeholder:text-[#8ca0ba] focus:!border-[#7ca8ff]/80 focus:!bg-[#101f35] focus:!text-[#f4f8ff] focus:shadow-[0_0_0_3px_rgba(37,87,255,0.16),0_0_54px_rgba(37,87,255,0.26),0_24px_76px_rgba(0,0,0,0.34)]"
+                        glowColor="#006cff"
+                        style={{
+                          backgroundColor: "rgba(9, 20, 36, 0.88)",
+                          borderColor: "rgba(96, 177, 255, 0.38)",
+                          color: "#f4f8ff",
+                        }}
+                        className="h-14 rounded-full px-16 text-center text-base font-semibold shadow-[0_24px_76px_rgba(0,0,0,0.32),0_0_34px_rgba(0,108,255,0.1),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-center placeholder:text-[#8ca0ba] focus:border-[#9fcfff]/80 focus:shadow-[0_0_0_3px_rgba(0,108,255,0.18),0_0_64px_rgba(0,108,255,0.34),0_24px_76px_rgba(0,0,0,0.36)]"
                       />
                       <button
                         type="submit"
