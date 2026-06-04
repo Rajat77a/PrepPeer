@@ -611,11 +611,11 @@ export default function LoginPage() {
                         required
                         glowColor="#006cff"
                         style={{
-                          backgroundColor: "rgba(9, 20, 36, 0.88)",
-                          borderColor: "rgba(96, 177, 255, 0.38)",
+                          backgroundColor: "rgba(13, 36, 66, 0.96)",
+                          borderColor: "rgba(159, 207, 255, 0.72)",
                           color: "#f4f8ff",
                         }}
-                        className="h-14 rounded-full px-16 text-center text-base font-semibold shadow-[0_24px_76px_rgba(0,0,0,0.32),0_0_34px_rgba(0,108,255,0.1),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-center placeholder:text-[#8ca0ba] focus:border-[#9fcfff]/80 focus:shadow-[0_0_0_3px_rgba(0,108,255,0.18),0_0_64px_rgba(0,108,255,0.34),0_24px_76px_rgba(0,0,0,0.36)]"
+                        className="h-14 rounded-full px-16 text-center text-base font-semibold shadow-[0_24px_76px_rgba(0,0,0,0.36),0_0_42px_rgba(0,108,255,0.2),inset_0_1px_1px_rgba(255,255,255,0.16),inset_0_0_22px_rgba(96,177,255,0.1)] placeholder:text-center placeholder:text-[#b7c6da] focus:border-[#d8ecff]/90 focus:shadow-[0_0_0_3px_rgba(159,207,255,0.24),0_0_76px_rgba(0,108,255,0.42),0_24px_76px_rgba(0,0,0,0.38),inset_0_0_26px_rgba(96,177,255,0.16)]"
                       />
                       <button
                         type="submit"
