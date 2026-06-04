@@ -7,6 +7,12 @@ import Link from "next/link";
 import { scoreDimensions } from "@/components/dashboard/DashboardData";
 import type { DimensionScore, LeaderboardEntry } from "@/lib/types";
 
+type DashboardProfileContext = {
+  role: string;
+  experience: string;
+  companyType: string;
+};
+
 type DashboardHomeProps = {
   firstName: string;
   sessions: DashboardSession[];
@@ -14,12 +20,6 @@ type DashboardHomeProps = {
   rankSummary: DashboardRankSummary | null;
   recentSessionScore: number | null;
   profileContext: DashboardProfileContext;
-};
-
-type DashboardProfileContext = {
-  role: string;
-  experience: string;
-  companyType: string;
 };
 
 export type DashboardSession = {
@@ -225,7 +225,9 @@ export function DashboardHome({
       sessions={sessions}
       leaderboardEntries={leaderboardEntries}
       rankSummary={rankSummary}
-      recentSessionScore={recentSessionScore ?? sessions[0]?.score ?? rankSummary.score}
+      recentSessionScore={
+        recentSessionScore ?? sessions[0]?.score ?? rankSummary.score
+      }
     />
   );
 }
@@ -295,9 +297,11 @@ function NewUserDashboard({
               Interview room ready
             </span>
           </div>
+
           <h2 className="font-inter text-[clamp(30px,5vw,48px)] font-black leading-tight tracking-[-0.04em] text-[#07111f]">
             Start your first mock interview
           </h2>
+
           <p className="mb-5 mt-4 max-w-lg font-inter text-base font-medium leading-7 text-[#64748b]">
             Five real questions. Scored on clarity, structure, confidence, and
             depth. See your rank among role-matched peers instantly.
@@ -344,6 +348,7 @@ function NewUserDashboard({
             View all
           </Link>
         </div>
+
         <div className="space-y-1">
           {topEntries.map((entry) => (
             <div
@@ -374,6 +379,7 @@ function NewUserDashboard({
             </div>
           ))}
         </div>
+
         <p className="mt-4 text-center font-inter text-xs font-semibold text-[#64748b]">
           Complete your first interview to appear on the leaderboard
         </p>
@@ -395,24 +401,31 @@ function ReturningDashboard({
   rankSummary: DashboardRankSummary;
   recentSessionScore: number;
 }) {
-  const [shareState, setShareState] = useState<"idle" | "creating" | "done" | "error">("idle");
+  const [shareState, setShareState] = useState<
+    "idle" | "creating" | "done" | "error"
+  >("idle");
+
   const userIndex = leaderboardEntries.findIndex((entry) => entry.isYou);
   const nearby =
     userIndex >= 0
       ? leaderboardEntries.slice(Math.max(0, userIndex - 2), userIndex + 3)
       : leaderboardEntries.slice(0, 5);
+
   const dimensions: DimensionScore[] = rankSummary.dimensions?.length
     ? rankSummary.dimensions
     : scoreDimensions.map((dimension) => ({
         label: dimension.label,
         value: dimension.score,
       }));
+
   const latestSession = sessions[0];
+
   const practiceAgainHref = `/interview?mode=account&autostart=1&role=${encodeURIComponent(
     rankSummary.role
   )}&experience=${encodeURIComponent(
     rankSummary.experience ?? latestSession?.experience ?? "Not set"
   )}&company=${encodeURIComponent(rankSummary.companyType)}`;
+
   const shareLabel =
     shareState === "creating"
       ? "Creating card..."
@@ -433,14 +446,17 @@ function ReturningDashboard({
         rankSummary,
         recentSessionScore,
       });
+
       const file = new File([blob], "preppeer-rank-card.png", {
         type: "image/png",
       });
+
       const shareData = {
         title: "PrepPeer rank card",
         text: `I am ranked #${rankSummary.rank} on PrepPeer.`,
         files: [file],
       };
+
       const navigatorWithShare = navigator as Navigator & {
         canShare?: (data: ShareData) => boolean;
       };
@@ -487,10 +503,8 @@ function ReturningDashboard({
             Here is where you stand today.
           </p>
         </div>
-        <motion.div
-          whileHover={{ y: -3, scale: 1.015 }}
-          whileTap={{ scale: 0.98 }}
-        >
+
+        <motion.div whileHover={{ y: -3, scale: 1.015 }} whileTap={{ scale: 0.98 }}>
           <Link
             href={practiceAgainHref}
             className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[linear-gradient(135deg,#07111f_0%,#006cff_48%,#20c4ff_100%)] px-8 py-3.5 font-inter text-sm font-black text-white shadow-[0_20px_50px_rgba(0,108,255,0.30)] transition"
@@ -524,6 +538,7 @@ function ReturningDashboard({
               backgroundSize: "20px 20px",
             }}
           />
+
           <div
             className="relative z-10 flex flex-col gap-8 md:flex-row md:items-center md:justify-between"
             style={{ transform: "translateZ(34px)" }}
@@ -545,16 +560,26 @@ function ReturningDashboard({
                   {rankSummary.rankChange}
                 </span>
                 <span className="text-[#b7c6d8]">/</span>
-                <span className="font-semibold text-[#64748b]">{rankSummary.percentile}</span>
+                <span className="font-semibold text-[#64748b]">
+                  {rankSummary.percentile}
+                </span>
                 <span className="text-[#b7c6d8]">/</span>
-                <span className="font-semibold text-[#64748b]">{rankSummary.role}</span>
+                <span className="font-semibold text-[#64748b]">
+                  {rankSummary.role}
+                </span>
                 <span className="text-[#b7c6d8]">/</span>
-                <span className="font-semibold text-[#64748b]">{rankSummary.companyType}</span>
+                <span className="font-semibold text-[#64748b]">
+                  {rankSummary.companyType}
+                </span>
               </div>
             </div>
             <PercentileRing value={recentSessionScore} />
           </div>
-          <div className="relative z-10 mt-6" style={{ transform: "translateZ(28px)" }}>
+
+          <div
+            className="relative z-10 mt-6"
+            style={{ transform: "translateZ(28px)" }}
+          >
             <button
               type="button"
               onClick={shareRankCard}
@@ -582,7 +607,10 @@ function ReturningDashboard({
           <p className="mb-5 font-inter text-xs font-bold uppercase tracking-[0.2em] text-[#64748b]">
             Score breakdown
           </p>
-          <div className="relative z-10 flex-1 space-y-4" style={{ transform: "translateZ(24px)" }}>
+          <div
+            className="relative z-10 flex-1 space-y-4"
+            style={{ transform: "translateZ(24px)" }}
+          >
             {dimensions.map((dim) => (
               <div key={dim.label}>
                 <div className="mb-1.5 flex justify-between">
@@ -629,7 +657,9 @@ function ReturningDashboard({
                 </p>
               </div>
               <div className="flex items-center gap-4 font-inter text-sm">
-                <span className="font-semibold text-[#07111f]">Score: {session.score}</span>
+                <span className="font-semibold text-[#07111f]">
+                  Score: {session.score}
+                </span>
                 <span className="font-semibold text-[#64748b]">
                   {session.rank ? `#${session.rank}` : "Not ranked"}
                 </span>
