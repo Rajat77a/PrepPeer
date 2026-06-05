@@ -507,14 +507,14 @@ function ReturningDashboard({
         <motion.div whileHover={{ y: -3, scale: 1.015 }} whileTap={{ scale: 0.98 }}>
           <Link
             href={practiceAgainHref}
-            className="group relative inline-flex min-w-[230px] items-center justify-center overflow-hidden rounded-[28px] border border-white/35 bg-[linear-gradient(135deg,#07111f_0%,#006cff_46%,#20c4ff_100%)] px-7 py-3.5 font-inter text-sm font-black text-white shadow-[0_20px_50px_rgba(0,108,255,0.30)] transition-all duration-500 hover:border-[#7dffd9]/70 hover:bg-[linear-gradient(135deg,#006cff_0%,#7dffd9_48%,#07111f_100%)] hover:text-[#07111f] hover:shadow-[0_22px_65px_rgba(0,108,255,0.42)]"
+            className="group relative inline-flex min-w-[230px] items-center justify-center overflow-hidden rounded-[28px] border border-[#60b1ff]/35 bg-[linear-gradient(135deg,#07111f_0%,#063f8f_48%,#006cff_100%)] px-7 py-3.5 font-inter text-sm font-black text-white shadow-[0_20px_50px_rgba(0,49,112,0.34)] transition-all duration-500 hover:border-[#9bd4ff]/70 hover:bg-[linear-gradient(135deg,#020817_0%,#082c55_46%,#0057cc_100%)] hover:shadow-[0_24px_70px_rgba(0,49,112,0.48)]"
           >
-            <span className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.46),transparent_26%),radial-gradient(circle_at_80%_80%,rgba(125,255,217,0.35),transparent_28%)] opacity-0 transition duration-500 group-hover:opacity-100" />
-            <span className="absolute inset-y-[-35%] left-[-42%] w-[38%] rotate-12 bg-white/55 blur-lg transition duration-700 ease-out group-hover:left-[116%]" />
-            <span className="absolute inset-[3px] rounded-[24px] border border-white/10 transition duration-500 group-hover:border-white/45" />
+            <span className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(155,212,255,0.34),transparent_28%),radial-gradient(circle_at_82%_78%,rgba(0,108,255,0.38),transparent_30%)] opacity-0 transition duration-500 group-hover:opacity-100" />
+            <span className="absolute inset-y-[-35%] left-[-42%] w-[38%] rotate-12 bg-[#d9efff]/45 blur-lg transition duration-700 ease-out group-hover:left-[116%]" />
+            <span className="absolute inset-[3px] rounded-[24px] border border-white/10 transition duration-500 group-hover:border-[#9bd4ff]/45" />
             <span className="relative z-10 flex items-center gap-3">
               <span>Practice again</span>
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/16 text-white transition duration-500 group-hover:translate-x-1 group-hover:bg-[#07111f] group-hover:text-white">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/14 text-white transition duration-500 group-hover:translate-x-1 group-hover:bg-[#006cff] group-hover:text-white group-hover:shadow-[0_0_22px_rgba(96,177,255,0.55)]">
                 <ArrowRight className="h-4 w-4" />
               </span>
             </span>
