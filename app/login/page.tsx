@@ -175,15 +175,6 @@ export default function LoginPage() {
     return message;
   };
 
-  const isFreshSignupUser = (createdAt?: string) => {
-    if (!createdAt) return false;
-
-    const createdTime = new Date(createdAt).getTime();
-    if (Number.isNaN(createdTime)) return false;
-
-    return Date.now() - createdTime < 12 * 60 * 1000;
-  };
-
   const signInWithGoogle = async () => {
     setError("");
 
@@ -259,30 +250,41 @@ export default function LoginPage() {
     const nextPath = getPostAuthPath();
 
     if (isSignUp) {
-      const hasCurrentSignupMarker =
-        verifyData.user?.user_metadata?.preppeer_signup_nonce === signupNonce;
-
-      if (
-        !hasCurrentSignupMarker ||
-        !isFreshSignupUser(verifyData.user?.created_at)
-      ) {
-        await supabase.auth.signOut();
-        setMode("signin");
-        setStep("email");
-        setOtp("");
-        setSignupNonce("");
-        setError(
-          "This email already has a PrepPeer account. Sign in instead to continue."
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      const verifiedUser = user ?? verifyData.user;
+      const metadata = verifiedUser?.user_metadata ?? {};
+      const hasCompletedSetup =
+        metadata.onboarding_complete === true &&
+        Boolean(
+          String(metadata.full_name ?? metadata.name ?? "").trim() &&
+            String(metadata.college ?? "").trim() &&
+            String(metadata.target_role ?? "").trim() &&
+            String(metadata.experience_level ?? "").trim() &&
+            String(metadata.target_company_type ?? "").trim()
         );
+
+      if (userError || !verifiedUser) {
+        setError("Account verified, but the session was not ready. Please sign in.");
+        return;
+      }
+
+      if (hasCompletedSetup) {
+        router.replace(nextPath);
+        router.refresh();
         return;
       }
 
       sessionStorage.setItem("preppeer_post_onboarding_next", nextPath);
-      router.push(`/onboarding?next=${encodeURIComponent(nextPath)}`);
+      router.replace(`/onboarding?next=${encodeURIComponent(nextPath)}`);
+      router.refresh();
       return;
     }
 
-    router.push(nextPath);
+    router.replace(nextPath);
+    router.refresh();
   };
 
   const savePassword = async (password: string) => {
