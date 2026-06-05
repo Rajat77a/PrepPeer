@@ -17,6 +17,13 @@ const supportLinks = [
   "Cookie policy",
 ];
 
+const footerLinkHref: Record<string, string> = {
+  "Privacy policy": "/privacy",
+  "Terms of service": "/terms",
+  Privacy: "/privacy",
+  Terms: "/terms",
+};
+
 export function Footer() {
   return (
     <footer className="bg-[#0A0A0F] px-6 md:px-12 pt-20 pb-12">
@@ -66,9 +73,18 @@ export function Footer() {
           <ul className="space-y-3">
             {supportLinks.map((link) => (
               <li key={link}>
-                <span className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer">
-                  {link}
-                </span>
+                {footerLinkHref[link] ? (
+                  <Link
+                    href={footerLinkHref[link]}
+                    className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer"
+                  >
+                    {link}
+                  </Link>
+                ) : (
+                  <span className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer">
+                    {link}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
@@ -81,12 +97,22 @@ export function Footer() {
         </p>
         <div className="flex gap-6">
           {["Privacy", "Terms", "Cookies"].map((link) => (
-            <span
-              key={link}
-              className="font-inter text-sm text-white/35 hover:text-white/60 transition-colors cursor-pointer"
-            >
-              {link}
-            </span>
+            footerLinkHref[link] ? (
+              <Link
+                key={link}
+                href={footerLinkHref[link]}
+                className="font-inter text-sm text-white/35 hover:text-white/60 transition-colors cursor-pointer"
+              >
+                {link}
+              </Link>
+            ) : (
+              <span
+                key={link}
+                className="font-inter text-sm text-white/35 hover:text-white/60 transition-colors cursor-pointer"
+              >
+                {link}
+              </span>
+            )
           ))}
         </div>
       </div>
