@@ -246,6 +246,20 @@ body {
   animation: sectionNavFlash 0.85s ease;
 }
 
+@keyframes dashboardSweep {
+  0% {
+    transform: translateX(-12%) rotate(12deg);
+    opacity: 0;
+  }
+  42% {
+    opacity: 0.72;
+  }
+  100% {
+    transform: translateX(310%) rotate(12deg);
+    opacity: 0;
+  }
+}
+
 .step-card::before {
   content: "";
   position: absolute;
