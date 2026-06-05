@@ -455,7 +455,7 @@ export default function LoginPage() {
                   </p>
                 )}
 
-                <p className="mx-auto mt-6 max-w-fit rounded-full border border-white/14 bg-white/8 px-4 py-2 text-center font-inter text-xs font-semibold leading-5 text-white/68 shadow-[0_16px_42px_rgba(0,19,60,0.16),inset_0_1px_1px_rgba(255,255,255,0.12)] backdrop-blur-xl">
+                <p className="mx-auto mt-6 max-w-[460px] text-center font-inter text-xs font-semibold leading-5 text-white/68">
                   By signing up, you agree to our{" "}
                   <Link
                     href="#"
