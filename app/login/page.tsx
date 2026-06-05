@@ -427,7 +427,7 @@ export default function LoginPage() {
                   >
                     <label className="block" aria-label="Email">
                       <div
-                        className="relative overflow-hidden rounded-full p-[2px] shadow-[0_24px_70px_rgba(0,16,50,0.24)]"
+                        className="relative overflow-hidden rounded-full bg-[#061735] p-[2px] shadow-[0_24px_70px_rgba(0,16,50,0.24),inset_0_0_0_1px_rgba(190,238,255,0.35)]"
                         style={emailGlowStyle}
                         onMouseMove={(event) => {
                           const rect = event.currentTarget.getBoundingClientRect();
@@ -452,7 +452,7 @@ export default function LoginPage() {
                               "radial-gradient(180px circle at var(--email-glow-x) var(--email-glow-y), rgba(126,231,255,0.98), rgba(0,108,255,0.72) 28%, rgba(94,255,217,0.42) 43%, transparent 68%)",
                           }}
                         />
-                        <div className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(110deg,rgba(255,255,255,0.18),rgba(126,231,255,0.24),rgba(0,108,255,0.20),rgba(255,255,255,0.14))]" />
+                        <div className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(110deg,rgba(190,238,255,0.52),rgba(0,108,255,0.40),rgba(94,255,217,0.30),rgba(190,238,255,0.38))]" />
                         <input
                           type="email"
                           value={email}
@@ -463,7 +463,11 @@ export default function LoginPage() {
                           placeholder="you@example.com"
                           autoComplete="email"
                           required
-                          className="relative z-10 h-12 w-full rounded-full border border-[#a6dbff]/38 bg-[#061635]/92 px-5 pr-14 text-left font-inter text-base font-bold text-white outline-none shadow-[inset_0_1px_2px_rgba(255,255,255,0.12),inset_0_-18px_40px_rgba(0,108,255,0.14)] backdrop-blur-xl transition duration-300 placeholder:text-[#c6dcf4]/62 hover:border-[#d8f7ff]/70 hover:bg-[#071d44]/95 focus:border-white focus:bg-[#08204b] focus:shadow-[inset_0_1px_2px_rgba(255,255,255,0.18),0_0_0_3px_rgba(126,231,255,0.20),0_0_54px_rgba(126,231,255,0.34)]"
+                          className="relative z-10 h-12 w-full rounded-full border border-[#bcecff]/52 !bg-[#061735] px-5 pr-14 text-left font-inter text-base font-bold !text-white outline-none shadow-[inset_0_1px_2px_rgba(255,255,255,0.16),inset_0_-18px_40px_rgba(0,108,255,0.18),0_0_34px_rgba(126,231,255,0.16)] backdrop-blur-xl transition duration-300 placeholder:!text-[#c6dcf4]/72 hover:border-[#e2fbff]/80 hover:!bg-[#071d44] hover:shadow-[inset_0_1px_2px_rgba(255,255,255,0.20),inset_0_-18px_44px_rgba(0,108,255,0.24),0_0_48px_rgba(126,231,255,0.30)] focus:border-white focus:!bg-[#08204b] focus:shadow-[inset_0_1px_2px_rgba(255,255,255,0.18),0_0_0_3px_rgba(126,231,255,0.20),0_0_54px_rgba(126,231,255,0.34)]"
+                          style={{
+                            backgroundColor: "#061735",
+                            color: "#ffffff",
+                          }}
                         />
                         <button
                           type="submit"
