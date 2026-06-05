@@ -3,7 +3,7 @@
 import { ArrowLeft, ArrowRight, Check, ShieldCheck } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { type CSSProperties, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { OrbLogo } from "@/components/ui/OrbLogo";
@@ -120,15 +120,9 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [signupNonce, setSignupNonce] = useState("");
-  const [emailGlow, setEmailGlow] = useState({ x: 50, y: 50, active: false });
 
   const isSignUp = mode === "signup";
   const activeCopy = copy[mode];
-  const emailGlowStyle = {
-    "--email-glow-x": `${emailGlow.x}%`,
-    "--email-glow-y": `${emailGlow.y}%`,
-    "--email-glow-opacity": emailGlow.active ? "1" : "0",
-  } as CSSProperties;
 
   const otpSlotClass =
     "!h-14 !w-12 rounded-xl !border-white/25 !bg-white/14 text-xl !text-white shadow-[0_16px_34px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.18)] transition-all duration-300 data-[filled=true]:!border-white/55 data-[filled=true]:!bg-white/22 data-[active=true]:!border-white data-[active=true]:!shadow-[0_0_0_3px_rgba(255,255,255,0.18),0_0_24px_rgba(255,255,255,0.18)]";
@@ -427,32 +421,8 @@ export default function LoginPage() {
                   >
                     <label className="block" aria-label="Email">
                       <div
-                        className="relative overflow-hidden rounded-full bg-[#061735] p-[2px] shadow-[0_24px_70px_rgba(0,16,50,0.24),inset_0_0_0_1px_rgba(190,238,255,0.35)]"
-                        style={emailGlowStyle}
-                        onMouseMove={(event) => {
-                          const rect = event.currentTarget.getBoundingClientRect();
-                          setEmailGlow({
-                            x: ((event.clientX - rect.left) / rect.width) * 100,
-                            y: ((event.clientY - rect.top) / rect.height) * 100,
-                            active: true,
-                          });
-                        }}
-                        onMouseEnter={() =>
-                          setEmailGlow((current) => ({ ...current, active: true }))
-                        }
-                        onMouseLeave={() =>
-                          setEmailGlow((current) => ({ ...current, active: false }))
-                        }
+                        className="group/email relative flex h-12 w-full items-center overflow-hidden rounded-2xl border border-white/22 bg-white/14 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-[#06142b] hover:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)] focus-within:-translate-y-0.5 focus-within:border-white focus-within:bg-white focus-within:text-[#06142b] focus-within:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)]"
                       >
-                        <div
-                          className="pointer-events-none absolute inset-0 rounded-full transition-opacity duration-300"
-                          style={{
-                            opacity: "var(--email-glow-opacity)",
-                            background:
-                              "radial-gradient(180px circle at var(--email-glow-x) var(--email-glow-y), rgba(126,231,255,0.98), rgba(0,108,255,0.72) 28%, rgba(94,255,217,0.42) 43%, transparent 68%)",
-                          }}
-                        />
-                        <div className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(110deg,rgba(190,238,255,0.52),rgba(0,108,255,0.40),rgba(94,255,217,0.30),rgba(190,238,255,0.38))]" />
                         <input
                           type="email"
                           value={email}
@@ -463,20 +433,17 @@ export default function LoginPage() {
                           placeholder="you@example.com"
                           autoComplete="email"
                           required
-                          className="relative z-10 h-12 w-full rounded-full border border-[#bcecff]/52 !bg-[#061735] px-5 pr-14 text-left font-inter text-base font-bold !text-white outline-none shadow-[inset_0_1px_2px_rgba(255,255,255,0.16),inset_0_-18px_40px_rgba(0,108,255,0.18),0_0_34px_rgba(126,231,255,0.16)] backdrop-blur-xl transition duration-300 placeholder:!text-[#c6dcf4]/72 hover:border-[#e2fbff]/80 hover:!bg-[#071d44] hover:shadow-[inset_0_1px_2px_rgba(255,255,255,0.20),inset_0_-18px_44px_rgba(0,108,255,0.24),0_0_48px_rgba(126,231,255,0.30)] focus:border-white focus:!bg-[#08204b] focus:shadow-[inset_0_1px_2px_rgba(255,255,255,0.18),0_0_0_3px_rgba(126,231,255,0.20),0_0_54px_rgba(126,231,255,0.34)]"
-                          style={{
-                            backgroundColor: "#061735",
-                            color: "#ffffff",
-                          }}
+                          className="relative z-10 h-full min-w-0 flex-1 border-0 bg-transparent px-5 pr-14 text-left font-inter text-base font-black text-white outline-none transition duration-300 placeholder:text-white/62 group-hover/email:text-[#06142b] group-hover/email:placeholder:text-[#5f7188] group-focus-within/email:text-[#06142b] group-focus-within/email:placeholder:text-[#5f7188]"
                         />
                         <button
                           type="submit"
                           disabled={loading}
                           aria-label={activeCopy.emailButton}
-                          className="absolute right-2 top-1/2 z-20 flex h-10 w-10 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-white text-[#006cff] shadow-[0_12px_28px_rgba(0,38,96,0.20)] transition hover:scale-105 hover:bg-[#eef7ff] disabled:opacity-50"
+                          className="absolute right-2 top-1/2 z-20 flex h-9 w-9 -translate-y-1/2 items-center justify-center overflow-hidden rounded-xl bg-white/18 text-white shadow-[0_12px_28px_rgba(0,38,96,0.16)] transition duration-300 hover:scale-105 group-hover/email:bg-[#eef7ff] group-hover/email:text-[#006cff] group-focus-within/email:bg-[#eef7ff] group-focus-within/email:text-[#006cff] disabled:opacity-50"
                         >
                           <ArrowRight size={17} />
                         </button>
+                        <span className="absolute inset-y-0 left-[-25%] w-[18%] skew-x-[-18deg] bg-white/60 blur-sm transition-transform duration-700 group-hover/email:translate-x-[720%] group-hover/email:bg-[#eaf5ff] group-focus-within/email:translate-x-[720%] group-focus-within/email:bg-[#eaf5ff]" />
                       </div>
                     </label>
                   </form>
