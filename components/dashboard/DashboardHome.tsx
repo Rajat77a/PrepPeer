@@ -507,11 +507,17 @@ function ReturningDashboard({
         <motion.div whileHover={{ y: -3, scale: 1.015 }} whileTap={{ scale: 0.98 }}>
           <Link
             href={practiceAgainHref}
-            className="group relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-full bg-[linear-gradient(135deg,#07111f_0%,#006cff_48%,#20c4ff_100%)] px-8 py-3.5 font-inter text-sm font-black text-white shadow-[0_20px_50px_rgba(0,108,255,0.30)] transition"
+            className="group relative inline-flex min-w-[230px] items-center justify-center overflow-hidden rounded-[28px] border border-white/35 bg-[linear-gradient(135deg,#07111f_0%,#006cff_46%,#20c4ff_100%)] px-7 py-3.5 font-inter text-sm font-black text-white shadow-[0_20px_50px_rgba(0,108,255,0.30)] transition-all duration-500 hover:border-[#7dffd9]/70 hover:bg-[linear-gradient(135deg,#006cff_0%,#7dffd9_48%,#07111f_100%)] hover:text-[#07111f] hover:shadow-[0_22px_65px_rgba(0,108,255,0.42)]"
           >
-            <span className="absolute inset-y-0 left-[-45%] w-1/3 rotate-12 bg-white/35 blur-md transition duration-700 group-hover:left-[120%]" />
-            Practice again
-            <ArrowRight className="h-4 w-4" />
+            <span className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.46),transparent_26%),radial-gradient(circle_at_80%_80%,rgba(125,255,217,0.35),transparent_28%)] opacity-0 transition duration-500 group-hover:opacity-100" />
+            <span className="absolute inset-y-[-35%] left-[-42%] w-[38%] rotate-12 bg-white/55 blur-lg transition duration-700 ease-out group-hover:left-[116%]" />
+            <span className="absolute inset-[3px] rounded-[24px] border border-white/10 transition duration-500 group-hover:border-white/45" />
+            <span className="relative z-10 flex items-center gap-3">
+              <span>Practice again</span>
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/16 text-white transition duration-500 group-hover:translate-x-1 group-hover:bg-[#07111f] group-hover:text-white">
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </span>
           </Link>
         </motion.div>
       </div>
