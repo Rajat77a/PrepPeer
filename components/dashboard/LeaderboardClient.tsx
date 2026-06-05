@@ -16,6 +16,30 @@ const roleMatches: Record<string, string[]> = {
   MBA: ["MBA"],
 };
 
+const formatMovement = (
+  delta?: string,
+  deltaType?: LeaderboardEntry["deltaType"]
+) => {
+  if (!delta) return "steady";
+
+  const normalized = delta.toLowerCase().trim();
+  const amount = delta.match(/\d+/)?.[0];
+
+  if (normalized.includes("steady")) return "steady";
+  if (normalized.includes("new entry")) return "new entry";
+  if (!amount) return delta.replace(/^[^0-9A-Za-z+-]+/, "").trim();
+
+  if (deltaType === "up") {
+    return `+${amount} ${amount === "1" ? "position" : "positions"}`;
+  }
+
+  if (deltaType === "down") {
+    return `-${amount} ${amount === "1" ? "position" : "positions"}`;
+  }
+
+  return delta.replace(/^[^0-9A-Za-z+-]+/, "").trim();
+};
+
 export function LeaderboardClient({
   entries: initialEntries,
 }: {
@@ -136,26 +160,15 @@ export function LeaderboardClient({
               </span>
               <span
                 className={cn(
-                  "inline-flex items-center gap-2 font-inter text-sm font-bold",
+                  "inline-flex items-center font-inter text-sm font-black tracking-[-0.01em]",
                   entry.deltaType === "up"
-                    ? "text-green-400"
+                    ? "text-[#08b86f]"
                     : entry.deltaType === "down"
-                      ? "text-red-400"
-                    : "text-[#64748b]"
+                      ? "text-[#006cff]"
+                      : "text-[#07111f]"
                 )}
               >
-                <span
-                  className={cn(
-                    "h-px w-6",
-                    entry.deltaType === "up"
-                      ? "bg-green-400"
-                      : entry.deltaType === "down"
-                        ? "bg-red-400"
-                        : "bg-[#b7c6d8]"
-                  )}
-                  aria-hidden="true"
-                />
-                {entry.delta ?? "→ steady"}
+                {formatMovement(entry.delta, entry.deltaType)}
               </span>
             </div>
           ))}
