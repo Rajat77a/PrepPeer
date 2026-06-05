@@ -85,6 +85,12 @@ const selectorFields: {
   },
 ];
 
+const profileContextLabels: Record<SelectorKey, string> = {
+  role: "Target role",
+  experience: "Experience",
+  company: "Company type",
+};
+
 export function ProfileForm({ user }: ProfileFormProps) {
   const router = useRouter();
 
@@ -177,22 +183,39 @@ export function ProfileForm({ user }: ProfileFormProps) {
               {user.email}
             </p>
 
-            {values.college && (
-              <p className="mt-4 inline-flex rounded-full border border-[rgba(0,132,255,0.14)] bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
-                {values.college}
+            <div className="mt-8 border-l-2 border-[#006cff] pl-5">
+              <p className="font-inter text-[11px] font-black uppercase tracking-[0.2em] text-[#006cff]">
+                Interview context
               </p>
-            )}
 
-            <div className="mt-6 space-y-2">
-              <p className="inline-flex rounded-full border border-[rgba(0,132,255,0.14)] bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
-                {values.role}
-              </p>
-              <p className="inline-flex rounded-full border border-[rgba(0,132,255,0.14)] bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
-                {values.experience}
-              </p>
-              <p className="inline-flex rounded-full border border-[rgba(0,132,255,0.14)] bg-[#f7fbff] px-3 py-1.5 font-inter text-xs font-bold text-[#64748b]">
-                {values.company}
-              </p>
+              <div className="mt-4 divide-y divide-[rgba(0,132,255,0.12)]">
+                {(["role", "experience", "company"] as SelectorKey[]).map(
+                  (key) => (
+                    <div
+                      key={key}
+                      className="group flex items-center justify-between gap-5 py-3"
+                    >
+                      <span className="font-inter text-xs font-bold uppercase tracking-[0.14em] text-[#8ba0b8] transition group-hover:text-[#006cff]">
+                        {profileContextLabels[key]}
+                      </span>
+                      <span className="text-right font-inter text-sm font-black text-[#07111f]">
+                        {values[key]}
+                      </span>
+                    </div>
+                  )
+                )}
+              </div>
+
+              {values.college && (
+                <div className="mt-4 border-t border-[rgba(0,132,255,0.12)] pt-4">
+                  <p className="font-inter text-xs font-bold uppercase tracking-[0.14em] text-[#8ba0b8]">
+                    College
+                  </p>
+                  <p className="mt-1 font-inter text-sm font-black text-[#07111f]">
+                    {values.college}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </motion.section>
