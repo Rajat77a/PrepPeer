@@ -91,8 +91,8 @@ export const FEATURE_DIMENSIONS: DimensionScore[] = [
 ];
 
 export const MINI_LEADERBOARD: LeaderboardEntry[] = [
-  { rank: 1, name: "Arjun S.", score: 94, delta: "Top 3%", deltaType: "up" },
-  { rank: 2, name: "Priya M.", score: 89 },
+  { rank: 1, name: "Arjun Sharma", score: 94, delta: "Top 3%", deltaType: "up" },
+  { rank: 2, name: "Priya Menon", score: 89 },
   {
     rank: 41,
     name: "You",
@@ -101,13 +101,13 @@ export const MINI_LEADERBOARD: LeaderboardEntry[] = [
     deltaType: "up",
     isYou: true,
   },
-  { rank: 42, name: "Karthik R.", score: 71 },
+  { rank: 42, name: "Karthik Iyer", score: 71 },
 ];
 
 export const LEADERBOARD_PREVIEW: LeaderboardEntry[] = [
   {
     rank: 1,
-    name: "Arjun S.",
+    name: "Arjun Sharma",
     subtitle: "SDE Fresher",
     score: 94,
     delta: "↑ +5",
@@ -115,13 +115,13 @@ export const LEADERBOARD_PREVIEW: LeaderboardEntry[] = [
   },
   {
     rank: 2,
-    name: "Priya M.",
+    name: "Priya Menon",
     subtitle: "SDE Fresher",
     score: 89,
   },
   {
     rank: 15,
-    name: "Sneha K.",
+    name: "Sneha Kapoor",
     subtitle: "SDE Fresher",
     score: 85,
     delta: "↑ +8",
@@ -138,7 +138,7 @@ export const LEADERBOARD_PREVIEW: LeaderboardEntry[] = [
   },
   {
     rank: 42,
-    name: "Karthik R.",
+    name: "Karthik Iyer",
     subtitle: "SDE Fresher",
     score: 71,
     delta: "↓ -3",
@@ -289,13 +289,13 @@ export const PRICING_PLANS: PricingPlan[] = [
 ];
 
 export const FULL_LEADERBOARD: LeaderboardEntry[] = [
-  { rank: 1, name: "Arjun S.", subtitle: "SDE Fresher", score: 94, sessions: 18, delta: "↗ 5 ranks", deltaType: "up", trend: "up" },
-  { rank: 2, name: "Priya M.", subtitle: "SDE Fresher", score: 89, sessions: 15, delta: "↗ 2 ranks", deltaType: "up", trend: "up" },
-  { rank: 3, name: "Sneha K.", subtitle: "SDE Fresher", score: 85, sessions: 12, delta: "↗ 8 ranks", deltaType: "up", trend: "up" },
-  { rank: 4, name: "Vikram P.", subtitle: "SDE Fresher", score: 83, sessions: 10, trend: "flat" },
-  { rank: 5, name: "Ananya R.", subtitle: "SDE Fresher", score: 81, sessions: 9, delta: "↘ 1 rank", deltaType: "down", trend: "down" },
-  { rank: 15, name: "Rohan T.", subtitle: "SDE Fresher", score: 76, sessions: 7, delta: "↗ 4 ranks", deltaType: "up", trend: "up" },
-  { rank: 28, name: "Meera L.", subtitle: "SDE Fresher", score: 74, sessions: 6, trend: "up" },
+  { rank: 1, name: "Arjun Sharma", subtitle: "SDE Fresher", score: 94, sessions: 18, delta: "↗ 5 ranks", deltaType: "up", trend: "up" },
+  { rank: 2, name: "Priya Menon", subtitle: "SDE Fresher", score: 89, sessions: 15, delta: "↗ 2 ranks", deltaType: "up", trend: "up" },
+  { rank: 3, name: "Sneha Kapoor", subtitle: "SDE Fresher", score: 85, sessions: 12, delta: "↗ 8 ranks", deltaType: "up", trend: "up" },
+  { rank: 4, name: "Vikram Bose", subtitle: "SDE Fresher", score: 83, sessions: 10, trend: "flat" },
+  { rank: 5, name: "Ananya Rao", subtitle: "SDE Fresher", score: 81, sessions: 9, delta: "↘ 1 rank", deltaType: "down", trend: "down" },
+  { rank: 15, name: "Rohan Verma", subtitle: "SDE Fresher", score: 76, sessions: 7, delta: "↗ 4 ranks", deltaType: "up", trend: "up" },
+  { rank: 28, name: "Meera Krishnan", subtitle: "SDE Fresher", score: 74, sessions: 6, trend: "up" },
   {
     rank: 41,
     name: "You",
@@ -307,8 +307,8 @@ export const FULL_LEADERBOARD: LeaderboardEntry[] = [
     isYou: true,
     trend: "up",
   },
-  { rank: 42, name: "Karthik R.", subtitle: "SDE Fresher", score: 71, sessions: 8, delta: "↘ 3 ranks", deltaType: "down", trend: "down" },
-  { rank: 43, name: "Divya N.", subtitle: "SDE Fresher", score: 70, sessions: 5, trend: "flat" },
+  { rank: 42, name: "Karthik Iyer", subtitle: "SDE Fresher", score: 71, sessions: 8, delta: "↘ 3 ranks", deltaType: "down", trend: "down" },
+  { rank: 43, name: "Divya Pillai", subtitle: "SDE Fresher", score: 70, sessions: 5, trend: "flat" },
 ];
 
 export const SCORE_TREND: ScoreTrendPoint[] = [
