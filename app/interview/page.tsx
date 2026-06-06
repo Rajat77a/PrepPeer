@@ -50,6 +50,7 @@ export default function InterviewPage() {
     reason: string;
   } | null>(null);
   const [questionReviews, setQuestionReviews] = useState<QuestionReview[]>([]);
+  const [endingSession, setEndingSession] = useState(false);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -57,6 +58,12 @@ export default function InterviewPage() {
   });
   const [pendingSetup, setPendingSetup] = useState<SetupData | null>(null);
   const autoStartRef = useRef(false);
+  const autoSubmitStartedRef = useRef(false);
+  const questionReviewsRef = useRef<QuestionReview[]>([]);
+
+  useEffect(() => {
+    questionReviewsRef.current = questionReviews;
+  }, [questionReviews]);
 
   const {
     strikeCount,
@@ -66,7 +73,11 @@ export default function InterviewPage() {
     timerDisplay,
     resetTimer,
     textareaProps,
-  } = useAntiCheat(stage === "interview" && !evaluating);
+  } = useAntiCheat(
+    questions.length === TOTAL &&
+      (stage === "interview" || stage === "feedback") &&
+      !endingSession
+  );
 
   useEffect(() => {
     const checkAccountAccess = async () => {
@@ -141,12 +152,50 @@ export default function InterviewPage() {
   }, [questionSetToken, setup]);
 
   useEffect(() => {
-    if (shouldAutoSubmit) {
-      saveResults(questionReviews, "autoSubmitted").then((saved) => {
-        if (saved) router.push("/results");
-      });
+    if (!shouldAutoSubmit || evaluating || autoSubmitStartedRef.current) return;
+
+    const finalizeSession = async () => {
+      if (document.hidden || autoSubmitStartedRef.current) return;
+
+      autoSubmitStartedRef.current = true;
+      setEndingSession(true);
+      setEvaluating(true);
+
+      let saved = false;
+      for (let attempt = 0; attempt < 3 && !saved; attempt += 1) {
+        saved = await saveResults(
+          questionReviewsRef.current,
+          "autoSubmitted"
+        );
+        if (!saved && attempt < 2) {
+          await new Promise((resolve) => window.setTimeout(resolve, 500));
+        }
+      }
+
+      if (saved) {
+        router.replace("/results");
+        return;
+      }
+
+      autoSubmitStartedRef.current = false;
+      setEvaluating(false);
+    };
+
+    if (document.hidden) {
+      const handleVisible = () => {
+        if (!document.hidden) {
+          document.removeEventListener("visibilitychange", handleVisible);
+          void finalizeSession();
+        }
+      };
+
+      document.addEventListener("visibilitychange", handleVisible);
+      return () =>
+        document.removeEventListener("visibilitychange", handleVisible);
     }
-  }, [shouldAutoSubmit, router, questionReviews, saveResults]);
+
+    void finalizeSession();
+  }, [evaluating, router, saveResults, shouldAutoSubmit]);
 
   const handleStart = async (profileSetup = setup) => {
     if (
@@ -180,6 +229,9 @@ export default function InterviewPage() {
         setQuestions(data.questions);
         setQuestionSetToken(data.questionSetToken);
         setQuestionReviews([]);
+        questionReviewsRef.current = [];
+        autoSubmitStartedRef.current = false;
+        setEndingSession(false);
         sessionStorage.removeItem("preppeer_results");
         setError("");
         setStage("interview");
@@ -222,6 +274,8 @@ export default function InterviewPage() {
   }, [stage]);
 
   const handleSubmit = async (answer: string) => {
+    if (endingSession || shouldAutoSubmit) return;
+
     const answerQuality = evaluateAnswerQuality(answer, questions[current - 1]);
 
     if (!answerQuality.valid) {
@@ -349,9 +403,16 @@ export default function InterviewPage() {
   };
 
   const handleNext = () => {
+    if (endingSession || shouldAutoSubmit) return;
+
     if (current >= TOTAL) {
+      setEndingSession(true);
       saveResults(questionReviews, "completed").then((saved) => {
-        if (saved) router.push("/results");
+        if (saved) {
+          router.push("/results");
+        } else {
+          setEndingSession(false);
+        }
       });
     } else {
       setCurrent((c) => c + 1);
@@ -496,7 +557,9 @@ export default function InterviewPage() {
               >
                 <div className="w-10 h-10 border-4 border-[#319AFF] border-t-transparent rounded-full animate-spin" />
                 <p className="font-inter text-muted text-sm">
-                  Evaluating your answer...
+                  {endingSession
+                    ? "Completing your session after the final integrity strike..."
+                    : "Evaluating your answer..."}
                 </p>
               </motion.div>
             ) : (

@@ -53,6 +53,8 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const questionStartTime = useRef<number>(Date.now());
   const lastSwitchTime = useRef<number>(0);
+  const switchCountRef = useRef(0);
+  const autoSubmitTriggeredRef = useRef(false);
   const wasActive = useRef(false);
 
   const blockShortcut = useCallback((e: KeyboardEvent | React.KeyboardEvent) => {
@@ -143,23 +145,28 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
 
   // ── Layer 3: Tab Switch Detection ───────────────────────
   const recordSwitch = useCallback(() => {
-    if (!active) return;
+    if (!active || autoSubmitTriggeredRef.current) return;
     const now = Date.now();
     if (now - lastSwitchTime.current < DEBOUNCE_MS) return;
     lastSwitchTime.current = now;
 
-    setState((prev) => {
-      const newCount = prev.tabSwitchCount + 1;
-      if (newCount >= 3) {
-        setShouldAutoSubmit(true);
-        return { ...prev, tabSwitchCount: newCount };
-      }
-      setShowWarningModal(true);
-      return { ...prev, tabSwitchCount: newCount };
-    });
+    const newCount = switchCountRef.current + 1;
+    switchCountRef.current = newCount;
+    setState((prev) => ({ ...prev, tabSwitchCount: newCount }));
+
+    if (newCount >= 3) {
+      autoSubmitTriggeredRef.current = true;
+      setShowWarningModal(false);
+      setShouldAutoSubmit(true);
+      return;
+    }
+
+    setShowWarningModal(true);
   }, [active]);
 
   useEffect(() => {
+    if (!active) return;
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
         recordSwitch();
@@ -178,7 +185,7 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.removeEventListener("blur", handleWindowBlur);
     };
-  }, [recordSwitch]);
+  }, [active, recordSwitch]);
 
   // ── Layer 4: Answer Timer ───────────────────────────────
   useEffect(() => {
