@@ -374,35 +374,18 @@ export default function LoginPage() {
       <Link
         href="/"
         aria-label="Return to PrepPeer home"
-        className="group absolute left-5 top-5 z-20 [perspective:700px] sm:left-8 sm:top-8"
+        className="group absolute left-5 top-5 z-20 flex h-11 w-11 items-center justify-center text-white/80 sm:left-8 sm:top-8"
       >
-        <motion.div
-          initial={{ opacity: 0, x: -16, rotateY: 18 }}
-          animate={{ opacity: 1, x: 0, rotateY: 0 }}
-          whileHover={{
-            y: -5,
-            rotateX: 8,
-            rotateY: -12,
-            scale: 1.04,
-          }}
-          whileTap={{ y: 2, rotateX: 0, rotateY: 0, scale: 0.96 }}
-          transition={{ type: "spring", stiffness: 320, damping: 20 }}
-          className="relative h-[54px] w-[54px] transform-gpu [transform-style:preserve-3d]"
+        <motion.span
+          initial={{ opacity: 0, x: -8 }}
+          animate={{ opacity: 1, x: 0 }}
+          whileHover={{ y: -2, scale: 1.1 }}
+          whileTap={{ y: 0, scale: 0.94 }}
+          transition={{ type: "spring", stiffness: 420, damping: 24 }}
+          className="flex items-center justify-center transition-colors duration-200 group-hover:text-white"
         >
-          <span className="absolute inset-x-[7px] bottom-[-7px] h-10 rounded-[15px] border border-[#2097ff]/25 bg-[#00102b]/90 shadow-[0_16px_34px_rgba(0,8,30,0.48)] transition-all duration-500 [transform:translateZ(-12px)] group-hover:bottom-[-4px] group-hover:rotate-[-5deg] group-hover:border-[#4cb4ff]/45" />
-
-          <span className="absolute inset-[3px] rounded-[17px] border border-white/16 bg-[#06275c]/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] backdrop-blur-xl transition-all duration-500 [transform:translateZ(-2px)] group-hover:rotate-[6deg] group-hover:border-[#55bbff]/55 group-hover:bg-[#073575]/90" />
-
-          <span className="absolute inset-0 flex items-center justify-center rounded-[18px] border border-white/38 bg-[linear-gradient(145deg,rgba(18,93,178,0.94),rgba(1,25,67,0.96))] text-white shadow-[0_12px_30px_rgba(0,22,67,0.36),inset_0_1px_0_rgba(255,255,255,0.38)] transition-all duration-500 [transform:translateZ(10px)] group-hover:-rotate-[3deg] group-hover:border-white/75 group-hover:bg-[linear-gradient(145deg,#168dff,#052860)] group-hover:shadow-[0_18px_42px_rgba(0,108,255,0.42),inset_0_1px_0_rgba(255,255,255,0.55)]">
-            <span className="absolute left-[9px] top-[8px] h-[3px] w-[15px] rounded-full bg-white/38 transition-all duration-500 group-hover:w-[22px] group-hover:bg-white/70" />
-            <Home
-              aria-hidden="true"
-              className="h-[21px] w-[21px] transition-all duration-500 [transform:translateZ(18px)] group-hover:-translate-y-0.5 group-hover:scale-110"
-              strokeWidth={2.25}
-            />
-            <span className="absolute bottom-[7px] h-[2px] w-2 rounded-full bg-[#68d7ff] opacity-65 shadow-[0_0_10px_rgba(104,215,255,0.85)] transition-all duration-500 group-hover:w-5 group-hover:bg-white group-hover:opacity-100" />
-          </span>
-        </motion.div>
+          <Home aria-hidden="true" className="h-6 w-6" strokeWidth={2.1} />
+        </motion.span>
       </Link>
 
       <section className="relative z-10 flex min-h-svh items-center justify-center px-5 py-6 sm:py-8">
