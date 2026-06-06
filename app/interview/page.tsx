@@ -51,6 +51,8 @@ export default function InterviewPage() {
   } | null>(null);
   const [questionReviews, setQuestionReviews] = useState<QuestionReview[]>([]);
   const [endingSession, setEndingSession] = useState(false);
+  const [completionError, setCompletionError] = useState("");
+  const [completionRetry, setCompletionRetry] = useState(0);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -59,6 +61,7 @@ export default function InterviewPage() {
   const [pendingSetup, setPendingSetup] = useState<SetupData | null>(null);
   const autoStartRef = useRef(false);
   const autoSubmitStartedRef = useRef(false);
+  const autoSubmitFailedRef = useRef(false);
   const questionReviewsRef = useRef<QuestionReview[]>([]);
 
   useEffect(() => {
@@ -160,13 +163,21 @@ export default function InterviewPage() {
   }, [questionSetToken, setup]);
 
   useEffect(() => {
-    if (!shouldAutoSubmit || evaluating || autoSubmitStartedRef.current) return;
+    if (
+      !shouldAutoSubmit ||
+      evaluating ||
+      autoSubmitStartedRef.current ||
+      autoSubmitFailedRef.current
+    ) {
+      return;
+    }
 
     const finalizeSession = async () => {
       if (document.hidden || autoSubmitStartedRef.current) return;
 
       autoSubmitStartedRef.current = true;
       setEndingSession(true);
+      setCompletionError("");
       setEvaluating(true);
 
       let saved = false;
@@ -186,7 +197,11 @@ export default function InterviewPage() {
       }
 
       autoSubmitStartedRef.current = false;
+      autoSubmitFailedRef.current = true;
       setEvaluating(false);
+      setCompletionError(
+        "Your session could not be saved securely. Check the server connection, then retry."
+      );
     };
 
     if (document.hidden) {
@@ -203,7 +218,13 @@ export default function InterviewPage() {
     }
 
     void finalizeSession();
-  }, [evaluating, router, saveResults, shouldAutoSubmit]);
+  }, [
+    completionRetry,
+    evaluating,
+    router,
+    saveResults,
+    shouldAutoSubmit,
+  ]);
 
   const handleStart = async (profileSetup = setup) => {
     if (
@@ -239,7 +260,9 @@ export default function InterviewPage() {
         setQuestionReviews([]);
         questionReviewsRef.current = [];
         autoSubmitStartedRef.current = false;
+        autoSubmitFailedRef.current = false;
         setEndingSession(false);
+        setCompletionError("");
         sessionStorage.removeItem("preppeer_results");
         setError("");
         setStage("interview");
@@ -555,7 +578,39 @@ export default function InterviewPage() {
 
         <AnimatePresence mode="wait">
           {stage === "interview" ? (
-            evaluating ? (
+            completionError ? (
+              <motion.div
+                key="completion-error"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="mx-auto flex max-w-xl flex-col items-center py-20 text-center"
+              >
+                <AlertTriangle size={34} color="#D83A3A" strokeWidth={1.8} />
+                <h2 className="mt-5 font-fustat text-2xl font-extrabold text-text">
+                  Session completion paused
+                </h2>
+                <p className="mt-3 font-inter text-sm font-medium leading-6 text-muted">
+                  {completionError}
+                </p>
+                {error && (
+                  <p className="mt-2 font-inter text-sm font-semibold text-red-500">
+                    {error}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    autoSubmitFailedRef.current = false;
+                    setCompletionError("");
+                    setCompletionRetry((value) => value + 1);
+                  }}
+                  className="mt-7 bg-[#0084FF] px-6 py-3 font-inter text-sm font-bold text-white shadow-[0_12px_30px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:bg-[#006FCC]"
+                >
+                  Retry secure completion
+                </button>
+              </motion.div>
+            ) : evaluating ? (
               <motion.div
                 key="evaluating"
                 initial={{ opacity: 0 }}

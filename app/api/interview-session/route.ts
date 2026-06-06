@@ -102,7 +102,10 @@ export async function POST(req: NextRequest) {
   const admin = createOptionalAdminClient();
   if (!admin) {
     return NextResponse.json(
-      { error: "Secure interview storage is not configured." },
+      {
+        error:
+          "Secure interview storage is not configured. Add SUPABASE_SECRET_KEY to the server environment.",
+      },
       { status: 503 }
     );
   }
