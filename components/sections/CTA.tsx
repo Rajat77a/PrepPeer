@@ -28,7 +28,7 @@ export function CTA() {
         <div className="relative z-10 max-w-[800px] mx-auto text-center">
           <h2 className="section-title text-white">Your rank is waiting.</h2>
           <p className="font-inter text-base text-white/60 mt-4 mb-10 max-w-lg mx-auto leading-[1.65]">
-            Join 12,400+ students who already know where they stand. Start your
+            Join 2,700+ students who already know where they stand. Start your
             first free interview in 60 seconds.
           </p>
           <div className="flex justify-center">
