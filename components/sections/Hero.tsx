@@ -321,7 +321,7 @@ export function Hero() {
             </span>
           </motion.div>
 
-          <div className="flex items-center gap-3 sm:gap-6 md:gap-10 mb-6 md:mb-8 overflow-visible">
+          <div className="-mt-2 mb-3 flex items-center gap-3 overflow-visible sm:gap-6 md:-mt-3 md:mb-4 md:gap-10">
             <motion.h1
               variants={itemVariants}
               className="hero-h1 text-text flex-1 min-w-0"
