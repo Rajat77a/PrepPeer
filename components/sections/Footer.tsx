@@ -20,8 +20,10 @@ const supportLinks = [
 const footerLinkHref: Record<string, string> = {
   "Privacy policy": "/privacy",
   "Terms of service": "/terms",
+  "Cookie policy": "/cookies",
   Privacy: "/privacy",
   Terms: "/terms",
+  Cookies: "/cookies",
 };
 
 export function Footer() {
