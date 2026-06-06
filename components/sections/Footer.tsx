@@ -6,7 +6,6 @@ const productLinks = [
   { label: "Features", href: "/#features" },
   { label: "Leaderboard", href: "/#leaderboard-preview" },
   { label: "In action", href: "/#see-it-in-action" },
-  { label: "Dashboard", href: "/dashboard" },
 ];
 
 const companyLinks = ["About", "Blog", "Careers", "Press", "Contact"];
