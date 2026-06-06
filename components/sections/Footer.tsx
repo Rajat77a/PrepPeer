@@ -83,6 +83,13 @@ export function Footer() {
                   >
                     {link}
                   </Link>
+                ) : link === "Press" ? (
+                  <Link
+                    href="/press"
+                    className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer"
+                  >
+                    {link}
+                  </Link>
                 ) : link === "Contact" ? (
                   <a
                     href="mailto:preppeerenquiries@gmail.com"
