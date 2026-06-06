@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { OnboardingForm } from "@/components/onboarding/OnboardingForm";
+import { getTrustedProfile, hasCompletedProfile } from "@/lib/profile";
 import { createClient } from "@/utils/supabase/server";
 
 export const metadata = {
@@ -17,23 +18,6 @@ const safeNextPath = (next?: string | string[]) => {
   return value;
 };
 
-const hasCompletedAccountSetup = (
-  metadata?: Record<string, unknown> | null
-) => {
-  const fullName = String(
-    metadata?.full_name ?? metadata?.name ?? ""
-  ).trim();
-  const college = String(metadata?.college ?? "").trim();
-  const role = String(metadata?.target_role ?? "").trim();
-  const experience = String(metadata?.experience_level ?? "").trim();
-  const company = String(metadata?.target_company_type ?? "").trim();
-
-  return (
-    metadata?.onboarding_complete === true &&
-    Boolean(fullName && college && role && experience && company)
-  );
-};
-
 export default async function OnboardingPage({
   searchParams,
 }: {
@@ -47,19 +31,17 @@ export default async function OnboardingPage({
 
   if (!user) redirect("/login");
 
-  const fullName =
-    user.user_metadata?.full_name ?? user.user_metadata?.name ?? "";
-  const college = user.user_metadata?.college ?? "";
+  const profile = getTrustedProfile(user);
   const nextPath = safeNextPath(searchParams?.next);
 
-  if (hasCompletedAccountSetup(user.user_metadata)) {
+  if (hasCompletedProfile(user)) {
     redirect(nextPath);
   }
 
   return (
     <OnboardingForm
-      initialName={fullName}
-      initialCollege={college}
+      initialName={profile.fullName}
+      initialCollege={profile.college}
       postSubmitPath={nextPath}
     />
   );

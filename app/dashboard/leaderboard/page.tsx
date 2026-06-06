@@ -5,6 +5,7 @@ import {
   toLiveLeaderboardEntries,
   type SupabaseLeaderboardRow,
 } from "@/lib/liveLeaderboard";
+import { getTrustedProfile } from "@/lib/profile";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
@@ -29,11 +30,10 @@ export default async function DashboardLeaderboardPage() {
     user?.id
   );
 
-  const profileRole = String(user?.user_metadata?.target_role ?? "").trim();
-  const profileCompanyType = String(
-    user?.user_metadata?.target_company_type ?? ""
-  ).trim();
-  const profileCollege = String(user?.user_metadata?.college ?? "").trim();
+  const profile = user ? getTrustedProfile(user) : null;
+  const profileRole = profile?.role ?? "";
+  const profileCompanyType = profile?.company ?? "";
+  const profileCollege = profile?.college ?? "";
 
   const entries = rawEntries.map((entry) => {
     if (!entry.isYou) return entry;

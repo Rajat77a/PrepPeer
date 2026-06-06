@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { createOptionalAdminClient } from "@/utils/supabase/admin";
 import {
   parseProfileInput,
   readJsonBody,
 } from "@/lib/validation";
 
 export async function PATCH(req: NextRequest) {
-  const { supabase, user } = await getAuthenticatedContext();
+  const { user } = await getAuthenticatedContext();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const admin = createOptionalAdminClient();
+  if (!admin) {
+    return NextResponse.json(
+      { error: "Secure profile storage is not configured." },
+      { status: 503 }
+    );
   }
 
   const rateLimit = checkRateLimit(
@@ -41,8 +50,20 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { error } = await supabase.auth.updateUser({
-      data: {
+    const { error } = await admin.auth.admin.updateUserById(user.id, {
+      app_metadata: {
+        ...user.app_metadata,
+        preppeer_profile: {
+          fullName: profile.fullName,
+          college: profile.college,
+          role: profile.role,
+          experience: profile.experience,
+          company: profile.company,
+          onboardingComplete: true,
+        },
+      },
+      user_metadata: {
+        ...user.user_metadata,
         full_name: profile.fullName,
         name: profile.fullName,
         college: profile.college,

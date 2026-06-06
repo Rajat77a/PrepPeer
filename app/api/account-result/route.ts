@@ -10,6 +10,7 @@ import {
   toLiveLeaderboardEntries,
   type SupabaseLeaderboardRow,
 } from "@/lib/liveLeaderboard";
+import { getTrustedDisplayMetadata } from "@/lib/profile";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 
@@ -80,7 +81,7 @@ export async function GET() {
   }
 
   return NextResponse.json({
-    name: getDisplayName(user.user_metadata, user.email),
+    name: getDisplayName(getTrustedDisplayMetadata(user), user.email),
     role: latestSession.role ?? "Interview",
     companyType: latestSession.company_type ?? "General",
     source: "account",

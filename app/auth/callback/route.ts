@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { hasCompletedProfile } from "@/lib/profile";
 import { getSupabaseConfig } from "@/utils/supabase/config";
 
 const safeNextPath = (next: string | null) => {
@@ -18,17 +19,6 @@ const isFreshAuthUser = (createdAt?: string) => {
   if (Number.isNaN(createdTime)) return false;
 
   return Date.now() - createdTime < 12 * 60 * 1000;
-};
-
-const hasCompletedAccountSetup = (
-  metadata?: Record<string, unknown> | null
-) => {
-  const fullName = String(
-    metadata?.full_name ?? metadata?.name ?? ""
-  ).trim();
-  const college = String(metadata?.college ?? "").trim();
-
-  return metadata?.onboarding_complete === true || Boolean(fullName && college);
 };
 
 export async function GET(request: Request) {
@@ -71,7 +61,8 @@ export async function GET(request: Request) {
 
   if (
     isFreshAuthUser(user?.created_at) &&
-    !hasCompletedAccountSetup(user?.user_metadata)
+    user &&
+    !hasCompletedProfile(user)
   ) {
     return NextResponse.redirect(
       `${siteUrl}/onboarding?next=${encodeURIComponent(next)}`

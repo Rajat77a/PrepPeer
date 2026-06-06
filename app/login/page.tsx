@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { hasCompletedProfile } from "@/lib/profile";
 import { OrbLogo } from "@/components/ui/OrbLogo";
 import {
   InputOTP,
@@ -273,23 +274,12 @@ export default function LoginPage() {
         error: userError,
       } = await supabase.auth.getUser();
       const verifiedUser = user ?? verifyData.user;
-      const metadata = verifiedUser?.user_metadata ?? {};
-      const hasCompletedSetup =
-        metadata.onboarding_complete === true &&
-        Boolean(
-          String(metadata.full_name ?? metadata.name ?? "").trim() &&
-            String(metadata.college ?? "").trim() &&
-            String(metadata.target_role ?? "").trim() &&
-            String(metadata.experience_level ?? "").trim() &&
-            String(metadata.target_company_type ?? "").trim()
-        );
-
       if (userError || !verifiedUser) {
         setError("Account verified, but the session was not ready. Please sign in.");
         return;
       }
 
-      if (hasCompletedSetup) {
+      if (hasCompletedProfile(verifiedUser)) {
         router.replace(nextPath);
         router.refresh();
         return;

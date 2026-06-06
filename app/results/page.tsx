@@ -17,6 +17,7 @@ import {
   getRankSummary,
   type InterviewSessionRow,
 } from "@/lib/ranking";
+import { getTrustedDisplayMetadata } from "@/lib/profile";
 import { createClient } from "@/utils/supabase/client";
 
 type StoredResult = Partial<SessionReport> & {
@@ -125,7 +126,7 @@ export default function ResultsPage() {
 
       const rankSummary = getRankSummary(allSessions, user.id);
       const accountResult: StoredResult = {
-        name: getDisplayName(user.user_metadata, user.email),
+        name: getDisplayName(getTrustedDisplayMetadata(user), user.email),
         role: latestSession.role ?? "Interview",
         companyType: latestSession.company_type ?? "General",
         source: "account",

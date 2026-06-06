@@ -16,6 +16,7 @@ import {
   toLiveLeaderboardEntries,
   type SupabaseLeaderboardRow,
 } from "@/lib/liveLeaderboard";
+import { getTrustedProfile } from "@/lib/profile";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
@@ -131,20 +132,13 @@ export default async function DashboardPage() {
 
   if (!user) redirect("/login");
 
-  const name =
-    user.user_metadata?.full_name ??
-    user.user_metadata?.name ??
-    user.email?.split("@")[0] ??
-    "PrepPeer user";
+  const profile = getTrustedProfile(user);
+  const name = profile.fullName || user.email?.split("@")[0] || "PrepPeer user";
 
   const firstName = name.split(" ")[0] ?? "there";
-  const profileRole = String(user.user_metadata?.target_role ?? "Interview");
-  const profileExperience = String(
-    user.user_metadata?.experience_level ?? "Not set"
-  );
-  const profileCompanyType = String(
-    user.user_metadata?.target_company_type ?? "General"
-  );
+  const profileRole = profile.role || "Interview";
+  const profileExperience = profile.experience || "Not set";
+  const profileCompanyType = profile.company || "General";
 
   const supabase = createClient(cookieStore);
   const leaderboardSupabase = createOptionalAdminClient() ?? supabase;
@@ -170,7 +164,7 @@ export default async function DashboardPage() {
   userProfiles[user.id] = {
     ...(userProfiles[user.id] ?? {}),
     name,
-    college: String(user.user_metadata?.college ?? ""),
+    college: profile.college,
     role: profileRole,
     companyType: profileCompanyType,
   };
@@ -187,7 +181,7 @@ export default async function DashboardPage() {
     allSessions,
     user.id,
     name,
-    String(user.user_metadata?.college ?? ""),
+    profile.college,
     userProfiles
   );
 
