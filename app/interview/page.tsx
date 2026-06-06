@@ -109,10 +109,14 @@ export default function InterviewPage() {
     reviews: QuestionReview[],
     completionReason: "completed" | "autoSubmitted"
   ) => {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 20_000);
+
     try {
       const response = await fetch("/api/interview-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
           setup,
           completionReason,
@@ -143,11 +147,15 @@ export default function InterviewPage() {
       return true;
     } catch (saveError) {
       setError(
-        saveError instanceof Error
+        saveError instanceof DOMException && saveError.name === "AbortError"
+          ? "The session save took too long. Retrying securely..."
+          : saveError instanceof Error
           ? saveError.message
           : "The interview result could not be saved."
       );
       return false;
+    } finally {
+      window.clearTimeout(timeout);
     }
   }, [questionSetToken, setup]);
 

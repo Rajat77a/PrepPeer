@@ -20,6 +20,8 @@ import {
 } from "@/lib/validation";
 
 const TOTAL_QUESTIONS = 5;
+const SESSION_COLUMNS =
+  "id,composite_score,dimensions,question_scores,summary";
 const zeroDimensions: DimensionScore[] = [
   "Communication",
   "Problem Solving",
@@ -164,6 +166,30 @@ export async function POST(req: NextRequest) {
         { error: "The interview question set is invalid or expired." },
         { status: 400 }
       );
+    }
+
+    const { data: existingSession, error: existingSessionError } = await admin
+      .from("interview_sessions")
+      .select(SESSION_COLUMNS)
+      .eq("user_id", user.id)
+      .contains("summary", { sessionAttemptId: questionSet.sessionId })
+      .maybeSingle();
+
+    if (existingSessionError) {
+      return NextResponse.json(
+        { error: "The interview result could not be checked." },
+        { status: 500 }
+      );
+    }
+
+    if (existingSession) {
+      return NextResponse.json({
+        sessionId: existingSession.id,
+        compositeScore: Number(existingSession.composite_score ?? 0),
+        dimensions: existingSession.dimensions ?? [],
+        questionScores: existingSession.question_scores ?? [],
+        summary: existingSession.summary,
+      });
     }
 
     const feedbackDimensions: DimensionScore[][] = [];
@@ -356,6 +382,7 @@ export async function POST(req: NextRequest) {
       trustedReviews
     );
     const summary = {
+      sessionAttemptId: questionSet.sessionId,
       completionReason: input.completionReason,
       attemptedQuestions: attemptedCount,
       totalQuestions: TOTAL_QUESTIONS,

@@ -12,6 +12,8 @@ type SummaryResult = {
   >[];
 };
 
+const SUMMARY_TIMEOUT_MS = 8_000;
+
 const fallbackSummary = (reviews: QuestionReview[]): SummaryResult => ({
   overallSummary:
     "Review each answer below and focus on clearer reasoning, specific examples, and accurate role-relevant details.",
@@ -81,6 +83,9 @@ export const generateInterviewSummary = async (
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return fallbackSummary(reviews);
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), SUMMARY_TIMEOUT_MS);
+
   try {
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -117,6 +122,7 @@ Return:
           ],
           max_tokens: 1200,
         }),
+        signal: controller.signal,
       }
     );
 
@@ -129,5 +135,7 @@ Return:
     return normalizeSummary(JSON.parse(match[0]), reviews) ?? fallbackSummary(reviews);
   } catch {
     return fallbackSummary(reviews);
+  } finally {
+    clearTimeout(timeout);
   }
 };
