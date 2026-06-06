@@ -132,7 +132,7 @@ export function Footer() {
 
       <div className="max-w-6xl mx-auto border-t border-white/[0.06] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="font-inter text-sm text-white/35">
-          © 2026 PrepPeer. All rights reserved.
+          © {new Date().getFullYear()} PrepPeer. All rights reserved.
         </p>
         <div className="flex gap-6">
           {["Privacy", "Terms", "Cookies"].map((link) => (
