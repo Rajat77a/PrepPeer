@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronRight, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { createClient } from "@/utils/supabase/client";
 
 type ProfileFormProps = {
   user: {
@@ -110,28 +109,25 @@ export function ProfileForm({ user }: ProfileFormProps) {
   );
 
   const saveProfile = async () => {
+    if (values.fullName.trim().length < 2 || values.college.trim().length < 2) {
+      setMessage("Please enter a valid name and college.");
+      return;
+    }
+
     setSaving(true);
     setMessage("");
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.updateUser({
-      data: {
-        full_name: values.fullName.trim(),
-        name: values.fullName.trim(),
-        college: values.college.trim(),
-        target_role: values.role.trim(),
-        experience_level: values.experience.trim(),
-        target_company_type: values.company.trim(),
-        onboarding_complete: Boolean(
-          values.fullName.trim() && values.college.trim()
-        ),
-      },
+    const response = await fetch("/api/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
     });
+    const result = await response.json();
 
     setSaving(false);
 
-    if (error) {
-      setMessage(error.message);
+    if (!response.ok) {
+      setMessage(result.error ?? "Profile could not be saved.");
       return;
     }
 
@@ -235,6 +231,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
                 <input
                   value={values[field.id]}
+                  minLength={2}
+                  maxLength={field.id === "fullName" ? 80 : 120}
                   onChange={(event) =>
                     setValues((current) => ({
                       ...current,

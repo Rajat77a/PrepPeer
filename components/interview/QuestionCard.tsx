@@ -83,6 +83,7 @@ export function QuestionCard({
             value={answer}
             onChange={(e) => setAnswer(e.target.value)}
             placeholder="Write your answer here. Use examples, tradeoffs, and clear reasoning."
+            maxLength={8000}
             className="w-full min-h-[240px] resize-y border border-[rgba(0,0,0,0.12)] bg-white p-5 font-inter text-[15px] leading-7 text-text outline-none transition focus:border-[#0084FF] focus:shadow-[0_0_0_3px_rgba(0,132,255,0.11)]"
             style={{ borderRadius: 16 }}
             {...(antiCheatProps ?? {})}

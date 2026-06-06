@@ -10,9 +10,10 @@ export default function ContactPage() {
     event.preventDefault();
 
     const form = new FormData(event.currentTarget);
-    const name = String(form.get("name") ?? "");
-    const email = String(form.get("email") ?? "");
-    const message = String(form.get("message") ?? "");
+    const name = String(form.get("name") ?? "").trim().slice(0, 80);
+    const email = String(form.get("email") ?? "").trim().slice(0, 254);
+    const message = String(form.get("message") ?? "").trim().slice(0, 4000);
+    if (!name || !email || !message) return;
     const subject = encodeURIComponent(`PrepPeer enquiry from ${name}`);
     const body = encodeURIComponent(
       `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
@@ -50,6 +51,8 @@ export default function ContactPage() {
                 required
                 type="text"
                 name="name"
+                minLength={2}
+                maxLength={80}
                 autoComplete="name"
                 className="mt-2 h-12 w-full border border-[#07111f]/15 bg-white px-4 font-inter text-base text-[#07111f] outline-none transition focus:border-[#006cff] focus:ring-2 focus:ring-[#006cff]/15"
               />
@@ -63,6 +66,7 @@ export default function ContactPage() {
                 required
                 type="email"
                 name="email"
+                maxLength={254}
                 autoComplete="email"
                 className="mt-2 h-12 w-full border border-[#07111f]/15 bg-white px-4 font-inter text-base text-[#07111f] outline-none transition focus:border-[#006cff] focus:ring-2 focus:ring-[#006cff]/15"
               />
@@ -76,6 +80,8 @@ export default function ContactPage() {
                 required
                 name="message"
                 rows={6}
+                minLength={5}
+                maxLength={4000}
                 className="mt-2 w-full resize-y border border-[#07111f]/15 bg-white px-4 py-3 font-inter text-base leading-7 text-[#07111f] outline-none transition focus:border-[#006cff] focus:ring-2 focus:ring-[#006cff]/15"
               />
             </label>

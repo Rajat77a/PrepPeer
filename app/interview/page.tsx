@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
@@ -11,7 +11,7 @@ import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 import { createClient } from "@/utils/supabase/client";
-import type { DimensionScore, QuestionReview } from "@/lib/types";
+import type { QuestionReview } from "@/lib/types";
 import {
   AlertTriangle,
   ArrowRight,
@@ -32,39 +32,13 @@ type SetupData = {
 
 type Stage = "setup" | "terms" | "interview" | "feedback";
 
-const zeroDimensions: DimensionScore[] = [
-  {
-    label: "Communication",
-    value: 0,
-    color: "#0084FF",
-    reason: "No valid answer was submitted.",
-  },
-  {
-    label: "Problem Solving",
-    value: 0,
-    color: "#319AFF",
-    reason: "No valid answer was submitted.",
-  },
-  {
-    label: "Specificity",
-    value: 0,
-    color: "#FF6B3D",
-    reason: "No valid answer was submitted.",
-  },
-  {
-    label: "Accuracy",
-    value: 0,
-    color: "#0084FF",
-    reason: "No valid answer was submitted.",
-  },
-];
-
 export default function InterviewPage() {
   const router = useRouter();
   const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
   const [current, setCurrent] = useState(1);
   const [questions, setQuestions] = useState<string[]>([]);
+  const [questionSetToken, setQuestionSetToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [directStarting, setDirectStarting] = useState(false);
   const [error, setError] = useState("");
@@ -75,13 +49,7 @@ export default function InterviewPage() {
     confidence: number;
     reason: string;
   } | null>(null);
-  const [questionScores, setQuestionScores] = useState<
-    { question: string; score: number }[]
-  >([]);
   const [questionReviews, setQuestionReviews] = useState<QuestionReview[]>([]);
-  const [dimensionHistory, setDimensionHistory] = useState<
-    typeof MOCK_FEEDBACK.dimensions[]
-  >([]);
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -126,152 +94,59 @@ export default function InterviewPage() {
     void checkAccountAccess();
   }, [router]);
 
-  const saveResults = async (
+  const saveResults = useCallback(async (
     reviews: QuestionReview[],
     completionReason: "completed" | "autoSubmitted"
   ) => {
-    const allReviews = Array.from({ length: TOTAL }, (_, index) => {
-      const questionLabel = `Q${index + 1}`;
-      const existing = reviews.find((item) => item.question === questionLabel);
-
-      return (
-        existing ?? {
-          question: questionLabel,
-          prompt: questions[index] ?? "Question not available",
-          score: 0,
-          status: "autoSkipped" as const,
-          reason: "The session ended before this question was answered.",
-        }
-      );
-    });
-
-    const attemptedReviews = allReviews.filter(
-      (item) =>
-        item.status === "answered" ||
-        item.status === "gibberish" ||
-        item.status === "ai"
-    );
-
-    const attemptedCount = attemptedReviews.length;
-
-    const attemptedAverage =
-      attemptedCount > 0
-        ? attemptedReviews.reduce(
-            (sum, item) => sum + Number(item.score ?? 0),
-            0
-          ) / attemptedCount
-        : 0;
-
-    const completionFactor =
-      attemptedCount > 0 ? 0.5 + 0.5 * (attemptedCount / TOTAL) : 0;
-
-    const compositeScore = Math.round(attemptedAverage * completionFactor);
-
-    const allQuestionScores = allReviews.map((item) => ({
-      question: item.question,
-      score: item.score,
-    }));
-
-    const resultDimensions =
-      dimensionHistory.length > 0 && attemptedCount > 0
-        ? zeroDimensions.map((fallbackDimension, index) => {
-            const sourceDimension =
-              dimensionHistory[0]?.[index] ?? fallbackDimension;
-
-            const total = dimensionHistory.reduce(
-              (sum, item) => sum + (item[index]?.value ?? 0),
-              0
-            );
-
-            const attemptedDimensionAverage = total / attemptedCount;
-
-            return {
-              ...sourceDimension,
-              value: Number(
-                (attemptedDimensionAverage * completionFactor).toFixed(1)
-              ),
-            };
-          })
-        : zeroDimensions;
-
-    let aiSummary: {
-      overallSummary?: string;
-      needsImprovement?: string[];
-      questionReviews?: QuestionReview[];
-    } | null = null;
-
     try {
-      const summaryRes = await fetch("/api/generate-summary", {
+      const response = await fetch("/api/interview-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ completionReason, questionReviews: allReviews }),
+        body: JSON.stringify({
+          setup,
+          completionReason,
+          questionReviews: reviews,
+          questionSetToken,
+        }),
       });
 
-      if (summaryRes.ok) {
-        aiSummary = await summaryRes.json();
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error ?? "The interview result could not be saved.");
       }
-    } catch {
-      aiSummary = null;
+
+      sessionStorage.setItem(
+        "preppeer_results",
+        JSON.stringify({
+          source: "account",
+          role: setup.domain,
+          companyType: setup.companyType,
+          unlockedSessionId: result.sessionId,
+          compositeScore: result.compositeScore,
+          dimensions: result.dimensions,
+          questionScores: result.questionScores,
+          summary: result.summary,
+        })
+      );
+      setError("");
+      return true;
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "The interview result could not be saved."
+      );
+      return false;
     }
-
-    const summary = {
-      completionReason,
-      attemptedQuestions: attemptedCount,
-      totalQuestions: TOTAL,
-      completionFactor,
-      overallSummary:
-        aiSummary?.overallSummary ?? "AI summary could not be generated right now.",
-      needsImprovement:
-        aiSummary?.needsImprovement ?? [
-          "Write clear, specific answers with real examples.",
-        ],
-      questionReviews: allReviews.map((item) => {
-        const aiReview = aiSummary?.questionReviews?.find(
-          (review) => review.question === item.question
-        );
-
-        return {
-          ...item,
-          summary: aiReview?.summary ?? item.summary,
-          improvement: aiReview?.improvement ?? item.improvement,
-        };
-      }),
-    };
-
-    sessionStorage.setItem(
-      "preppeer_results",
-      JSON.stringify({
-        compositeScore,
-        dimensions: resultDimensions,
-        questionScores: allQuestionScores,
-        summary,
-      })
-    );
-
-    const supabase = createClient();
-    const { data } = await supabase.auth.getUser();
-
-    if (data.user) {
-      await supabase.from("interview_sessions").insert({
-        user_id: data.user.id,
-        role: setup.domain,
-        experience: setup.experience,
-        company_type: setup.companyType,
-        composite_score: compositeScore,
-        dimensions: resultDimensions,
-        question_scores: allQuestionScores,
-        summary,
-      });
-    }
-  };
+  }, [questionSetToken, setup]);
 
   useEffect(() => {
     if (shouldAutoSubmit) {
-      saveResults(questionReviews, "autoSubmitted").then(() => {
-        router.push("/results");
+      saveResults(questionReviews, "autoSubmitted").then((saved) => {
+        if (saved) router.push("/results");
       });
     }
-  }, [shouldAutoSubmit, router, questionReviews, dimensionHistory]);
+  }, [shouldAutoSubmit, router, questionReviews, saveResults]);
 
   const handleStart = async (profileSetup = setup) => {
     if (
@@ -296,11 +171,15 @@ export default function InterviewPage() {
 
       const data = await res.json();
 
-      if (res.ok && Array.isArray(data.questions) && data.questions.length > 0) {
+      if (
+        res.ok &&
+        Array.isArray(data.questions) &&
+        data.questions.length === TOTAL &&
+        typeof data.questionSetToken === "string"
+      ) {
         setQuestions(data.questions);
-        setQuestionScores([]);
+        setQuestionSetToken(data.questionSetToken);
         setQuestionReviews([]);
-        setDimensionHistory([]);
         sessionStorage.removeItem("preppeer_results");
         setError("");
         setStage("interview");
@@ -350,10 +229,6 @@ export default function InterviewPage() {
 
       setFeedback(zeroFeedback);
       setAiDetected(null);
-      setQuestionScores((prev) => [
-        ...prev,
-        { question: `Q${current}`, score: 0 },
-      ]);
       setQuestionReviews((prev) => [
         ...prev,
         {
@@ -381,6 +256,8 @@ export default function InterviewPage() {
             answer,
             domain: setup.domain,
             experience: setup.experience,
+            questionIndex: current - 1,
+            questionSetToken,
           }),
         }),
         fetch("/api/detect-ai", {
@@ -392,6 +269,15 @@ export default function InterviewPage() {
 
       const evalData = await evalRes.json();
       const detectData = await detectRes.json();
+
+      if (!evalRes.ok || !detectRes.ok) {
+        throw new Error(
+          evalData.error ??
+            detectData.error ??
+            "This answer could not be evaluated."
+        );
+      }
+
       const isAI = detectData?.isAI === true;
 
       if (isAI) {
@@ -400,10 +286,6 @@ export default function InterviewPage() {
         );
 
         setFeedback(aiFeedback);
-        setQuestionScores((prev) => [
-          ...prev,
-          { question: `Q${current}`, score: 0 },
-        ]);
         setQuestionReviews((prev) => [
           ...prev,
           {
@@ -413,17 +295,13 @@ export default function InterviewPage() {
             score: 0,
             status: "ai",
             reason: detectData.reason,
+            detectionToken: detectData.detectionToken,
           },
         ]);
       } else if (evalData.feedback) {
         const score = Number(evalData.feedback.compositeScore ?? 0);
 
         setFeedback(evalData.feedback);
-        setDimensionHistory((prev) => [...prev, evalData.feedback.dimensions]);
-        setQuestionScores((prev) => [
-          ...prev,
-          { question: `Q${current}`, score },
-        ]);
         setQuestionReviews((prev) => [
           ...prev,
           {
@@ -439,6 +317,8 @@ export default function InterviewPage() {
                     `${dimension.label}: ${dimension.reason}`
                 )
                 .join(" ") ?? "",
+            evaluationToken: evalData.evaluationToken,
+            detectionToken: detectData.detectionToken,
           },
         ]);
       }
@@ -451,10 +331,6 @@ export default function InterviewPage() {
 
       setFeedback(zeroFeedback);
       setAiDetected(null);
-      setQuestionScores((prev) => [
-        ...prev,
-        { question: `Q${current}`, score: 0 },
-      ]);
       setQuestionReviews((prev) => [
         ...prev,
         {
@@ -474,8 +350,8 @@ export default function InterviewPage() {
 
   const handleNext = () => {
     if (current >= TOTAL) {
-      saveResults(questionReviews, "completed").then(() => {
-        router.push("/results");
+      saveResults(questionReviews, "completed").then((saved) => {
+        if (saved) router.push("/results");
       });
     } else {
       setCurrent((c) => c + 1);

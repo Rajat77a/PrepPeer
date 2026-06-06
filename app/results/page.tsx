@@ -21,87 +21,26 @@ import { createClient } from "@/utils/supabase/client";
 
 type StoredResult = Partial<SessionReport> & {
   source?: "account" | "demo";
-  demoAttemptId?: string;
   unlockedUserId?: string;
   unlockedSessionId?: string;
 };
 
-const DEMO_RESULTS_KEY = "preppeer_pending_demo_results";
 const RESULTS_KEY = "preppeer_results";
-
-const getObjectSummary = (summary: unknown) =>
-  summary && typeof summary === "object" && !Array.isArray(summary)
-    ? (summary as Record<string, unknown>)
-    : {};
-
-const normalizeJson = (value: unknown) => JSON.stringify(value ?? []);
-
-const isSameUnlockedDemoSession = (
-  session: InterviewSessionRow,
-  storedResult: StoredResult
-) => {
-  const summary = getObjectSummary(session.summary);
-
-  if (
-    storedResult.demoAttemptId &&
-    summary.demoAttemptId === storedResult.demoAttemptId
-  ) {
-    return true;
-  }
-
-  const createdAt = new Date(session.created_at ?? 0).getTime();
-  const isRecent = Date.now() - createdAt < 6 * 60 * 60 * 1000;
-
-  return (
-    isRecent &&
-    Number(session.composite_score ?? 0) ===
-      Number(storedResult.compositeScore ?? 0) &&
-    (session.role ?? "Interview") === (storedResult.role ?? "Interview") &&
-    (session.company_type ?? "General") ===
-      (storedResult.companyType ?? "General") &&
-    normalizeJson(session.question_scores) ===
-      normalizeJson(storedResult.questionScores) &&
-    normalizeJson(session.dimensions) === normalizeJson(storedResult.dimensions)
-  );
-};
-
-const hasLockedDemoResult = () => {
-  const stored =
-    sessionStorage.getItem(RESULTS_KEY) ?? localStorage.getItem(DEMO_RESULTS_KEY);
-
-  if (!stored) return false;
-
-  try {
-    const storedResult = JSON.parse(stored) as StoredResult;
-    return storedResult.source === "demo" && !storedResult.unlockedUserId;
-  } catch {
-    return false;
-  }
-};
 
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
-  const [rankLocked, setRankLocked] = useState(false);
-  const [missingUnlockResult, setMissingUnlockResult] = useState(false);
   const [briefOpen, setBriefOpen] = useState(false);
   const reviewScrollRef = useRef<HTMLDivElement>(null);
-  const unlockInFlightRef = useRef(false);
   const lastTouchYRef = useRef<number | null>(null);
   const targetScrollTopRef = useRef(0);
   const scrollFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     try {
-      const stored =
-        sessionStorage.getItem(RESULTS_KEY) ?? localStorage.getItem(DEMO_RESULTS_KEY);
-      const shouldUnlockRank =
-        new URLSearchParams(window.location.search).get("unlockRank") === "1";
+      const stored = sessionStorage.getItem(RESULTS_KEY);
 
       if (stored) {
-        sessionStorage.setItem(RESULTS_KEY, stored);
         const realData = JSON.parse(stored) as StoredResult;
-        const shouldLockRank =
-          realData.source === "demo" && !realData.unlockedUserId;
 
         setReport((prev) => ({
           ...prev,
@@ -119,22 +58,16 @@ export default function ResultsPage() {
           questionScores: realData.questionScores ?? prev.questionScores,
           summary: realData.summary ?? prev.summary,
         }));
-        setRankLocked(shouldLockRank);
-      } else if (shouldUnlockRank) {
-        setMissingUnlockResult(true);
       }
     } catch {
-      setMissingUnlockResult(true);
+      // Ignore malformed browser state and load the latest trusted account result.
     }
   }, []);
 
   useEffect(() => {
     const loadLatestAccountResult = async () => {
-      if (hasLockedDemoResult()) return;
-
       const applyAccountResult = (accountResult: StoredResult) => {
         sessionStorage.setItem(RESULTS_KEY, JSON.stringify(accountResult));
-        setRankLocked(false);
         setReport((prev) => ({
           ...prev,
           name: accountResult.name ?? prev.name,
@@ -221,133 +154,6 @@ export default function ResultsPage() {
 
     void loadLatestAccountResult();
   }, []);
-
-  useEffect(() => {
-    if (!rankLocked) return;
-    const shouldUnlockRank =
-      new URLSearchParams(window.location.search).get("unlockRank") === "1";
-
-    if (!shouldUnlockRank) return;
-
-    const unlockStoredRank = async () => {
-      if (unlockInFlightRef.current) return;
-      unlockInFlightRef.current = true;
-
-      try {
-        const stored =
-          sessionStorage.getItem(RESULTS_KEY) ?? localStorage.getItem(DEMO_RESULTS_KEY);
-        if (!stored) return;
-
-        const storedResult = JSON.parse(stored) as StoredResult;
-        const supabase = createClient();
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user || storedResult.unlockedUserId === user.id) return;
-
-        const { data: existingUserSessions } = await supabase
-          .from("interview_sessions")
-          .select(
-            "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
-          )
-          .eq("user_id", user.id)
-          .order("created_at", { ascending: false })
-          .limit(50);
-
-        const alreadySavedSession = (
-          (existingUserSessions ?? []) as InterviewSessionRow[]
-        ).find((session) => isSameUnlockedDemoSession(session, storedResult));
-
-        let unlockedSessionId = alreadySavedSession?.id;
-
-        if (!alreadySavedSession) {
-          const { data: insertedSession, error: insertError } = await supabase
-            .from("interview_sessions")
-            .insert({
-              user_id: user.id,
-              role: storedResult.role ?? "Interview",
-              experience: null,
-              company_type: storedResult.companyType ?? "General",
-              composite_score: storedResult.compositeScore ?? 0,
-              dimensions: storedResult.dimensions ?? [],
-              question_scores: storedResult.questionScores ?? [],
-              summary: {
-                ...getObjectSummary(storedResult.summary),
-                source: "demo-unlock",
-                demoAttemptId:
-                  storedResult.demoAttemptId ??
-                  `${user.id}-${storedResult.compositeScore ?? 0}`,
-              },
-            })
-            .select("id")
-            .single();
-
-          if (insertError) return;
-          unlockedSessionId = insertedSession?.id;
-        }
-
-        const { data: sessionRows } = await supabase
-          .from("interview_sessions")
-          .select(
-            "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
-          )
-          .order("created_at", { ascending: false })
-          .limit(1000);
-
-        const rankSummary = getRankSummary(
-          (sessionRows ?? []) as InterviewSessionRow[],
-          user.id
-        );
-
-        if (!rankSummary) return;
-
-        const unlockedResult: StoredResult = {
-          ...storedResult,
-          name: getDisplayName(user.user_metadata, user.email),
-          role: storedResult.role ?? "Interview",
-          companyType: storedResult.companyType ?? "General",
-          source: "account",
-          unlockedUserId: user.id,
-          unlockedSessionId,
-          percentile: getRankPercentileLabel(
-            rankSummary.rank,
-            rankSummary.totalCandidates
-          ),
-          rankDelta: rankSummary.rankChange,
-          previousRank: rankSummary.previousRank ?? 0,
-          currentRank: rankSummary.rank,
-          totalCandidates: rankSummary.totalCandidates,
-        };
-
-        sessionStorage.setItem(RESULTS_KEY, JSON.stringify(unlockedResult));
-        localStorage.removeItem(DEMO_RESULTS_KEY);
-        setReport((prev) => ({
-          ...prev,
-          name: unlockedResult.name ?? prev.name,
-          role: unlockedResult.role ?? prev.role,
-          companyType: unlockedResult.companyType ?? prev.companyType,
-          source: unlockedResult.source ?? prev.source,
-          compositeScore: unlockedResult.compositeScore ?? prev.compositeScore,
-          percentile: unlockedResult.percentile ?? prev.percentile,
-          rankDelta: unlockedResult.rankDelta ?? prev.rankDelta,
-          previousRank: unlockedResult.previousRank ?? prev.previousRank,
-          currentRank: unlockedResult.currentRank ?? prev.currentRank,
-          totalCandidates: unlockedResult.totalCandidates ?? prev.totalCandidates,
-          dimensions: unlockedResult.dimensions ?? prev.dimensions,
-          questionScores: unlockedResult.questionScores ?? prev.questionScores,
-          summary: unlockedResult.summary ?? prev.summary,
-        }));
-        setRankLocked(false);
-      } catch {
-        // Keep the rank locked if the unlock attempt cannot complete.
-      } finally {
-        unlockInFlightRef.current = false;
-      }
-    };
-
-    void unlockStoredRank();
-  }, [rankLocked]);
 
   const summaryPreview =
     report.summary?.overallSummary ??
@@ -437,34 +243,6 @@ export default function ResultsPage() {
     };
   }, [briefOpen]);
 
-  if (missingUnlockResult) {
-    return (
-      <div className="min-h-screen bg-off-white">
-        <Navbar variant="inner" homeHref="/" />
-        <div className="mx-auto flex min-h-[calc(100vh-84px)] max-w-[760px] items-center px-6 py-20">
-          <div className="w-full rounded-[28px] border border-[rgba(0,132,255,0.16)] bg-white p-8 shadow-[0_24px_70px_rgba(0,132,255,0.1)]">
-            <p className="font-inter text-[11px] font-bold uppercase tracking-[0.22em] text-blue">
-              Demo result not found
-            </p>
-            <h1 className="mt-3 font-fustat text-3xl font-extrabold tracking-[-0.04em] text-text sm:text-4xl">
-              Your saved demo score was not available in this tab.
-            </h1>
-            <p className="mt-4 max-w-[560px] font-inter text-base leading-7 text-muted">
-              Start an interview from your account dashboard to get a ranked
-              result connected to your profile and the live leaderboard.
-            </p>
-            <Link
-              href="/dashboard"
-              className="mt-7 inline-flex rounded-2xl bg-blue px-6 py-3 font-inter text-sm font-extrabold text-white shadow-[0_16px_34px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5"
-            >
-              Go to dashboard
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-off-white">
       <Navbar
@@ -552,7 +330,7 @@ export default function ResultsPage() {
 
         <SessionScoreCard
           report={report}
-          rankLocked={rankLocked}
+          rankLocked={false}
         />
         <QuestionBreakdownChart data={report.questionScores} />
       </div>

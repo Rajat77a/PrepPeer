@@ -51,8 +51,18 @@ export const updateSession = async (request: NextRequest) => {
     return supabaseResponse;
   }
 
-  if (request.nextUrl.pathname.startsWith("/dashboard") && !user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+  const protectedPaths = ["/dashboard", "/interview", "/results", "/onboarding"];
+  const requiresAccount = protectedPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path)
+  );
+
+  if (requiresAccount && !user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set(
+      "next",
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
+    );
+    return NextResponse.redirect(loginUrl);
   }
 
   return supabaseResponse;

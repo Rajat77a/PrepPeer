@@ -1,124 +1,181 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
-
-const clampDimensionScore = (value: unknown) => {
-  const numeric = typeof value === "number" ? value : Number(value);
-  if (!Number.isFinite(numeric)) return 0;
-  return Math.min(10, Math.max(0, numeric));
-};
+import { getAuthenticatedContext } from "@/lib/server/auth";
+import {
+  createInterviewProof,
+  hashAnswer,
+  verifyInterviewProof,
+} from "@/lib/server/interviewProof";
+import { checkRateLimit } from "@/lib/server/rateLimit";
+import {
+  normalizeFeedback,
+  parseEvaluationInput,
+  readJsonBody,
+} from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
-  try {
-    const { question, answer, domain, experience } = await req.json();
+  const { user } = await getAuthenticatedContext();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
-    const answerQuality = evaluateAnswerQuality(answer, question);
+  const rateLimit = checkRateLimit(
+    `evaluate-answer:${user.id}`,
+    70,
+    10 * 60 * 1000
+  );
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many evaluation requests. Please wait and try again." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      }
+    );
+  }
+
+  const body = await readJsonBody(req);
+  if (!body.ok) {
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+  }
+
+  try {
+    const input = parseEvaluationInput(body.data);
+    if (!input) {
+      return NextResponse.json(
+        { error: "Invalid evaluation input." },
+        { status: 400 }
+      );
+    }
+
+    const questionSet = verifyInterviewProof(
+      input.questionSetToken,
+      "questionSet",
+      user.id
+    );
+    if (
+      !questionSet ||
+      questionSet.kind !== "questionSet" ||
+      questionSet.domain !== input.domain ||
+      questionSet.experience !== input.experience ||
+      questionSet.questions[input.questionIndex] !== input.question
+    ) {
+      return NextResponse.json(
+        { error: "The interview question set is invalid or expired." },
+        { status: 400 }
+      );
+    }
+
+    const answerQuality = evaluateAnswerQuality(input.answer, input.question);
     if (!answerQuality.valid) {
-      return NextResponse.json({ feedback: createZeroFeedback(answerQuality.reason) });
+      const feedback = createZeroFeedback(answerQuality.reason);
+      const evaluationToken = createInterviewProof({
+        kind: "evaluation",
+        version: 1,
+        userId: user.id,
+        question: input.question,
+        answerHash: hashAnswer(input.answer),
+        domain: input.domain,
+        experience: input.experience,
+        sessionId: questionSet.sessionId,
+        questionIndex: input.questionIndex,
+        feedback,
+        issuedAt: Date.now(),
+      });
+      return NextResponse.json({ feedback, evaluationToken });
     }
 
     const apiKey = process.env.GROQ_API_KEY;
-
     if (!apiKey) {
-      return NextResponse.json({ error: "Missing API key" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Evaluation is unavailable." },
+        { status: 503 }
+      );
     }
 
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
-        messages: [
-          {
-            role: "user",
-            content: `You are a strict technical interviewer evaluating a candidate's answer. Be harsh and accurate - do not give high scores unless the answer truly deserves it.
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.1-8b-instant",
+          messages: [
+            {
+              role: "user",
+              content: `You are a strict technical interviewer. Evaluate whether the answer genuinely addresses the exact question.
 
-Question: ${question}
-Candidate Level: ${experience}
-Domain: ${domain}
-Answer: ${answer}
+Question: ${input.question}
+Candidate level: ${input.experience}
+Domain: ${input.domain}
+Answer: ${input.answer}
 
-First decide whether the answer is a real attempt to answer THIS exact question.
-A real attempt must address the question's topic and provide relevant reasoning, approach, tradeoffs, facts, examples, or concrete steps.
+Score Communication, Problem Solving, Specificity, and Accuracy from 0 to 10.
+A meta-answer, filler, irrelevant response, or non-answer receives 0 on every dimension even if it is grammatical.
+Only award high scores for question-specific, accurate reasoning with concrete details.
 
-Evaluate strictly on these 4 dimensions (score each out of 10):
-
-1. Communication (0-10): Is the answer clear, structured, and easy to follow?
-2. Problem Solving (0-10): Does the answer show logical thinking and a clear approach?
-3. Specificity (0-10): Does the answer use concrete examples, numbers, metrics, or real scenarios? Vague answers score 0-3.
-4. Accuracy (0-10): Is the technical/factual content of the answer actually correct for ${domain}? Wrong or shallow answers score 0-4.
-
-Scoring rules:
-- If the answer is random, unreadable, nonsensical, or mostly meaningless characters, score 0 on all dimensions
-- If you cannot understand the candidate's content well enough to evaluate it, score 0 on all dimensions
-- A random or gibberish answer must never receive credit for communication, problem solving, specificity, or accuracy
-- If the answer is meta-commentary about the question, the test, the scoring system, the AI, or filling the word limit, score 0 on all dimensions
-- If the answer is fluent but does not actually answer THIS question, score 0 on all dimensions
-- If the answer is generic interview-sounding filler without question-specific reasoning or concrete details, score 0 on all dimensions
-- Do not award Communication points for a clear non-answer; a non-answer is 0 even if it is grammatical
-- Accuracy cannot exceed 2 unless the answer contains relevant factual or domain-specific content for the question
-- A vague answer with no examples scores max 4 on Specificity
-- Only award 8-10 if the answer is genuinely impressive for a ${experience} level candidate
-- compositeScore = Communication + ProblemSolving + Specificity + Accuracy
-
-Return ONLY this JSON, no explanation:
+Return only:
 {
-  "compositeScore": <number 0-40>,
+  "compositeScore": 0,
   "dimensions": [
-    {"label": "Communication", "value": <0-10>, "reason": "<one sentence why>"},
-    {"label": "Problem Solving", "value": <0-10>, "reason": "<one sentence why>"},
-    {"label": "Specificity", "value": <0-10>, "reason": "<one sentence why>"},
-    {"label": "Accuracy", "value": <0-10>, "reason": "<one sentence why>"}
+    {"label":"Communication","value":0,"reason":"one sentence"},
+    {"label":"Problem Solving","value":0,"reason":"one sentence"},
+    {"label":"Specificity","value":0,"reason":"one sentence"},
+    {"label":"Accuracy","value":0,"reason":"one sentence"}
   ],
-  "modelAnswer": "<a strong 3-4 sentence model answer for this question at ${experience} level>"
+  "modelAnswer":"a strong concise model answer"
 }`,
-          },
-        ],
-        max_tokens: 1024,
-      }),
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      return NextResponse.json({ error: `API error: ${errText}` }, { status: 500 });
-    }
-
-    const json = await res.json();
-    const text = json.choices?.[0]?.message?.content ?? "";
-    const match = text.match(/\{[\s\S]*\}/);
-
-    if (!match) {
-      return NextResponse.json({ error: `Could not parse: ${text}` }, { status: 500 });
-    }
-
-    const feedback = JSON.parse(match[0]);
-    const finalQualityCheck = evaluateAnswerQuality(answer, question);
-
-    if (!finalQualityCheck.valid) {
-      return NextResponse.json({
-        feedback: createZeroFeedback(finalQualityCheck.reason),
-      });
-    }
-
-    const dimensions = Array.isArray(feedback.dimensions)
-      ? feedback.dimensions.map((dimension: { label?: string; value?: unknown; reason?: string }) => ({
-          ...dimension,
-          value: clampDimensionScore(dimension.value),
-        }))
-      : [];
-    const compositeScore = dimensions.reduce(
-      (sum: number, dimension: { value: number }) => sum + dimension.value,
-      0
+            },
+          ],
+          max_tokens: 1024,
+        }),
+      }
     );
 
-    feedback.dimensions = dimensions;
-    feedback.compositeScore = compositeScore;
-    return NextResponse.json({ feedback });
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: "Evaluation service failed." },
+        { status: 502 }
+      );
+    }
 
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : String(err);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const json = await response.json();
+    const text = json.choices?.[0]?.message?.content ?? "";
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) {
+      return NextResponse.json(
+        { error: "Evaluation returned an invalid response." },
+        { status: 502 }
+      );
+    }
+
+    const feedback = normalizeFeedback(JSON.parse(match[0]));
+    if (!feedback) {
+      return NextResponse.json(
+        { error: "Evaluation returned an invalid response." },
+        { status: 502 }
+      );
+    }
+
+    const evaluationToken = createInterviewProof({
+      kind: "evaluation",
+      version: 1,
+      userId: user.id,
+      question: input.question,
+      answerHash: hashAnswer(input.answer),
+      domain: input.domain,
+      experience: input.experience,
+      sessionId: questionSet.sessionId,
+      questionIndex: input.questionIndex,
+      feedback,
+      issuedAt: Date.now(),
+    });
+
+    return NextResponse.json({ feedback, evaluationToken });
+  } catch {
+    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }

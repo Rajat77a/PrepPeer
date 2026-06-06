@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { Logo } from "@/components/ui/Logo";
-import { createClient } from "@/utils/supabase/client";
 
 type OnboardingFormProps = {
   initialName: string;
@@ -112,23 +111,23 @@ export function OnboardingForm({
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const { error: updateError } = await supabase.auth.updateUser({
-      data: {
-        full_name: fullName.trim(),
-        name: fullName.trim(),
-        college: college.trim(),
-        target_role: role.trim(),
-        experience_level: experience.trim(),
-        target_company_type: company.trim(),
-        onboarding_complete: true,
-      },
+    const response = await fetch("/api/profile", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fullName,
+        college,
+        role,
+        experience,
+        company,
+      }),
     });
+    const result = await response.json();
 
     setLoading(false);
 
-    if (updateError) {
-      setError(updateError.message);
+    if (!response.ok) {
+      setError(result.error ?? "Profile could not be saved.");
       return;
     }
 
@@ -189,6 +188,8 @@ export function OnboardingForm({
                 }}
                 placeholder="Rajat Krishnan"
                 autoComplete="name"
+                minLength={2}
+                maxLength={80}
                 className="mt-2 h-14 w-full rounded-2xl border border-[#d8ebff] bg-white/80 px-5 font-inter text-base font-bold text-[#07111f] outline-none transition placeholder:text-[#a5b4c8] focus:border-[#0084ff]/70 focus:shadow-[0_0_0_4px_rgba(0,132,255,0.12)]"
               />
             </label>
@@ -205,6 +206,8 @@ export function OnboardingForm({
                 }}
                 placeholder="Your college or university"
                 autoComplete="organization"
+                minLength={2}
+                maxLength={120}
                 className="mt-2 h-14 w-full rounded-2xl border border-[#d8ebff] bg-white/80 px-5 font-inter text-base font-bold text-[#07111f] outline-none transition placeholder:text-[#a5b4c8] focus:border-[#0084ff]/70 focus:shadow-[0_0_0_4px_rgba(0,132,255,0.12)]"
               />
             </label>

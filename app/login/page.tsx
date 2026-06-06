@@ -196,7 +196,14 @@ export default function LoginPage() {
   };
 
   const sendOtp = async () => {
-    if (!email.trim()) return;
+    const normalizedEmail = email.trim().toLowerCase();
+    if (
+      normalizedEmail.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
+    ) {
+      setError("Enter a valid email address.");
+      return;
+    }
 
     setLoading(true);
     setError("");
@@ -212,7 +219,7 @@ export default function LoginPage() {
     setSignupNonce(nextSignupNonce);
 
     const { error: otpError } = await supabase.auth.signInWithOtp({
-      email: email.trim(),
+      email: normalizedEmail,
       options: {
         shouldCreateUser: isSignUp,
         data: isSignUp
@@ -235,6 +242,11 @@ export default function LoginPage() {
   };
 
   const verifyOtp = async (code: string) => {
+    if (!/^\d{6}$/.test(code)) {
+      setError("Enter the complete 6-digit code.");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -457,6 +469,7 @@ export default function LoginPage() {
                           }}
                           placeholder="you@example.com"
                           autoComplete="email"
+                          maxLength={254}
                           required
                           className="relative z-10 h-full min-w-0 flex-1 border-0 bg-transparent px-5 pr-14 text-left font-inter text-base font-black text-white outline-none transition duration-300 placeholder:text-white/62 group-hover/email:text-[#06142b] group-hover/email:placeholder:text-[#5f7188] group-focus-within/email:text-[#06142b] group-focus-within/email:placeholder:text-[#5f7188]"
                         />

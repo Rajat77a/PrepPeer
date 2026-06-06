@@ -77,6 +77,8 @@ export function AssistedPasswordConfirmation({
           }}
           placeholder="Create a strong password"
           autoComplete="new-password"
+          minLength={8}
+          maxLength={128}
           glowColor="#60b1ff"
           className="border-[#28415f]/80 bg-[#0d1828]/88 text-[#f4f8ff] shadow-[0_18px_50px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-[#71839a] focus:border-[#9fcfff]/70 focus:bg-[#111f33]"
         />
@@ -136,6 +138,8 @@ export function AssistedPasswordConfirmation({
           onChange={handleConfirmPasswordChange}
           placeholder="Type it again"
           autoComplete="new-password"
+          minLength={8}
+          maxLength={128}
           glowColor={passwordsMatch ? "#16a34a" : "#60b1ff"}
           className="border-[#28415f]/80 bg-[#0d1828]/88 text-[#f4f8ff] shadow-[0_18px_50px_rgba(0,0,0,0.2),inset_0_1px_1px_rgba(255,255,255,0.08)] placeholder:text-[#71839a] focus:border-[#9fcfff]/70 focus:bg-[#111f33]"
         />

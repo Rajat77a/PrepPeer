@@ -95,6 +95,8 @@ export interface QuestionReview {
   summary?: string;
   improvement?: string;
   reason?: string;
+  evaluationToken?: string;
+  detectionToken?: string;
 }
 
 export interface AISessionSummary {

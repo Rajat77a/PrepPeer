@@ -11,9 +11,27 @@ import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
 
 export default async function SessionDetailPage({ params }: { params: { id: string } }) {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(params.id)) {
+    notFound();
+  }
+
   const cookieStore = cookies();
   const supabase = createClient(cookieStore);
   const user = await getCurrentUser();
+
+  if (!user) notFound();
+
+  const { data: session } = await supabase
+    .from("interview_sessions")
+    .select(
+      "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
+    )
+    .eq("id", params.id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!session) notFound();
+  const selectedSession = session as InterviewSessionRow;
 
   const { data: rows } = await supabase
     .from("interview_sessions")
@@ -24,15 +42,9 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
     .limit(1000);
 
   const allSessions = (rows ?? []) as InterviewSessionRow[];
-  const session = allSessions.find(
-    (item) => item.id === params.id && item.user_id === user?.id
-  );
-
-  if (!session) notFound();
-
-  const sessionRank = getSessionRankHistory(allSessions, user?.id)[session.id];
-  const dimensions = session.dimensions?.length
-    ? session.dimensions
+  const sessionRank = getSessionRankHistory(allSessions, user.id)[selectedSession.id];
+  const dimensions = selectedSession.dimensions?.length
+    ? selectedSession.dimensions
     : scoreDimensions.map((dimension) => ({
         label: dimension.label,
         value: dimension.score,
@@ -52,23 +64,23 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
         <div className="pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full bg-[#006cff]/10 blur-[90px]" />
         <div className="relative z-10">
           <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#006cff]">
-            {session.created_at
+            {selectedSession.created_at
               ? new Intl.DateTimeFormat("en", {
                   month: "long",
                   day: "numeric",
                   year: "numeric",
-                }).format(new Date(session.created_at))
+                }).format(new Date(selectedSession.created_at))
               : "Session"}
           </p>
           <h1 className="mt-4 font-inter text-[clamp(36px,6vw,68px)] font-black leading-none tracking-[-0.05em] text-[#07111f]">
-            {session.role ?? "Interview"}
+            {selectedSession.role ?? "Interview"}
           </h1>
           <p className="mt-4 font-inter font-semibold text-[#64748b]">
-            {session.company_type ?? "General"} / {session.experience ?? "Not set"}
+            {selectedSession.company_type ?? "General"} / {selectedSession.experience ?? "Not set"}
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            <Stat label="Score" value={`${Number(session.composite_score ?? 0)}/100`} />
+            <Stat label="Score" value={`${Number(selectedSession.composite_score ?? 0)}/100`} />
             <Stat label="Rank then" value={sessionRank ? `#${sessionRank.rank}` : "-"} />
             <Stat label="Movement" value={sessionRank?.rankChange ?? "-"} />
           </div>
