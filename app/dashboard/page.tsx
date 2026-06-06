@@ -151,13 +151,21 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false })
     .limit(1000);
 
-  const { data: leaderboardRows } = await leaderboardSupabase.rpc(
+  const { data: leaderboardRows, error: leaderboardError } =
+    await leaderboardSupabase.rpc(
     "get_leaderboard",
     {
       p_role: null,
       p_company_type: null,
     }
   );
+
+  if (leaderboardError) {
+    console.error(
+      "Unable to load the live dashboard leaderboard:",
+      leaderboardError.message
+    );
+  }
 
   const userProfiles = await getLeaderboardUserProfiles(leaderboardSupabase);
 
@@ -185,7 +193,7 @@ export default async function DashboardPage() {
     userProfiles
   );
 
-  const leaderboardEntries = leaderboardRows
+  const leaderboardEntries = !leaderboardError && leaderboardRows
     ? toLiveLeaderboardEntries(
         (leaderboardRows ?? []) as SupabaseLeaderboardRow[],
         user.id

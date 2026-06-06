@@ -42,8 +42,10 @@ const formatMovement = (
 
 export function LeaderboardClient({
   entries: initialEntries,
+  loadError,
 }: {
   entries: LeaderboardEntry[];
+  loadError?: string;
 }) {
   const [activeTab, setActiveTab] = useState("All Roles");
   const [query, setQuery] = useState("");
@@ -96,6 +98,15 @@ export function LeaderboardClient({
           <RefreshTableButton label="Refresh board" />
         </div>
       </div>
+
+      {loadError && (
+        <div
+          role="alert"
+          className="mb-5 border-l-4 border-[#006cff] bg-white/85 px-5 py-4 font-inter text-sm font-bold text-[#32445b] shadow-[0_12px_34px_rgba(0,108,255,0.08)]"
+        >
+          {loadError}
+        </div>
+      )}
 
       <div className="mb-5 flex gap-2 overflow-x-auto pb-2">
         {tabs.map((tab) => (

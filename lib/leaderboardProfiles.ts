@@ -14,10 +14,15 @@ type LeaderboardProfileRow = {
 export const getLeaderboardUserProfiles = async (
   supabase: SupabaseClient
 ): Promise<Record<string, LeaderboardUserProfile>> => {
-  const { data } = await supabase.rpc("get_leaderboard", {
+  const { data, error } = await supabase.rpc("get_leaderboard", {
     p_role: null,
     p_company_type: null,
   });
+
+  if (error) {
+    console.error("Unable to load leaderboard profiles:", error.message);
+    return {};
+  }
 
   return ((data ?? []) as LeaderboardProfileRow[]).reduce<
     Record<string, LeaderboardUserProfile>

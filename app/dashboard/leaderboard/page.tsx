@@ -20,10 +20,14 @@ export default async function DashboardLeaderboardPage() {
   const leaderboardSupabase = createOptionalAdminClient() ?? supabase;
   const user = await getCurrentUser();
 
-  const { data } = await leaderboardSupabase.rpc("get_leaderboard", {
+  const { data, error } = await leaderboardSupabase.rpc("get_leaderboard", {
     p_role: null,
     p_company_type: null,
   });
+
+  if (error) {
+    console.error("Unable to load the live leaderboard:", error.message);
+  }
 
   const rawEntries = toLiveLeaderboardEntries(
     (data ?? []) as SupabaseLeaderboardRow[],
@@ -49,5 +53,14 @@ export default async function DashboardLeaderboardPage() {
     };
   });
 
-  return <LeaderboardClient entries={entries} />;
+  return (
+    <LeaderboardClient
+      entries={entries}
+      loadError={
+        error
+          ? "The live leaderboard could not be loaded. Refresh after the database update is applied."
+          : undefined
+      }
+    />
+  );
 }

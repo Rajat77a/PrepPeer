@@ -53,30 +53,30 @@ export async function GET() {
       )
     : "Not ranked";
 
-  const leaderboardSupabase = createOptionalAdminClient();
+  const leaderboardSupabase = createOptionalAdminClient() ?? supabase;
+  const { data: leaderboardRows, error: leaderboardError } =
+    await leaderboardSupabase.rpc("get_leaderboard", {
+      p_role: null,
+      p_company_type: null,
+    });
 
-  if (leaderboardSupabase) {
-    const { data: leaderboardRows } = await leaderboardSupabase.rpc(
-      "get_leaderboard",
-      {
-        p_role: null,
-        p_company_type: null,
-      }
+  if (leaderboardError) {
+    console.error(
+      "Unable to load the live result rank:",
+      leaderboardError.message
     );
+  } else if (leaderboardRows) {
+    const leaderboardEntries = toLiveLeaderboardEntries(
+      leaderboardRows as SupabaseLeaderboardRow[],
+      user.id
+    );
+    const liveUserEntry = leaderboardEntries.find((entry) => entry.isYou);
 
-    if (leaderboardRows) {
-      const leaderboardEntries = toLiveLeaderboardEntries(
-        leaderboardRows as SupabaseLeaderboardRow[],
-        user.id
-      );
-      const liveUserEntry = leaderboardEntries.find((entry) => entry.isYou);
-
-      if (liveUserEntry) {
-        currentRank = liveUserEntry.rank;
-        totalCandidates = leaderboardEntries.length;
-        rankDelta = liveUserEntry.delta ?? rankDelta;
-        percentile = getRankPercentileLabel(currentRank, totalCandidates);
-      }
+    if (liveUserEntry) {
+      currentRank = liveUserEntry.rank;
+      totalCandidates = leaderboardEntries.length;
+      rankDelta = liveUserEntry.delta ?? rankDelta;
+      percentile = getRankPercentileLabel(currentRank, totalCandidates);
     }
   }
 
