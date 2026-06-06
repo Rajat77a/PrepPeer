@@ -69,6 +69,13 @@ export function Footer() {
                   >
                     {link}
                   </Link>
+                ) : link === "Blog" ? (
+                  <Link
+                    href="/blog"
+                    className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer"
+                  >
+                    {link}
+                  </Link>
                 ) : link === "Careers" ? (
                   <Link
                     href="/careers"
