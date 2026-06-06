@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Check, ShieldCheck } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Home,
+  ShieldCheck,
+} from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -364,6 +370,34 @@ export default function LoginPage() {
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#031b4f] text-white">
       <LoginBackground />
+
+      <Link
+        href="/"
+        aria-label="Return to PrepPeer home"
+        className="absolute left-5 top-5 z-20 sm:left-8 sm:top-8"
+      >
+        <motion.span
+          initial={{ opacity: 0, x: -12 }}
+          animate={{ opacity: 1, x: 0 }}
+          whileHover={{
+            y: -4,
+            rotateX: 9,
+            rotateY: -10,
+            scale: 1.06,
+          }}
+          whileTap={{ y: 1, scale: 0.96 }}
+          transition={{ type: "spring", stiffness: 360, damping: 22 }}
+          className="group relative flex h-12 w-12 transform-gpu items-center justify-center rounded-xl border border-white/30 bg-[#061d46]/72 text-white shadow-[0_8px_0_#001331,0_18px_38px_rgba(0,20,62,0.34),inset_0_1px_1px_rgba(255,255,255,0.26)] backdrop-blur-xl [transform-style:preserve-3d] hover:border-white/75 hover:bg-[#0a66d8] hover:shadow-[0_5px_0_#00235a,0_22px_42px_rgba(0,108,255,0.38),inset_0_1px_1px_rgba(255,255,255,0.42)]"
+        >
+          <span className="absolute inset-[5px] rounded-lg border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.16),transparent_58%)] [transform:translateZ(4px)]" />
+          <Home
+            aria-hidden="true"
+            className="relative z-10 h-5 w-5 transition-transform duration-300 [transform:translateZ(12px)] group-hover:scale-110"
+            strokeWidth={2.2}
+          />
+          <span className="absolute inset-y-1 left-[-45%] w-4 skew-x-[-18deg] bg-white/60 opacity-0 blur-sm transition-all duration-500 group-hover:left-[115%] group-hover:opacity-100" />
+        </motion.span>
+      </Link>
 
       <section className="relative z-10 flex min-h-svh items-center justify-center px-5 py-6 sm:py-8">
         <div className="w-full max-w-[500px]">
