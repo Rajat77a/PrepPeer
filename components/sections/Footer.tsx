@@ -61,7 +61,14 @@ export function Footer() {
           <ul className="space-y-3">
             {companyLinks.map((link) => (
               <li key={link}>
-                {link === "Contact" ? (
+                {link === "About" ? (
+                  <Link
+                    href="/about"
+                    className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer"
+                  >
+                    {link}
+                  </Link>
+                ) : link === "Contact" ? (
                   <a
                     href="mailto:preppeerenquiries@gmail.com"
                     className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer"
