@@ -18,6 +18,7 @@ const supportLinks = [
 ];
 
 const footerLinkHref: Record<string, string> = {
+  "Help center": "/help",
   "Privacy policy": "/privacy",
   "Terms of service": "/terms",
   "Cookie policy": "/cookies",
