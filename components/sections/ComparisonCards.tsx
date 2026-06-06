@@ -19,8 +19,8 @@ const cards = [
   },
   {
     number: "03",
-    label: "VS. CHATGPT PREP",
-    title: "ChatGPT coaches you. Only PrepPeer ranks you.",
+    label: "VS. GENERIC AI CHAT TOOLS",
+    title: "Chat tools coach you. PrepPeer shows where you rank.",
     description: "Real peer benchmark across thousands of sessions.",
     pro: "Live rank, real benchmark",
     con: "No rank, no peers",

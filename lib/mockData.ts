@@ -58,7 +58,7 @@ export const HOW_IT_WORKS_STEPS: HowItWorksStep[] = [
     number: 2,
     title: "AI interviews you",
     description:
-      "Claude asks 5 real interview questions — behavioral, technical, situational — calibrated to your company type.",
+      "PrepPeer asks 5 real interview questions — behavioral, technical, situational — calibrated to your company type.",
     tags: ["Behavioral", "Technical", "Timed flow"],
     image:
       "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=440&h=280&fit=crop",
