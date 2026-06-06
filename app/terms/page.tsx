@@ -14,26 +14,26 @@ const darkThemeOverrides = `
   #preppeer-terms [data-custom-class='heading_1'] *,
   #preppeer-terms [data-custom-class='heading_2'],
   #preppeer-terms [data-custom-class='heading_2'] * {
-    color: #ffffff !important;
+    color: #000000 !important;
   }
 
   #preppeer-terms [data-custom-class='subtitle'],
   #preppeer-terms [data-custom-class='subtitle'] *,
   #preppeer-terms [data-custom-class='body_text'],
   #preppeer-terms [data-custom-class='body_text'] * {
-    color: #b8bcc7 !important;
+    color: #595959 !important;
   }
 
   #preppeer-terms [data-custom-class='link'],
   #preppeer-terms [data-custom-class='link'] * {
-    color: #60b1ff !important;
+    color: #3030f1 !important;
   }
 
   #preppeer-terms h1,
   #preppeer-terms h2,
   #preppeer-terms h3,
   #preppeer-terms strong {
-    color: #ffffff !important;
+    color: #000000 !important;
   }
 
   #preppeer-terms p,
@@ -47,10 +47,10 @@ const darkThemeOverrides = `
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen bg-[#080808] px-5 py-12 text-white sm:px-8 lg:px-12">
+    <main className="min-h-screen bg-white px-5 py-12 text-black sm:px-8 lg:px-12">
       <article
         id="preppeer-terms"
-        className="mx-auto max-w-4xl font-inter text-[15px] leading-7 text-[#b8bcc7]"
+        className="mx-auto max-w-4xl font-inter text-[15px] leading-7 text-[#595959]"
         dangerouslySetInnerHTML={{ __html: termsHtml + darkThemeOverrides }}
       />
     </main>
