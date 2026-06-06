@@ -374,29 +374,35 @@ export default function LoginPage() {
       <Link
         href="/"
         aria-label="Return to PrepPeer home"
-        className="absolute left-5 top-5 z-20 sm:left-8 sm:top-8"
+        className="group absolute left-5 top-5 z-20 [perspective:700px] sm:left-8 sm:top-8"
       >
-        <motion.span
-          initial={{ opacity: 0, x: -12 }}
-          animate={{ opacity: 1, x: 0 }}
+        <motion.div
+          initial={{ opacity: 0, x: -16, rotateY: 18 }}
+          animate={{ opacity: 1, x: 0, rotateY: 0 }}
           whileHover={{
-            y: -4,
-            rotateX: 9,
-            rotateY: -10,
-            scale: 1.06,
+            y: -5,
+            rotateX: 8,
+            rotateY: -12,
+            scale: 1.04,
           }}
-          whileTap={{ y: 1, scale: 0.96 }}
-          transition={{ type: "spring", stiffness: 360, damping: 22 }}
-          className="group relative flex h-12 w-12 transform-gpu items-center justify-center rounded-xl border border-white/30 bg-[#061d46]/72 text-white shadow-[0_8px_0_#001331,0_18px_38px_rgba(0,20,62,0.34),inset_0_1px_1px_rgba(255,255,255,0.26)] backdrop-blur-xl [transform-style:preserve-3d] hover:border-white/75 hover:bg-[#0a66d8] hover:shadow-[0_5px_0_#00235a,0_22px_42px_rgba(0,108,255,0.38),inset_0_1px_1px_rgba(255,255,255,0.42)]"
+          whileTap={{ y: 2, rotateX: 0, rotateY: 0, scale: 0.96 }}
+          transition={{ type: "spring", stiffness: 320, damping: 20 }}
+          className="relative h-[54px] w-[54px] transform-gpu [transform-style:preserve-3d]"
         >
-          <span className="absolute inset-[5px] rounded-lg border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.16),transparent_58%)] [transform:translateZ(4px)]" />
-          <Home
-            aria-hidden="true"
-            className="relative z-10 h-5 w-5 transition-transform duration-300 [transform:translateZ(12px)] group-hover:scale-110"
-            strokeWidth={2.2}
-          />
-          <span className="absolute inset-y-1 left-[-45%] w-4 skew-x-[-18deg] bg-white/60 opacity-0 blur-sm transition-all duration-500 group-hover:left-[115%] group-hover:opacity-100" />
-        </motion.span>
+          <span className="absolute inset-x-[7px] bottom-[-7px] h-10 rounded-[15px] border border-[#2097ff]/25 bg-[#00102b]/90 shadow-[0_16px_34px_rgba(0,8,30,0.48)] transition-all duration-500 [transform:translateZ(-12px)] group-hover:bottom-[-4px] group-hover:rotate-[-5deg] group-hover:border-[#4cb4ff]/45" />
+
+          <span className="absolute inset-[3px] rounded-[17px] border border-white/16 bg-[#06275c]/78 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] backdrop-blur-xl transition-all duration-500 [transform:translateZ(-2px)] group-hover:rotate-[6deg] group-hover:border-[#55bbff]/55 group-hover:bg-[#073575]/90" />
+
+          <span className="absolute inset-0 flex items-center justify-center rounded-[18px] border border-white/38 bg-[linear-gradient(145deg,rgba(18,93,178,0.94),rgba(1,25,67,0.96))] text-white shadow-[0_12px_30px_rgba(0,22,67,0.36),inset_0_1px_0_rgba(255,255,255,0.38)] transition-all duration-500 [transform:translateZ(10px)] group-hover:-rotate-[3deg] group-hover:border-white/75 group-hover:bg-[linear-gradient(145deg,#168dff,#052860)] group-hover:shadow-[0_18px_42px_rgba(0,108,255,0.42),inset_0_1px_0_rgba(255,255,255,0.55)]">
+            <span className="absolute left-[9px] top-[8px] h-[3px] w-[15px] rounded-full bg-white/38 transition-all duration-500 group-hover:w-[22px] group-hover:bg-white/70" />
+            <Home
+              aria-hidden="true"
+              className="h-[21px] w-[21px] transition-all duration-500 [transform:translateZ(18px)] group-hover:-translate-y-0.5 group-hover:scale-110"
+              strokeWidth={2.25}
+            />
+            <span className="absolute bottom-[7px] h-[2px] w-2 rounded-full bg-[#68d7ff] opacity-65 shadow-[0_0_10px_rgba(104,215,255,0.85)] transition-all duration-500 group-hover:w-5 group-hover:bg-white group-hover:opacity-100" />
+          </span>
+        </motion.div>
       </Link>
 
       <section className="relative z-10 flex min-h-svh items-center justify-center px-5 py-6 sm:py-8">
