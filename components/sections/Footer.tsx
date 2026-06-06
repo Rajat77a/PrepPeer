@@ -59,9 +59,18 @@ export function Footer() {
           <ul className="space-y-3">
             {companyLinks.map((link) => (
               <li key={link}>
-                <span className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer">
-                  {link}
-                </span>
+                {link === "Contact" ? (
+                  <a
+                    href="mailto:preppeerenquiries@gmail.com"
+                    className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer"
+                  >
+                    {link}
+                  </a>
+                ) : (
+                  <span className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer">
+                    {link}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
