@@ -90,12 +90,12 @@ export function Footer() {
                     {link}
                   </Link>
                 ) : link === "Contact" ? (
-                  <a
-                    href="mailto:preppeerenquiries@gmail.com"
+                  <Link
+                    href="/contact"
                     className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer"
                   >
                     {link}
-                  </a>
+                  </Link>
                 ) : (
                   <span className="font-inter text-sm text-white/45 hover:text-white/80 transition-colors cursor-pointer">
                     {link}
