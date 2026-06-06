@@ -460,14 +460,14 @@ export default function LoginPage() {
                 <p className="mx-auto mt-6 max-w-[460px] text-center font-inter text-xs font-semibold leading-5 text-white/68">
                   By signing up, you agree to our{" "}
                   <Link
-                    href="#"
+                    href="/terms"
                     className="font-black text-white underline decoration-[#7be7ff]/55 underline-offset-4 transition hover:text-[#dff7ff] hover:decoration-white"
                   >
                     Terms
                   </Link>{" "}
                   and{" "}
                   <Link
-                    href="#"
+                    href="/privacy"
                     className="font-black text-white underline decoration-[#7be7ff]/55 underline-offset-4 transition hover:text-[#dff7ff] hover:decoration-white"
                   >
                     Privacy Policy
