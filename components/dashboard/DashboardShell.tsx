@@ -40,7 +40,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
 
   const signOut = async () => {
     setSignOutError("");
-    const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut({ scope: "global" });
     if (error) {
       setSignOutError("Could not sign out. Please try again.");
       return;
