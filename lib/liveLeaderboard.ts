@@ -1,5 +1,6 @@
 import { getRankChangeLabel, toLeaderboardEntries } from "@/lib/ranking";
 import type { LeaderboardEntry } from "@/lib/types";
+import { getSafeOptionalString } from "@/lib/validation";
 
 export type SupabaseLeaderboardRow = {
   rank: number;
@@ -52,14 +53,15 @@ const toRealEntry = (
 ): InternalLeaderboardEntry => {
   const role = row.role ?? "Interview";
   const companyType = row.company_type ?? "General";
-  const college = row.college?.trim();
+  const college = getSafeOptionalString(row.college, 120);
+  const name = getSafeOptionalString(row.name, 80, "PrepPeer user");
 
   return {
     rank: row.rank,
     name:
       currentUserId && row.user_id === currentUserId
         ? "You"
-        : row.name?.trim() || "PrepPeer user",
+        : name || "PrepPeer user",
     subtitle: `${college ? `${college} - ` : ""}${role} - ${companyType}`,
     role,
     companyType,

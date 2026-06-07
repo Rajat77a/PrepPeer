@@ -2,21 +2,14 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { safeDashboardPath } from "@/lib/validation";
 import { getSupabaseConfig } from "@/utils/supabase/config";
-
-const safeNextPath = (next: string | null) => {
-  if (!next || !next.startsWith("/dashboard") || next.startsWith("//")) {
-    return "/dashboard";
-  }
-
-  return next;
-};
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = safeNextPath(searchParams.get("next"));
+  const next = safeDashboardPath(searchParams.get("next"));
 
   if (!tokenHash || !type) {
     return NextResponse.redirect(`${origin}/login?error=missing_token`);

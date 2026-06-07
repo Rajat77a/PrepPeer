@@ -1,4 +1,5 @@
 import type { User } from "@supabase/supabase-js";
+import { getSafeOptionalString } from "@/lib/validation";
 
 type ProfileMetadata = {
   fullName: string;
@@ -14,8 +15,8 @@ const asRecord = (value: unknown): Record<string, unknown> =>
     ? (value as Record<string, unknown>)
     : {};
 
-const text = (value: unknown) =>
-  typeof value === "string" ? value.trim() : "";
+const text = (value: unknown, maxLength = 120) =>
+  getSafeOptionalString(value, maxLength);
 
 export const getTrustedProfile = (
   user: Pick<User, "app_metadata" | "user_metadata">
@@ -25,15 +26,15 @@ export const getTrustedProfile = (
 
   return {
     fullName:
-      text(trusted.fullName) ||
-      text(fallback.full_name) ||
-      text(fallback.name),
-    college: text(trusted.college) || text(fallback.college),
-    role: text(trusted.role) || text(fallback.target_role),
+      text(trusted.fullName, 80) ||
+      text(fallback.full_name, 80) ||
+      text(fallback.name, 80),
+    college: text(trusted.college, 120) || text(fallback.college, 120),
+    role: text(trusted.role, 80) || text(fallback.target_role, 80),
     experience:
-      text(trusted.experience) || text(fallback.experience_level),
+      text(trusted.experience, 40) || text(fallback.experience_level, 40),
     company:
-      text(trusted.company) || text(fallback.target_company_type),
+      text(trusted.company, 80) || text(fallback.target_company_type, 80),
     onboardingComplete:
       trusted.onboardingComplete === true ||
       fallback.onboarding_complete === true,

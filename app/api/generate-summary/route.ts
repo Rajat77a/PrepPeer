@@ -2,13 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { generateInterviewSummary } from "@/lib/server/summary";
-import type { QuestionReview } from "@/lib/types";
 import {
-  COMPLETION_REASONS,
-  isAllowedValue,
-  isPlainObject,
+  parseSummaryInput,
   readJsonBody,
-  REVIEW_STATUSES,
 } from "@/lib/validation";
 
 export async function POST(req: NextRequest) {
@@ -38,23 +34,13 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const input = body.data;
-    if (
-      !isPlainObject(input) ||
-      !isAllowedValue(input.completionReason, COMPLETION_REASONS) ||
-      !Array.isArray(input.questionReviews) ||
-      input.questionReviews.length !== 5 ||
-      input.questionReviews.some(
-        (review) =>
-          !isPlainObject(review) ||
-          typeof review.question !== "string" ||
-          typeof review.prompt !== "string" ||
-          typeof review.score !== "number" ||
-          !isAllowedValue(review.status, REVIEW_STATUSES)
-      )
-    ) {
+    const input = parseSummaryInput(body.data);
+    if (!input) {
       return NextResponse.json(
-        { error: "Invalid summary input." },
+        {
+          error:
+            "Invalid summary input. Check all required fields and value limits.",
+        },
         { status: 400 }
       );
     }
@@ -62,7 +48,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       await generateInterviewSummary(
         input.completionReason,
-        input.questionReviews as QuestionReview[]
+        input.questionReviews
       )
     );
   } catch {

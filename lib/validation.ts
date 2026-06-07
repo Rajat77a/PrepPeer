@@ -1,4 +1,9 @@
-import type { DimensionScore, FeedbackData, QuestionReviewStatus } from "./types";
+import type {
+  DimensionScore,
+  FeedbackData,
+  QuestionReview,
+  QuestionReviewStatus,
+} from "./types";
 
 export const PROFILE_ROLES = [
   "SDE",
@@ -55,15 +60,66 @@ export const isPlainObject = (
 ): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
+export const sanitizePlainText = (value: string) =>
+  value.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim();
+
+export const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (char) => {
+    switch (char) {
+      case "&":
+        return "&amp;";
+      case "<":
+        return "&lt;";
+      case ">":
+        return "&gt;";
+      case '"':
+        return "&quot;";
+      case "'":
+        return "&#39;";
+      default:
+        return char;
+    }
+  });
+
 export const getBoundedString = (
   value: unknown,
   minLength: number,
   maxLength: number
 ) => {
   if (typeof value !== "string") return null;
-  const normalized = value.trim();
+  const normalized = sanitizePlainText(value);
   if (normalized.length < minLength || normalized.length > maxLength) return null;
   return normalized;
+};
+
+export const getSafeOptionalString = (
+  value: unknown,
+  maxLength: number,
+  fallback = ""
+) => {
+  if (typeof value !== "string") return fallback;
+  return sanitizePlainText(value).slice(0, maxLength);
+};
+
+export const isValidEmail = (value: unknown) => {
+  if (typeof value !== "string" || value.length > 254) return false;
+  return /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(sanitizePlainText(value));
+};
+
+export const safeDashboardPath = (next: string | null | undefined) => {
+  const value = typeof next === "string" ? sanitizePlainText(next) : "";
+  if (
+    !value ||
+    value.length > 300 ||
+    !value.startsWith("/dashboard") ||
+    value.startsWith("//") ||
+    value.includes("\\") ||
+    /[\r\n]/.test(value)
+  ) {
+    return "/dashboard";
+  }
+
+  return value;
 };
 
 export const isAllowedValue = <T extends readonly string[]>(
@@ -141,6 +197,78 @@ export const parseDetectionInput = (value: unknown) => {
   if (!isPlainObject(value)) return null;
   const answer = getBoundedString(value.answer, 1, 8000);
   return answer ? { answer } : null;
+};
+
+export const parseSummaryInput = (value: unknown) => {
+  if (
+    !isPlainObject(value) ||
+    !isAllowedValue(value.completionReason, COMPLETION_REASONS) ||
+    !Array.isArray(value.questionReviews) ||
+    value.questionReviews.length !== 5
+  ) {
+    return null;
+  }
+
+  const reviews: QuestionReview[] = [];
+  const seenQuestions = new Set<string>();
+
+  for (const item of value.questionReviews) {
+    if (!isPlainObject(item)) return null;
+
+    const question = getBoundedString(item.question, 2, 4);
+    const prompt = getBoundedString(item.prompt, 8, 1200);
+    const score = Number(item.score);
+    const answer =
+      item.answer === undefined
+        ? undefined
+        : getBoundedString(item.answer, 1, 8000);
+    const summary =
+      item.summary === undefined
+        ? undefined
+        : getBoundedString(item.summary, 1, 1000);
+    const improvement =
+      item.improvement === undefined
+        ? undefined
+        : getBoundedString(item.improvement, 1, 1000);
+    const reason =
+      item.reason === undefined
+        ? undefined
+        : getBoundedString(item.reason, 1, 1000);
+
+    if (
+      !question ||
+      !/^Q[1-5]$/.test(question) ||
+      seenQuestions.has(question) ||
+      !prompt ||
+      !Number.isFinite(score) ||
+      score < 0 ||
+      score > 40 ||
+      !isAllowedValue(item.status, REVIEW_STATUSES) ||
+      (item.answer !== undefined && !answer) ||
+      (item.summary !== undefined && !summary) ||
+      (item.improvement !== undefined && !improvement) ||
+      (item.reason !== undefined && !reason)
+    ) {
+      return null;
+    }
+
+    seenQuestions.add(question);
+    reviews.push({
+      question,
+      prompt,
+      score,
+      status: item.status,
+      answer: answer ?? undefined,
+      summary: summary ?? undefined,
+      improvement: improvement ?? undefined,
+      reason: reason ?? undefined,
+    });
+  }
+
+  return {
+    completionReason: value.completionReason,
+    questionReviews: reviews,
+  };
 };
 
 export const normalizeFeedback = (value: unknown): FeedbackData | null => {

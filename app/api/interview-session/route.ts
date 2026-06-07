@@ -58,13 +58,28 @@ const parseReviews = (value: unknown): ReviewInput[] | null => {
       typeof item.answer === "string"
         ? getBoundedString(item.answer, 1, 8000) ?? undefined
         : undefined;
+    const evaluationToken =
+      item.evaluationToken === undefined
+        ? undefined
+        : getBoundedString(item.evaluationToken, 20, 24_000);
+    const detectionToken =
+      item.detectionToken === undefined
+        ? undefined
+        : getBoundedString(item.detectionToken, 20, 24_000);
+    const reason =
+      item.reason === undefined
+        ? undefined
+        : getBoundedString(item.reason, 1, 1000);
 
     if (
       !question ||
       !/^Q[1-5]$/.test(question) ||
       seenQuestions.has(question) ||
       !prompt ||
-      !isAllowedValue(item.status, REVIEW_STATUSES)
+      !isAllowedValue(item.status, REVIEW_STATUSES) ||
+      (item.evaluationToken !== undefined && !evaluationToken) ||
+      (item.detectionToken !== undefined && !detectionToken) ||
+      (item.reason !== undefined && !reason)
     ) {
       return null;
     }
@@ -77,16 +92,9 @@ const parseReviews = (value: unknown): ReviewInput[] | null => {
       prompt,
       answer,
       status: item.status,
-      evaluationToken:
-        typeof item.evaluationToken === "string"
-          ? item.evaluationToken
-          : undefined,
-      detectionToken:
-        typeof item.detectionToken === "string" ? item.detectionToken : undefined,
-      reason:
-        typeof item.reason === "string"
-          ? item.reason.trim().slice(0, 1000)
-          : undefined,
+      evaluationToken: evaluationToken ?? undefined,
+      detectionToken: detectionToken ?? undefined,
+      reason: reason ?? undefined,
     });
   }
 

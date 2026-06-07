@@ -2,15 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { hasCompletedProfile } from "@/lib/profile";
+import { safeDashboardPath } from "@/lib/validation";
 import { getSupabaseConfig } from "@/utils/supabase/config";
-
-const safeNextPath = (next: string | null) => {
-  if (!next || !next.startsWith("/dashboard") || next.startsWith("//")) {
-    return "/dashboard";
-  }
-
-  return next;
-};
 
 const isFreshAuthUser = (createdAt?: string) => {
   if (!createdAt) return false;
@@ -24,7 +17,7 @@ const isFreshAuthUser = (createdAt?: string) => {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = safeNextPath(searchParams.get("next"));
+  const next = safeDashboardPath(searchParams.get("next"));
   const mode = searchParams.get("mode");
   const siteUrl = "https://prep-peer.vercel.app";
 

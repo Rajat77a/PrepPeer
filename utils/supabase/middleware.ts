@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
+import { sanitizePlainText } from "@/lib/validation";
 import { getSupabaseConfig } from "@/utils/supabase/config";
 
 export const updateSession = async (request: NextRequest) => {
@@ -58,9 +59,12 @@ export const updateSession = async (request: NextRequest) => {
 
   if (requiresAccount && !user) {
     const loginUrl = new URL("/login", request.url);
+    const nextPath = sanitizePlainText(
+      `${request.nextUrl.pathname}${request.nextUrl.search}`
+    ).slice(0, 300);
     loginUrl.searchParams.set(
       "next",
-      `${request.nextUrl.pathname}${request.nextUrl.search}`
+      nextPath
     );
     return NextResponse.redirect(loginUrl);
   }

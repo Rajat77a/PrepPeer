@@ -1,4 +1,5 @@
 import type { DimensionScore, LeaderboardEntry } from "@/lib/types";
+import { getSafeOptionalString } from "@/lib/validation";
 
 export type InterviewSessionRow = {
   id: string;
@@ -349,7 +350,11 @@ export const getDisplayName = (
   metadata: Record<string, unknown> | undefined,
   email?: string | null
 ) =>
-  String(metadata?.full_name ?? metadata?.name ?? email?.split("@")[0] ?? "You");
+  getSafeOptionalString(
+    metadata?.full_name ?? metadata?.name ?? email?.split("@")[0],
+    80,
+    "You"
+  ) || "You";
 
 const getScore = (session: InterviewSessionRow) =>
   Number(session.composite_score ?? 0);

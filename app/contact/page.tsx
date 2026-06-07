@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { Navbar } from "@/components/ui/Navbar";
+import { isValidEmail, sanitizePlainText } from "@/lib/validation";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -10,10 +11,13 @@ export default function ContactPage() {
     event.preventDefault();
 
     const form = new FormData(event.currentTarget);
-    const name = String(form.get("name") ?? "").trim().slice(0, 80);
-    const email = String(form.get("email") ?? "").trim().slice(0, 254);
-    const message = String(form.get("message") ?? "").trim().slice(0, 4000);
-    if (!name || !email || !message) return;
+    const name = sanitizePlainText(String(form.get("name") ?? "")).slice(0, 80);
+    const email = sanitizePlainText(String(form.get("email") ?? "")).slice(0, 254);
+    const message = sanitizePlainText(String(form.get("message") ?? "")).slice(
+      0,
+      4000
+    );
+    if (!name || !isValidEmail(email) || !message) return;
     const subject = encodeURIComponent(`PrepPeer enquiry from ${name}`);
     const body = encodeURIComponent(
       `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`

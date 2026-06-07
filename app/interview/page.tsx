@@ -12,6 +12,7 @@ import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 import { createClient } from "@/utils/supabase/client";
 import type { QuestionReview } from "@/lib/types";
+import { isValidSetup } from "@/lib/validation";
 import {
   AlertTriangle,
   ArrowRight,
@@ -292,7 +293,7 @@ export default function InterviewPage() {
       companyType: params.get("company") ?? "",
     };
 
-    if (!nextSetup.domain || !nextSetup.experience || !nextSetup.companyType) {
+    if (!isValidSetup(nextSetup)) {
       return;
     }
 
