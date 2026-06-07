@@ -15,14 +15,15 @@ const isFreshAuthUser = (createdAt?: string) => {
 };
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
+  const { origin, searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const next = safeDashboardPath(searchParams.get("next"));
   const mode = searchParams.get("mode");
-  const siteUrl =
+  const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.SITE_URL ??
-    "http://localhost:3000";
+    origin
+  ).replace(/\/$/, "");
 
   if (!code) {
     return NextResponse.redirect(`${siteUrl}/login?error=missing_code`);
