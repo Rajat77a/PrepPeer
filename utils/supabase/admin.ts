@@ -1,8 +1,8 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { getSupabaseConfig } from "@/utils/supabase/config";
+import { getSupabaseServerConfig } from "@/utils/supabase/server-config";
 
 export const createOptionalAdminClient = (): SupabaseClient | null => {
-  const { serviceRoleKey, supabaseUrl } = getSupabaseConfig();
+  const { serviceRoleKey, supabaseUrl } = getSupabaseServerConfig();
 
   if (!supabaseUrl || !serviceRoleKey) {
     return null;
