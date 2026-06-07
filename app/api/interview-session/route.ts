@@ -140,10 +140,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const input = body.data;
+    const questionSetToken =
+      isPlainObject(input)
+        ? getBoundedString(input.questionSetToken, 20, 24_000)
+        : null;
+
     if (
       !isPlainObject(input) ||
       !isValidSetup(input.setup) ||
-      !isAllowedValue(input.completionReason, COMPLETION_REASONS)
+      !isAllowedValue(input.completionReason, COMPLETION_REASONS) ||
+      !questionSetToken
     ) {
       return NextResponse.json(
         { error: "Invalid interview session." },
@@ -161,7 +167,7 @@ export async function POST(req: NextRequest) {
 
     const setup = input.setup;
     const questionSet = verifyInterviewProof(
-      input.questionSetToken,
+      questionSetToken,
       "questionSet",
       user.id
     );

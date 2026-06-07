@@ -101,6 +101,18 @@ export const getSafeOptionalString = (
   return sanitizePlainText(value).slice(0, maxLength);
 };
 
+export const getBoundedNumber = (
+  value: unknown,
+  min: number,
+  max: number,
+  integerOnly = false
+) => {
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  if (integerOnly && !Number.isInteger(value)) return null;
+  if (value < min || value > max) return null;
+  return value;
+};
+
 export const isValidEmail = (value: unknown) => {
   if (typeof value !== "string" || value.length > 254) return false;
   return /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(sanitizePlainText(value));
@@ -168,15 +180,13 @@ export const parseEvaluationInput = (value: unknown) => {
   const question = getBoundedString(value.question, 8, 1200);
   const answer = getBoundedString(value.answer, 1, 8000);
   const questionSetToken = getBoundedString(value.questionSetToken, 20, 24_000);
-  const questionIndex = Number(value.questionIndex);
+  const questionIndex = getBoundedNumber(value.questionIndex, 0, 4, true);
 
   if (
     !question ||
     !answer ||
     !questionSetToken ||
-    !Number.isInteger(questionIndex) ||
-    questionIndex < 0 ||
-    questionIndex > 4 ||
+    questionIndex === null ||
     !isAllowedValue(value.domain, PROFILE_ROLES) ||
     !isAllowedValue(value.experience, EXPERIENCE_LEVELS)
   ) {
@@ -217,7 +227,7 @@ export const parseSummaryInput = (value: unknown) => {
 
     const question = getBoundedString(item.question, 2, 4);
     const prompt = getBoundedString(item.prompt, 8, 1200);
-    const score = Number(item.score);
+    const score = getBoundedNumber(item.score, 0, 40);
     const answer =
       item.answer === undefined
         ? undefined
@@ -240,9 +250,7 @@ export const parseSummaryInput = (value: unknown) => {
       !/^Q[1-5]$/.test(question) ||
       seenQuestions.has(question) ||
       !prompt ||
-      !Number.isFinite(score) ||
-      score < 0 ||
-      score > 40 ||
+      score === null ||
       !isAllowedValue(item.status, REVIEW_STATUSES) ||
       (item.answer !== undefined && !answer) ||
       (item.summary !== undefined && !summary) ||
@@ -289,12 +297,12 @@ export const normalizeFeedback = (value: unknown): FeedbackData | null => {
     const rawDimension = value.dimensions[index];
     if (!isPlainObject(rawDimension)) return null;
 
-    const numeric = Number(rawDimension.value);
+    const numeric = getBoundedNumber(rawDimension.value, 0, 10);
     const reason = getBoundedString(rawDimension.reason, 1, 500);
 
     if (
       rawDimension.label !== expectedLabels[index] ||
-      !Number.isFinite(numeric) ||
+      numeric === null ||
       !reason
     ) {
       return null;
@@ -302,7 +310,7 @@ export const normalizeFeedback = (value: unknown): FeedbackData | null => {
 
     dimensions.push({
       label: expectedLabels[index],
-      value: Math.min(10, Math.max(0, numeric)),
+      value: numeric,
       reason,
     });
   }
