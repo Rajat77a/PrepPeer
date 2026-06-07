@@ -299,15 +299,21 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
-    const { error: passwordError } = await supabase.auth.updateUser({
-      password,
+    const response = await fetch("/api/auth/password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
     });
 
     setLoading(false);
 
-    if (passwordError) {
-      setError(friendlyAuthError(passwordError.message));
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+      setError(
+        friendlyAuthError(payload?.error ?? "Password could not be saved.")
+      );
       return;
     }
 
