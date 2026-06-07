@@ -209,7 +209,6 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
 
-    const supabase = createClient();
     const nextSignupNonce =
       isSignUp && typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
@@ -219,23 +218,24 @@ export default function LoginPage() {
 
     setSignupNonce(nextSignupNonce);
 
-    const { error: otpError } = await supabase.auth.signInWithOtp({
-      email: normalizedEmail,
-      options: {
-        shouldCreateUser: isSignUp,
-        data: isSignUp
-          ? {
-              preppeer_signup_nonce: nextSignupNonce,
-            }
-          : undefined,
-      },
+    const response = await fetch("/api/auth/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: normalizedEmail,
+        mode,
+        signupNonce: nextSignupNonce,
+      }),
     });
 
     setLoading(false);
 
-    if (otpError) {
+    if (!response.ok) {
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
       setSignupNonce("");
-      setError(friendlyAuthError(otpError.message));
+      setError(friendlyAuthError(payload?.error ?? "Could not send the code."));
       return;
     }
 

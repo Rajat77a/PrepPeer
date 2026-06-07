@@ -8,7 +8,7 @@ import {
   History,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Logo } from "@/components/ui/Logo";
@@ -36,9 +36,15 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const [signOutError, setSignOutError] = useState("");
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    setSignOutError("");
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      setSignOutError("Could not sign out. Please try again.");
+      return;
+    }
     router.push("/");
     router.refresh();
   };
@@ -137,6 +143,11 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
             <LogOut className="h-3.5 w-3.5" />
             Sign out
           </button>
+          {signOutError ? (
+            <p className="px-3 font-inter text-[11px] font-semibold text-[#dc2626]">
+              {signOutError}
+            </p>
+          ) : null}
         </div>
       </aside>
 
