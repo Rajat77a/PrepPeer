@@ -19,7 +19,10 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const next = safeDashboardPath(searchParams.get("next"));
   const mode = searchParams.get("mode");
-  const siteUrl = "https://prep-peer.vercel.app";
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    process.env.SITE_URL ??
+    "http://localhost:3000";
 
   if (!code) {
     return NextResponse.redirect(`${siteUrl}/login?error=missing_code`);
