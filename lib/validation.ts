@@ -328,6 +328,116 @@ export const normalizeFeedback = (value: unknown): FeedbackData | null => {
   };
 };
 
+const HONEYPOT_FIELDS = new Set([
+  "_gotcha",
+  "honeypot",
+  "botField",
+  "hiddenField",
+  "website",
+  "homepage",
+  "fax",
+]);
+
+const SUSPICIOUS_PATTERNS = [
+  {
+    name: "script tag",
+    pattern: /<\s*\/?\s*script\b/i,
+  },
+  {
+    name: "javascript url",
+    pattern: /\bjavascript\s*:/i,
+  },
+  {
+    name: "inline event handler",
+    pattern: /\bon(?:error|load|click|mouseover|focus|submit)\s*=/i,
+  },
+  {
+    name: "sql injection marker",
+    pattern:
+      /(?:--|\/\*|\*\/|;\s*(?:drop|delete|insert|update|select)\b|'\s*(?:or|and)\s*'?\d+'?\s*=\s*'?\d+|\b(?:or|and)\s+\d+\s*=\s*\d+)/i,
+  },
+  {
+    name: "destructive sql",
+    pattern:
+      /\b(?:drop\s+(?:table|database|schema)|alter\s+table|truncate\s+table|delete\s+from|insert\s+into)\b/i,
+  },
+  {
+    name: "union query",
+    pattern: /\bunion\s+(?:all\s+)?select\b/i,
+  },
+];
+
+type AbuseMatch = {
+  fieldPath: string;
+  reason: string;
+};
+
+const isFilledHoneypot = (value: unknown) => {
+  if (typeof value === "string") return sanitizePlainText(value).length > 0;
+  if (typeof value === "number" || typeof value === "boolean") return true;
+  if (Array.isArray(value)) return value.length > 0;
+  return value !== null && value !== undefined;
+};
+
+export const findAbusePattern = (
+  value: unknown,
+  fieldPath = "body",
+  depth = 0
+): AbuseMatch | null => {
+  if (depth > 8) {
+    return { fieldPath, reason: "payload nesting is too deep" };
+  }
+
+  if (typeof value === "string") {
+    if (value.length > 24_000) {
+      return { fieldPath, reason: "string exceeds abuse threshold" };
+    }
+
+    for (const { name, pattern } of SUSPICIOUS_PATTERNS) {
+      if (pattern.test(value)) {
+        return { fieldPath, reason: name };
+      }
+    }
+
+    return null;
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length > 50) {
+      return { fieldPath, reason: "array exceeds abuse threshold" };
+    }
+
+    for (let index = 0; index < value.length; index += 1) {
+      const match = findAbusePattern(
+        value[index],
+        `${fieldPath}[${index}]`,
+        depth + 1
+      );
+      if (match) return match;
+    }
+
+    return null;
+  }
+
+  if (isPlainObject(value)) {
+    const entries = Object.entries(value);
+    if (entries.length > 80) {
+      return { fieldPath, reason: "object has too many fields" };
+    }
+
+    for (const [key, child] of entries) {
+      if (HONEYPOT_FIELDS.has(key) && isFilledHoneypot(child)) {
+        return { fieldPath: `${fieldPath}.${key}`, reason: "honeypot field" };
+      }
+
+      const match = findAbusePattern(child, `${fieldPath}.${key}`, depth + 1);
+      if (match) return match;
+    }
+  }
+
+  return null;
+};
+
 export const hasSafeJsonContentType = (request: Request) =>
   request.headers.get("content-type")?.toLowerCase().includes("application/json") ??
   false;

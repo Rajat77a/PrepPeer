@@ -7,6 +7,7 @@ import {
   verifyInterviewProof,
 } from "@/lib/server/interviewProof";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import {
   normalizeFeedback,
   parseEvaluationInput,
@@ -38,6 +39,14 @@ export async function POST(req: NextRequest) {
   if (!body.ok) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
+
+  const abuseGuard = enforceRequestAbuseGuards({
+    request: req,
+    userId: user.id,
+    route: "evaluate-answer",
+    body: body.data,
+  });
+  if (!abuseGuard.ok) return abuseGuard.response;
 
   try {
     const input = parseEvaluationInput(body.data);

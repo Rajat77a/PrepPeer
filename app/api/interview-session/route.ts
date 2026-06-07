@@ -6,6 +6,7 @@ import {
   verifyInterviewProof,
 } from "@/lib/server/interviewProof";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import { generateInterviewSummary } from "@/lib/server/summary";
 import type { DimensionScore, QuestionReview } from "@/lib/types";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
@@ -137,6 +138,14 @@ export async function POST(req: NextRequest) {
   if (!body.ok) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
+
+  const abuseGuard = enforceRequestAbuseGuards({
+    request: req,
+    userId: user.id,
+    route: "interview-session",
+    body: body.data,
+  });
+  if (!abuseGuard.ok) return abuseGuard.response;
 
   try {
     const input = body.data;

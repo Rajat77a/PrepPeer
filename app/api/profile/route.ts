@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
 import {
   parseProfileInput,
@@ -43,6 +44,14 @@ export async function PATCH(req: NextRequest) {
   if (!body.ok) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
+
+  const abuseGuard = enforceRequestAbuseGuards({
+    request: req,
+    userId: user.id,
+    route: "profile",
+    body: body.data,
+  });
+  if (!abuseGuard.ok) return abuseGuard.response;
 
   try {
     const profile = parseProfileInput(body.data);

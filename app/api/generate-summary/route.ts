@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import { generateInterviewSummary } from "@/lib/server/summary";
 import {
   parseSummaryInput,
@@ -32,6 +33,14 @@ export async function POST(req: NextRequest) {
   if (!body.ok) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
+
+  const abuseGuard = enforceRequestAbuseGuards({
+    request: req,
+    userId: user.id,
+    route: "generate-summary",
+    body: body.data,
+  });
+  if (!abuseGuard.ok) return abuseGuard.response;
 
   try {
     const input = parseSummaryInput(body.data);

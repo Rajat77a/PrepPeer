@@ -5,6 +5,7 @@ import {
   hashAnswer,
 } from "@/lib/server/interviewProof";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import {
   getBoundedString,
   isPlainObject,
@@ -53,6 +54,14 @@ export async function POST(req: NextRequest) {
   if (!body.ok) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
+
+  const abuseGuard = enforceRequestAbuseGuards({
+    request: req,
+    userId: user.id,
+    route: "detect-ai",
+    body: body.data,
+  });
+  if (!abuseGuard.ok) return abuseGuard.response;
 
   try {
     const input = parseDetectionInput(body.data);

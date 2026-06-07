@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { createInterviewProof } from "@/lib/server/interviewProof";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import {
   isValidSetup,
   readJsonBody,
@@ -33,6 +34,14 @@ export async function POST(req: NextRequest) {
   if (!body.ok) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
+
+  const abuseGuard = enforceRequestAbuseGuards({
+    request: req,
+    userId: user.id,
+    route: "generate-questions",
+    body: body.data,
+  });
+  if (!abuseGuard.ok) return abuseGuard.response;
 
   try {
     const input = body.data;
