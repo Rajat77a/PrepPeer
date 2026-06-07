@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { authCookieOptions } from "@/utils/authCookieOptions";
 import { getSupabaseConfig } from "@/utils/supabase/config";
 
 export const createClient = (
@@ -12,6 +13,7 @@ export const createClient = (
   }
 
   return createServerClient(supabaseUrl, supabaseKey, {
+    cookieOptions: authCookieOptions,
     cookies: {
       getAll() {
         return cookieStore.getAll();

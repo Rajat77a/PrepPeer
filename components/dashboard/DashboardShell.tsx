@@ -10,7 +10,6 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { createClient } from "@/utils/supabase/client";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
 
@@ -35,13 +34,12 @@ const LIVE_REFRESH_MS = 5 * 60 * 1000;
 export function DashboardShell({ children, user }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const supabase = createClient();
   const [signOutError, setSignOutError] = useState("");
 
   const signOut = async () => {
     setSignOutError("");
-    const { error } = await supabase.auth.signOut({ scope: "global" });
-    if (error) {
+    const response = await fetch("/api/auth/logout", { method: "POST" });
+    if (!response.ok) {
       setSignOutError("Could not sign out. Please try again.");
       return;
     }
@@ -141,7 +139,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
             className="mt-3 flex w-full items-center gap-2 px-3 py-2 font-inter text-xs font-bold text-[#64748b] transition hover:text-[#006cff]"
           >
             <LogOut className="h-3.5 w-3.5" />
-            Sign out
+            Sign out everywhere
           </button>
           {signOutError ? (
             <p className="px-3 font-inter text-[11px] font-semibold text-[#dc2626]">

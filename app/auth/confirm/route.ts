@@ -3,6 +3,12 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { safeDashboardPath } from "@/lib/validation";
+import { authCookieOptions } from "@/utils/authCookieOptions";
+import {
+  createSessionGuard,
+  SESSION_GUARD_COOKIE,
+  sessionGuardCookieOptions,
+} from "@/utils/sessionSecurity";
 import { getSupabaseConfig } from "@/utils/supabase/config";
 
 export async function GET(request: Request) {
@@ -23,6 +29,7 @@ export async function GET(request: Request) {
 
   const cookieStore = cookies();
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookieOptions: authCookieOptions,
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (cookiesToSet) =>
@@ -41,5 +48,21 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=verification_failed`);
   }
 
-  return NextResponse.redirect(`${origin}${next}`);
+  const response = NextResponse.redirect(`${origin}${next}`);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    const guard = await createSessionGuard(request, user.id);
+    if (guard) {
+      response.cookies.set(
+        SESSION_GUARD_COOKIE,
+        guard,
+        sessionGuardCookieOptions
+      );
+    }
+  }
+
+  return response;
 }

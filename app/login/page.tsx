@@ -259,10 +259,17 @@ export default function LoginPage() {
         type: "email",
       });
 
+    if (verifyError) {
+      setLoading(false);
+      setError("Invalid code. Please try again.");
+      return;
+    }
+
+    const sessionResponse = await fetch("/api/auth/session", { method: "POST" });
     setLoading(false);
 
-    if (verifyError) {
-      setError("Invalid code. Please try again.");
+    if (!sessionResponse.ok) {
+      setError("Session protection could not be started. Please try again.");
       return;
     }
 
@@ -339,6 +346,8 @@ export default function LoginPage() {
       setError(
         authError === "auth_not_configured"
           ? "Authentication is not configured yet."
+          : authError === "session_changed"
+            ? "Your session changed. Please sign in again."
           : "We could not complete authentication. Please try again."
       );
       window.history.replaceState(null, "", "/login");

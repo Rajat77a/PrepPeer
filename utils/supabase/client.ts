@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { authCookieOptions } from "@/utils/authCookieOptions";
 import { getSupabaseConfig } from "@/utils/supabase/config";
 
 export const createClient = () => {
@@ -8,5 +9,7 @@ export const createClient = () => {
     throw new Error("Supabase environment variables are not configured.");
   }
 
-  return createBrowserClient(supabaseUrl, supabaseKey);
+  return createBrowserClient(supabaseUrl, supabaseKey, {
+    cookieOptions: authCookieOptions,
+  });
 };

@@ -3,6 +3,12 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { hasCompletedProfile } from "@/lib/profile";
 import { safeDashboardPath } from "@/lib/validation";
+import { authCookieOptions } from "@/utils/authCookieOptions";
+import {
+  createSessionGuard,
+  SESSION_GUARD_COOKIE,
+  sessionGuardCookieOptions,
+} from "@/utils/sessionSecurity";
 import { getSupabaseConfig } from "@/utils/supabase/config";
 
 const isFreshAuthUser = (createdAt?: string) => {
@@ -37,6 +43,7 @@ export async function GET(request: Request) {
   }
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookieOptions: authCookieOptions,
     cookies: {
       getAll: () => cookieStore.getAll(),
       setAll: (cookiesToSet) =>
@@ -61,10 +68,30 @@ export async function GET(request: Request) {
     user &&
     !hasCompletedProfile(user)
   ) {
-    return NextResponse.redirect(
+    const response = NextResponse.redirect(
       `${siteUrl}/onboarding?next=${encodeURIComponent(next)}`
     );
+    const guard = await createSessionGuard(request, user.id);
+    if (guard) {
+      response.cookies.set(
+        SESSION_GUARD_COOKIE,
+        guard,
+        sessionGuardCookieOptions
+      );
+    }
+    return response;
   }
 
-  return NextResponse.redirect(`${siteUrl}${next}`);
+  const response = NextResponse.redirect(`${siteUrl}${next}`);
+  if (user) {
+    const guard = await createSessionGuard(request, user.id);
+    if (guard) {
+      response.cookies.set(
+        SESSION_GUARD_COOKIE,
+        guard,
+        sessionGuardCookieOptions
+      );
+    }
+  }
+  return response;
 }
