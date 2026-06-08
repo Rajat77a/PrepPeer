@@ -2,6 +2,7 @@ import "server-only";
 
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { enforceApiRateLimit } from "@/lib/server/apiRateLimit";
 import { validateCsrfRequest } from "@/lib/server/csrf";
 import { logServerError } from "@/lib/server/errorLog";
 
@@ -17,8 +18,13 @@ export const withApiErrorHandler =
   async (...args: TArgs) => {
     try {
       const request = args[0] instanceof Request ? (args[0] as NextRequest) : null;
-      const csrfResponse = request ? validateCsrfRequest(request) : null;
-      if (csrfResponse) return csrfResponse;
+      if (request) {
+        const rateLimitResponse = await enforceApiRateLimit(request);
+        if (rateLimitResponse) return rateLimitResponse;
+
+        const csrfResponse = validateCsrfRequest(request);
+        if (csrfResponse) return csrfResponse;
+      }
 
       return await handler(...args);
     } catch (error) {
