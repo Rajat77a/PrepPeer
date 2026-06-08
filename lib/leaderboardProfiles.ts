@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LeaderboardUserProfile } from "@/lib/ranking";
 import { logServerError } from "@/lib/server/errorLog";
+import { getSafeOptionalString } from "@/lib/validation";
 
 type LeaderboardProfileRow = {
   user_id: string;
@@ -31,11 +32,12 @@ export const getLeaderboardUserProfiles = async (
     if (!row.user_id) return profiles;
 
     profiles[row.user_id] = {
-      name: row.name?.trim() || undefined,
-      college: row.college?.trim() || undefined,
-      role: (row.target_role ?? row.role)?.trim() || undefined,
+      name: getSafeOptionalString(row.name, 80) || undefined,
+      college: getSafeOptionalString(row.college, 120) || undefined,
+      role: getSafeOptionalString(row.target_role ?? row.role, 80) || undefined,
       companyType:
-        (row.target_company_type ?? row.company_type)?.trim() || undefined,
+        getSafeOptionalString(row.target_company_type ?? row.company_type, 80) ||
+        undefined,
     };
 
     return profiles;

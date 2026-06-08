@@ -10,7 +10,7 @@ import { QuestionBreakdownChart } from "@/components/results/QuestionBreakdownCh
 import { SessionSummary } from "@/components/results/SessionSummary";
 import { Navbar } from "@/components/ui/Navbar";
 import { SESSION_REPORT } from "@/lib/mockData";
-import type { SessionReport } from "@/lib/types";
+import type { QuestionReviewStatus, SessionReport } from "@/lib/types";
 import {
   getDisplayName,
   getRankPercentileLabel,
@@ -18,6 +18,7 @@ import {
   type InterviewSessionRow,
 } from "@/lib/ranking";
 import { getTrustedDisplayMetadata } from "@/lib/profile";
+import { getSafeOptionalString, isPlainObject } from "@/lib/validation";
 import { createClient } from "@/utils/supabase/client";
 
 type StoredResult = Partial<SessionReport> & {
@@ -27,6 +28,96 @@ type StoredResult = Partial<SessionReport> & {
 };
 
 const RESULTS_KEY = "preppeer_results";
+const REVIEW_STATUSES: QuestionReviewStatus[] = [
+  "answered",
+  "ai",
+  "gibberish",
+  "autoSkipped",
+];
+
+const cleanText = (value: unknown, fallback = "", maxLength = 700) =>
+  getSafeOptionalString(value, maxLength, fallback);
+
+const cleanSummary = (value: unknown): SessionReport["summary"] | undefined => {
+  if (!isPlainObject(value)) return undefined;
+
+  const questionReviews = Array.isArray(value.questionReviews)
+    ? value.questionReviews.slice(0, 10).flatMap((item) => {
+        if (!isPlainObject(item)) return [];
+
+        const status = REVIEW_STATUSES.includes(
+          item.status as QuestionReviewStatus
+        )
+          ? (item.status as QuestionReviewStatus)
+          : "answered";
+
+        return [
+          {
+            question: cleanText(item.question, "Question", 40),
+            prompt: cleanText(item.prompt, "", 1_200),
+            score: Number.isFinite(Number(item.score)) ? Number(item.score) : 0,
+            status,
+            summary: cleanText(item.summary, "", 700) || undefined,
+            improvement: cleanText(item.improvement, "", 700) || undefined,
+            reason: cleanText(item.reason, "", 500) || undefined,
+          },
+        ];
+      })
+    : [];
+
+  return {
+    completionReason:
+      value.completionReason === "autoSubmitted" ? "autoSubmitted" : "completed",
+    overallSummary: cleanText(value.overallSummary, "", 1_500),
+    needsImprovement: Array.isArray(value.needsImprovement)
+      ? value.needsImprovement
+          .map((item) => cleanText(item, "", 500))
+          .filter(Boolean)
+          .slice(0, 8)
+      : [],
+    questionReviews,
+  };
+};
+
+const cleanDimensions = (value: unknown): SessionReport["dimensions"] => {
+  if (!Array.isArray(value)) return [];
+
+  return value.slice(0, 8).flatMap((item) => {
+    if (!isPlainObject(item)) return [];
+
+    return [
+      {
+        label: cleanText(item.label, "Score", 80),
+        value: Number.isFinite(Number(item.value)) ? Number(item.value) : 0,
+        max:
+          item.max === undefined
+            ? undefined
+            : Number.isFinite(Number(item.max))
+              ? Number(item.max)
+              : 10,
+        color: cleanText(item.color, "", 32) || undefined,
+        reason: cleanText(item.reason, "", 700) || undefined,
+      },
+    ];
+  });
+};
+
+const cleanQuestionScores = (
+  value: unknown
+): SessionReport["questionScores"] => {
+  if (!Array.isArray(value)) return [];
+
+  return value.slice(0, 10).flatMap((item) => {
+    if (!isPlainObject(item)) return [];
+
+    return [
+      {
+        question: cleanText(item.question, "Question", 40),
+        score: Number.isFinite(Number(item.score)) ? Number(item.score) : 0,
+      },
+    ];
+  });
+};
 
 export default function ResultsPage() {
   const [report, setReport] = useState<SessionReport>(SESSION_REPORT);
@@ -45,19 +136,23 @@ export default function ResultsPage() {
 
         setReport((prev) => ({
           ...prev,
-          name: realData.name ?? prev.name,
-          role: realData.role ?? prev.role,
-          companyType: realData.companyType ?? prev.companyType,
+          name: cleanText(realData.name, prev.name, 80),
+          role: cleanText(realData.role, prev.role, 80),
+          companyType: cleanText(realData.companyType, prev.companyType, 80),
           source: realData.source ?? prev.source,
           compositeScore: realData.compositeScore ?? prev.compositeScore,
-          percentile: realData.percentile ?? "Not ranked",
-          rankDelta: realData.rankDelta ?? "No ranked session yet",
+          percentile: cleanText(realData.percentile, "Not ranked", 80),
+          rankDelta: cleanText(realData.rankDelta, "No ranked session yet", 80),
           previousRank: realData.previousRank ?? 0,
           currentRank: realData.currentRank ?? 0,
           totalCandidates: realData.totalCandidates ?? 0,
-          dimensions: realData.dimensions ?? prev.dimensions,
-          questionScores: realData.questionScores ?? prev.questionScores,
-          summary: realData.summary ?? prev.summary,
+          dimensions: cleanDimensions(realData.dimensions).length
+            ? cleanDimensions(realData.dimensions)
+            : prev.dimensions,
+          questionScores: cleanQuestionScores(realData.questionScores).length
+            ? cleanQuestionScores(realData.questionScores)
+            : prev.questionScores,
+          summary: cleanSummary(realData.summary) ?? prev.summary,
         }));
       }
     } catch {
@@ -71,23 +166,23 @@ export default function ResultsPage() {
         sessionStorage.setItem(RESULTS_KEY, JSON.stringify(accountResult));
         setReport((prev) => ({
           ...prev,
-          name: accountResult.name ?? prev.name,
-          role: accountResult.role ?? prev.role,
-          companyType: accountResult.companyType ?? prev.companyType,
+          name: cleanText(accountResult.name, prev.name, 80),
+          role: cleanText(accountResult.role, prev.role, 80),
+          companyType: cleanText(accountResult.companyType, prev.companyType, 80),
           source: "account",
           compositeScore: accountResult.compositeScore ?? prev.compositeScore,
-          percentile: accountResult.percentile ?? prev.percentile,
-          rankDelta: accountResult.rankDelta ?? prev.rankDelta,
+          percentile: cleanText(accountResult.percentile, prev.percentile, 80),
+          rankDelta: cleanText(accountResult.rankDelta, prev.rankDelta, 80),
           previousRank: accountResult.previousRank ?? prev.previousRank,
           currentRank: accountResult.currentRank ?? prev.currentRank,
           totalCandidates: accountResult.totalCandidates ?? prev.totalCandidates,
-          dimensions: accountResult.dimensions?.length
-            ? accountResult.dimensions
+          dimensions: cleanDimensions(accountResult.dimensions).length
+            ? cleanDimensions(accountResult.dimensions)
             : prev.dimensions,
-          questionScores: accountResult.questionScores?.length
-            ? accountResult.questionScores
+          questionScores: cleanQuestionScores(accountResult.questionScores).length
+            ? cleanQuestionScores(accountResult.questionScores)
             : prev.questionScores,
-          summary: accountResult.summary ?? prev.summary,
+          summary: cleanSummary(accountResult.summary) ?? prev.summary,
         }));
       };
 
@@ -141,14 +236,10 @@ export default function ResultsPage() {
         previousRank: rankSummary?.previousRank ?? 0,
         currentRank: rankSummary?.rank ?? 0,
         totalCandidates: rankSummary?.totalCandidates ?? 0,
-        dimensions: latestSession.dimensions ?? [],
-        questionScores: latestSession.question_scores ?? [],
+        dimensions: cleanDimensions(latestSession.dimensions),
+        questionScores: cleanQuestionScores(latestSession.question_scores),
         summary:
-          latestSession.summary &&
-          typeof latestSession.summary === "object" &&
-          !Array.isArray(latestSession.summary)
-            ? (latestSession.summary as SessionReport["summary"])
-            : undefined,
+          cleanSummary(latestSession.summary),
       };
 
       applyAccountResult(accountResult);

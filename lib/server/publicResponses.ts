@@ -6,7 +6,7 @@ import type {
   QuestionScore,
   QuestionReview,
 } from "@/lib/types";
-import { isPlainObject } from "@/lib/validation";
+import { getSafeOptionalString, isPlainObject } from "@/lib/validation";
 
 const SUMMARY_STATUSES: QuestionReview["status"][] = [
   "answered",
@@ -15,8 +15,8 @@ const SUMMARY_STATUSES: QuestionReview["status"][] = [
   "autoSkipped",
 ];
 
-const getString = (value: unknown, fallback = "") =>
-  typeof value === "string" ? value : fallback;
+const getString = (value: unknown, fallback = "", maxLength = 700) =>
+  getSafeOptionalString(value, maxLength, fallback);
 
 const getFiniteNumber = (value: unknown, fallback = 0) => {
   const number = Number(value);
@@ -35,8 +35,8 @@ export const toPublicDimensions = (value: unknown): DimensionScore[] => {
         value: getFiniteNumber(item.value),
         max:
           item.max === undefined ? undefined : getFiniteNumber(item.max, 10),
-        color: typeof item.color === "string" ? item.color : undefined,
-        reason: typeof item.reason === "string" ? item.reason : undefined,
+        color: getString(item.color, "", 32) || undefined,
+        reason: getString(item.reason, "", 700) || undefined,
       },
     ];
   });
@@ -50,7 +50,7 @@ export const toPublicQuestionScores = (value: unknown): QuestionScore[] => {
 
     return [
       {
-        question: getString(item.question, "Question"),
+        question: getString(item.question, "Question", 40),
         score: getFiniteNumber(item.score),
       },
     ];
@@ -64,10 +64,12 @@ export const toPublicSessionSummary = (
 
   const completionReason =
     value.completionReason === "autoSubmitted" ? "autoSubmitted" : "completed";
-  const overallSummary = getString(value.overallSummary);
+  const overallSummary = getString(value.overallSummary, "", 1_500);
   const needsImprovement = Array.isArray(value.needsImprovement)
     ? value.needsImprovement
         .filter((item): item is string => typeof item === "string")
+        .map((item) => getSafeOptionalString(item, 500))
+        .filter(Boolean)
         .slice(0, 8)
     : [];
   const questionReviews = Array.isArray(value.questionReviews)
@@ -82,14 +84,14 @@ export const toPublicSessionSummary = (
 
         return [
           {
-            question: getString(item.question, "Question"),
-            prompt: getString(item.prompt),
+            question: getString(item.question, "Question", 40),
+            prompt: getString(item.prompt, "", 1_200),
             score: getFiniteNumber(item.score),
             status,
-            summary: typeof item.summary === "string" ? item.summary : undefined,
+            summary: getString(item.summary, "", 700) || undefined,
             improvement:
-              typeof item.improvement === "string" ? item.improvement : undefined,
-            reason: typeof item.reason === "string" ? item.reason : undefined,
+              getString(item.improvement, "", 700) || undefined,
+            reason: getString(item.reason, "", 500) || undefined,
           },
         ];
       })

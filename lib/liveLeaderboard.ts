@@ -51,8 +51,9 @@ const toRealEntry = (
   row: SupabaseLeaderboardRow,
   currentUserId?: string
 ): InternalLeaderboardEntry => {
-  const role = row.role ?? "Interview";
-  const companyType = row.company_type ?? "General";
+  const role = getSafeOptionalString(row.role, 80, "Interview") || "Interview";
+  const companyType =
+    getSafeOptionalString(row.company_type, 80, "General") || "General";
   const college = getSafeOptionalString(row.college, 120);
   const name = getSafeOptionalString(row.name, 80, "PrepPeer user");
 
