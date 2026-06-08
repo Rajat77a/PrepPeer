@@ -10,6 +10,7 @@ import {
   INVALID_LOGIN_MESSAGE,
   recordFailedLoginAttempt,
 } from "@/lib/server/loginAttempts";
+import { sendAccountLockAlertEmail } from "@/lib/server/securityEmail";
 import {
   findAbusePattern,
   isPlainObject,
@@ -98,6 +99,15 @@ async function postVerifyOtp(request: NextRequest) {
       ip,
       locked: failedBlock.blocked,
     });
+
+    if (failedBlock.accountJustLocked) {
+      await sendAccountLockAlertEmail({
+        email,
+        ip,
+        lockedUntil: failedBlock.lockedUntil,
+        request,
+      });
+    }
 
     return genericLoginError(
       failedBlock.blocked ? 429 : 401,
