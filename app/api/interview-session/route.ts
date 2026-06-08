@@ -7,6 +7,11 @@ import {
   hashAnswer,
   verifyInterviewProof,
 } from "@/lib/server/interviewProof";
+import {
+  toPublicDimensions,
+  toPublicQuestionScores,
+  toPublicSessionSummary,
+} from "@/lib/server/publicResponses";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import { generateInterviewSummary } from "@/lib/server/summary";
@@ -24,7 +29,7 @@ import {
 
 const TOTAL_QUESTIONS = 5;
 const SESSION_COLUMNS =
-  "id,composite_score,dimensions,question_scores,summary";
+  "composite_score,dimensions,question_scores,summary";
 const zeroDimensions: DimensionScore[] = [
   "Communication",
   "Problem Solving",
@@ -214,11 +219,10 @@ async function postInterviewSession(req: NextRequest) {
 
     if (existingSession) {
       return NextResponse.json({
-        sessionId: existingSession.id,
         compositeScore: Number(existingSession.composite_score ?? 0),
-        dimensions: existingSession.dimensions ?? [],
-        questionScores: existingSession.question_scores ?? [],
-        summary: existingSession.summary,
+        dimensions: toPublicDimensions(existingSession.dimensions),
+        questionScores: toPublicQuestionScores(existingSession.question_scores),
+        summary: toPublicSessionSummary(existingSession.summary),
       });
     }
 
@@ -430,7 +434,7 @@ async function postInterviewSession(req: NextRequest) {
       }),
     };
 
-    const { data: inserted, error } = await admin
+    const { error } = await admin
       .from("interview_sessions")
       .insert({
         user_id: user.id,
@@ -441,9 +445,7 @@ async function postInterviewSession(req: NextRequest) {
         dimensions,
         question_scores: questionScores,
         summary,
-      })
-      .select("id")
-      .single();
+      });
 
     if (error) {
       logServerError("Interview result insert failed", error, {
@@ -457,11 +459,10 @@ async function postInterviewSession(req: NextRequest) {
     }
 
     return NextResponse.json({
-      sessionId: inserted.id,
       compositeScore,
-      dimensions,
-      questionScores,
-      summary,
+      dimensions: toPublicDimensions(dimensions),
+      questionScores: toPublicQuestionScores(questionScores),
+      summary: toPublicSessionSummary(summary),
     });
   } catch (error) {
     logServerError("Interview session request failed", error, {

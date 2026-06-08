@@ -14,6 +14,11 @@ import {
 import { getTrustedDisplayMetadata } from "@/lib/profile";
 import { logServerError } from "@/lib/server/errorLog";
 import { requireProtectedRoute } from "@/lib/server/protectedRoute";
+import {
+  toPublicDimensions,
+  toPublicQuestionScores,
+  toPublicSessionSummary,
+} from "@/lib/server/publicResponses";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -98,22 +103,15 @@ async function getAccountResult(request: NextRequest) {
     role: latestSession.role ?? "Interview",
     companyType: latestSession.company_type ?? "General",
     source: "account",
-    unlockedUserId: user.id,
-    unlockedSessionId: latestSession.id,
     compositeScore: Number(latestSession.composite_score ?? 0),
     percentile,
     rankDelta,
     previousRank: fallbackRankSummary?.previousRank ?? 0,
     currentRank,
     totalCandidates,
-    dimensions: latestSession.dimensions ?? [],
-    questionScores: latestSession.question_scores ?? [],
-    summary:
-      latestSession.summary &&
-      typeof latestSession.summary === "object" &&
-      !Array.isArray(latestSession.summary)
-        ? latestSession.summary
-        : undefined,
+    dimensions: toPublicDimensions(latestSession.dimensions),
+    questionScores: toPublicQuestionScores(latestSession.question_scores),
+    summary: toPublicSessionSummary(latestSession.summary),
   });
 }
 
