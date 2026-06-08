@@ -38,11 +38,12 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
     .select(
       "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
     )
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1000);
 
-  const allSessions = (rows ?? []) as InterviewSessionRow[];
-  const sessionRank = getSessionRankHistory(allSessions, user.id)[selectedSession.id];
+  const userSessions = (rows ?? []) as InterviewSessionRow[];
+  const sessionRank = getSessionRankHistory(userSessions, user.id)[selectedSession.id];
   const dimensions = selectedSession.dimensions?.length
     ? selectedSession.dimensions
     : scoreDimensions.map((dimension) => ({

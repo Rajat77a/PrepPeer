@@ -27,22 +27,31 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: sessionRows } = await supabase
+  const { data: latestSession, error: latestSessionError } = await supabase
     .from("interview_sessions")
     .select(
       "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
     )
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
-    .limit(1000);
+    .limit(1)
+    .maybeSingle();
 
-  const allSessions = (sessionRows ?? []) as InterviewSessionRow[];
-  const latestSession = allSessions.find((session) => session.user_id === user.id);
+  if (latestSessionError) {
+    return NextResponse.json(
+      { error: "The interview result could not be loaded." },
+      { status: 500 }
+    );
+  }
 
   if (!latestSession) {
     return NextResponse.json({ error: "No session found" }, { status: 404 });
   }
 
-  const fallbackRankSummary = getRankSummary(allSessions, user.id);
+  const fallbackRankSummary = getRankSummary(
+    [latestSession as InterviewSessionRow],
+    user.id
+  );
   let currentRank = fallbackRankSummary?.rank ?? 0;
   let totalCandidates = fallbackRankSummary?.totalCandidates ?? 0;
   let rankDelta = fallbackRankSummary?.rankChange ?? "No ranked session yet";

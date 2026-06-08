@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { RefreshTableButton } from "@/components/dashboard/RefreshTableButton";
 import {
@@ -19,17 +20,19 @@ export default async function DashboardSessionsPage() {
   const supabase = createClient(cookieStore);
   const user = await getCurrentUser();
 
+  if (!user) redirect("/login");
+
   const { data: rows } = await supabase
     .from("interview_sessions")
     .select(
       "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
     )
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1000);
 
-  const allSessions = (rows ?? []) as InterviewSessionRow[];
-  const userSessions = allSessions.filter((session) => session.user_id === user?.id);
-  const sessionRankHistory = getSessionRankHistory(allSessions, user?.id);
+  const userSessions = (rows ?? []) as InterviewSessionRow[];
+  const sessionRankHistory = getSessionRankHistory(userSessions, user.id);
 
   return (
     <div className="mx-auto max-w-6xl p-5 sm:p-8">

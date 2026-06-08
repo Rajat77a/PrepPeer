@@ -148,6 +148,7 @@ export default async function DashboardPage() {
     .select(
       "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
     )
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(1000);
 
@@ -177,16 +178,13 @@ export default async function DashboardPage() {
     companyType: profileCompanyType,
   };
 
-  const allSessions = (rows ?? []) as InterviewSessionRow[];
-  const userSessions = allSessions.filter(
-    (session) => session.user_id === user.id
-  );
+  const userSessions = (rows ?? []) as InterviewSessionRow[];
   const latestUserSession = userSessions[0] ?? null;
 
-  const sessionRankSummary = getRankSummary(allSessions, user.id);
+  const sessionRankSummary = getRankSummary(userSessions, user.id);
 
   const fallbackLeaderboardEntries = toLeaderboardEntries(
-    allSessions,
+    userSessions,
     user.id,
     name,
     profile.college,

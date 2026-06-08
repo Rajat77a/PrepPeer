@@ -116,15 +116,16 @@ export default function ResultsPage() {
         .select(
           "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
         )
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(1000);
 
-      const allSessions = (sessionRows ?? []) as InterviewSessionRow[];
-      const latestSession = allSessions.find((session) => session.user_id === user.id);
+      const userSessions = (sessionRows ?? []) as InterviewSessionRow[];
+      const latestSession = userSessions[0];
 
       if (!latestSession) return;
 
-      const rankSummary = getRankSummary(allSessions, user.id);
+      const rankSummary = getRankSummary(userSessions, user.id);
       const accountResult: StoredResult = {
         name: getDisplayName(getTrustedDisplayMetadata(user), user.email),
         role: latestSession.role ?? "Interview",
