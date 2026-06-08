@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { sanitizePlainText } from "@/lib/validation";
 import { authCookieOptions } from "@/utils/authCookieOptions";
+import { CSRF_COOKIE, createCsrfToken, csrfCookieOptions } from "@/utils/csrf";
 import {
   SESSION_GUARD_COOKIE,
   clearSessionGuard,
@@ -12,15 +13,26 @@ import {
 } from "@/utils/sessionSecurity";
 import { getSupabaseConfig } from "@/utils/supabase/config";
 
+const ensureCsrfCookie = (request: NextRequest, response: NextResponse) => {
+  if (!request.cookies.get(CSRF_COOKIE)?.value) {
+    response.cookies.set(CSRF_COOKIE, createCsrfToken(), csrfCookieOptions);
+  }
+
+  return response;
+};
+
 export const updateSession = async (request: NextRequest) => {
   const { isConfigured, supabaseKey, supabaseUrl } = getSupabaseConfig();
 
   if (!isConfigured || !supabaseUrl || !supabaseKey) {
-    return NextResponse.next({
-      request: {
-        headers: request.headers,
-      },
-    });
+    return ensureCsrfCookie(
+      request,
+      NextResponse.next({
+        request: {
+          headers: request.headers,
+        },
+      })
+    );
   }
 
   let supabaseResponse = NextResponse.next({
@@ -76,7 +88,7 @@ export const updateSession = async (request: NextRequest) => {
       "next",
       nextPath
     );
-    return NextResponse.redirect(loginUrl);
+      return ensureCsrfCookie(request, NextResponse.redirect(loginUrl));
   }
 
   if (requiresAccount && user) {
@@ -94,7 +106,7 @@ export const updateSession = async (request: NextRequest) => {
           sessionGuardCookieOptions
         );
       }
-      return supabaseResponse;
+      return ensureCsrfCookie(request, supabaseResponse);
     }
 
     if (
@@ -107,9 +119,9 @@ export const updateSession = async (request: NextRequest) => {
       loginUrl.searchParams.set("error", "session_changed");
       const response = NextResponse.redirect(loginUrl);
       clearSessionGuard(response);
-      return response;
+      return ensureCsrfCookie(request, response);
     }
   }
 
-  return supabaseResponse;
+  return ensureCsrfCookie(request, supabaseResponse);
 };

@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { csrfHeaders } from "@/utils/csrf";
 import { hasCompletedProfile } from "@/lib/profile";
 import { OrbLogo } from "@/components/ui/OrbLogo";
 import {
@@ -220,7 +221,7 @@ export default function LoginPage() {
 
     const response = await fetch("/api/auth/send-otp", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: csrfHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         email: normalizedEmail,
         mode,
@@ -265,7 +266,10 @@ export default function LoginPage() {
       return;
     }
 
-    const sessionResponse = await fetch("/api/auth/session", { method: "POST" });
+    const sessionResponse = await fetch("/api/auth/session", {
+      method: "POST",
+      headers: csrfHeaders(),
+    });
     setLoading(false);
 
     if (!sessionResponse.ok) {
@@ -308,7 +312,7 @@ export default function LoginPage() {
 
     const response = await fetch("/api/auth/password", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: csrfHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ password }),
     });
 

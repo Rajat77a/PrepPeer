@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { Logo } from "@/components/ui/Logo";
+import { csrfHeaders } from "@/utils/csrf";
 
 type OnboardingFormProps = {
   initialName: string;
@@ -113,7 +114,7 @@ export function OnboardingForm({
 
     const response = await fetch("/api/profile", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: csrfHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         fullName,
         college,

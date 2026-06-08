@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import { cn } from "@/lib/utils";
+import { csrfHeaders } from "@/utils/csrf";
 
 type DashboardShellProps = {
   children: React.ReactNode;
@@ -38,7 +39,10 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
 
   const signOut = async () => {
     setSignOutError("");
-    const response = await fetch("/api/auth/logout", { method: "POST" });
+    const response = await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: csrfHeaders(),
+    });
     if (!response.ok) {
       setSignOutError("Could not sign out. Please try again.");
       return;

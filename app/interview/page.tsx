@@ -11,6 +11,7 @@ import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 import { createClient } from "@/utils/supabase/client";
+import { csrfHeaders } from "@/utils/csrf";
 import type { QuestionReview } from "@/lib/types";
 import { isValidSetup } from "@/lib/validation";
 import {
@@ -119,7 +120,7 @@ export default function InterviewPage() {
     try {
       const response = await fetch("/api/interview-session", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: csrfHeaders({ "Content-Type": "application/json" }),
         signal: controller.signal,
         body: JSON.stringify({
           setup,
@@ -244,7 +245,7 @@ export default function InterviewPage() {
     try {
       const res = await fetch("/api/generate-questions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: csrfHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify(profileSetup),
       });
 
@@ -336,7 +337,7 @@ export default function InterviewPage() {
       const [evalRes, detectRes] = await Promise.all([
         fetch("/api/evaluate-answer", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: csrfHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({
             question: questions[current - 1],
             answer,
@@ -348,7 +349,7 @@ export default function InterviewPage() {
         }),
         fetch("/api/detect-ai", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: csrfHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ answer }),
         }),
       ]);

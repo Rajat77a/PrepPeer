@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronRight, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { csrfHeaders } from "@/utils/csrf";
 
 type ProfileFormProps = {
   user: {
@@ -119,7 +120,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
     const response = await fetch("/api/profile", {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: csrfHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(values),
     });
     const result = await response.json();

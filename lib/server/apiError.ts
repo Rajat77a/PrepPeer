@@ -1,6 +1,8 @@
 import "server-only";
 
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { validateCsrfRequest } from "@/lib/server/csrf";
 import { logServerError } from "@/lib/server/errorLog";
 
 type ApiRouteHandler<TArgs extends unknown[]> = (
@@ -14,6 +16,10 @@ export const withApiErrorHandler =
   ) =>
   async (...args: TArgs) => {
     try {
+      const request = args[0] instanceof Request ? (args[0] as NextRequest) : null;
+      const csrfResponse = request ? validateCsrfRequest(request) : null;
+      if (csrfResponse) return csrfResponse;
+
       return await handler(...args);
     } catch (error) {
       logServerError(context, error);
