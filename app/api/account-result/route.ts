@@ -11,6 +11,7 @@ import {
   type SupabaseLeaderboardRow,
 } from "@/lib/liveLeaderboard";
 import { getTrustedDisplayMetadata } from "@/lib/profile";
+import { logServerError } from "@/lib/server/errorLog";
 import { requireProtectedRoute } from "@/lib/server/protectedRoute";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
 
@@ -38,6 +39,9 @@ export async function GET(request: NextRequest) {
     .maybeSingle();
 
   if (latestSessionError) {
+    logServerError("Account result session lookup failed", latestSessionError, {
+      userId: user.id,
+    });
     return NextResponse.json(
       { error: "The interview result could not be loaded." },
       { status: 500 }
@@ -70,10 +74,9 @@ export async function GET(request: NextRequest) {
     });
 
   if (leaderboardError) {
-    console.error(
-      "Unable to load the live result rank:",
-      leaderboardError.message
-    );
+    logServerError("Unable to load the live result rank", leaderboardError, {
+      userId: user.id,
+    });
   } else if (leaderboardRows) {
     const leaderboardEntries = toLiveLeaderboardEntries(
       leaderboardRows as SupabaseLeaderboardRow[],

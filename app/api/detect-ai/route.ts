@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { logServerError } from "@/lib/server/errorLog";
 import {
   createInterviewProof,
   hashAnswer,
@@ -120,8 +121,12 @@ Gibberish is not AI. Only mark AI when the answer is coherent and shows strong, 
     );
 
     if (!response.ok) {
+      logServerError("AI-detection provider failed", {
+        status: response.status,
+        statusText: response.statusText,
+      });
       return NextResponse.json(
-        { error: "Detection service failed." },
+        { error: "Detection is temporarily unavailable." },
         { status: 502 }
       );
     }
@@ -130,16 +135,22 @@ Gibberish is not AI. Only mark AI when the answer is coherent and shows strong, 
     const text = json.choices?.[0]?.message?.content ?? "";
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) {
+      logServerError("AI-detection returned malformed content", {
+        textPreview: text.slice(0, 500),
+      });
       return NextResponse.json(
-        { error: "Detection returned an invalid response." },
+        { error: "Detection is temporarily unavailable." },
         { status: 502 }
       );
     }
 
     const raw: unknown = JSON.parse(match[0]);
     if (!isPlainObject(raw)) {
+      logServerError("AI-detection returned non-object payload", {
+        payloadPreview: match[0].slice(0, 500),
+      });
       return NextResponse.json(
-        { error: "Detection returned an invalid response." },
+        { error: "Detection is temporarily unavailable." },
         { status: 502 }
       );
     }
@@ -151,8 +162,11 @@ Gibberish is not AI. Only mark AI when the answer is coherent and shows strong, 
       !Number.isFinite(confidence) ||
       !reason
     ) {
+      logServerError("AI-detection returned invalid payload shape", {
+        raw,
+      });
       return NextResponse.json(
-        { error: "Detection returned an invalid response." },
+        { error: "Detection is temporarily unavailable." },
         { status: 502 }
       );
     }
@@ -164,7 +178,10 @@ Gibberish is not AI. Only mark AI when the answer is coherent and shows strong, 
         reason,
       })
     );
-  } catch {
+  } catch (error) {
+    logServerError("AI-detection request failed", error, {
+      userId: user.id,
+    });
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }

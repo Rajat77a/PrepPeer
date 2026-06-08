@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { logServerError } from "@/lib/server/errorLog";
 import {
   findAbusePattern,
   isPlainObject,
@@ -77,8 +78,9 @@ export async function POST(request: NextRequest) {
 
   const { supabaseKey, supabaseUrl } = getSupabaseConfig();
   if (!supabaseUrl || !supabaseKey) {
+    logServerError("OTP auth is not configured", new Error("Missing Supabase config"));
     return NextResponse.json(
-      { error: "Authentication is not configured yet." },
+      { error: "Sign-in is temporarily unavailable. Please try again later." },
       { status: 503 }
     );
   }
@@ -102,7 +104,11 @@ export async function POST(request: NextRequest) {
   });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    logServerError("OTP sign-in failed", error, { mode, emailHash: hashEmail(email) });
+    return NextResponse.json(
+      { error: "We could not send your sign-in code. Please try again." },
+      { status: 400 }
+    );
   }
 
   return NextResponse.json({ ok: true });

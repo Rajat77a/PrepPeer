@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { logServerError } from "@/lib/server/errorLog";
 import { isPlainObject, readJsonBody } from "@/lib/validation";
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -102,7 +103,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-  } catch {
+  } catch (error) {
+    logServerError("Password safety check failed", error, { userId: user.id });
     return NextResponse.json(
       {
         error:
@@ -114,6 +116,7 @@ export async function POST(request: NextRequest) {
 
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {
+    logServerError("Password update failed", error, { userId: user.id });
     return NextResponse.json(
       { error: "Password could not be saved." },
       { status: 400 }

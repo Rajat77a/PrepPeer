@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { evaluateAnswerQuality } from "@/lib/answerQuality";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { logServerError } from "@/lib/server/errorLog";
 import {
   hashAnswer,
   verifyInterviewProof,
@@ -110,11 +111,9 @@ export async function POST(req: NextRequest) {
 
   const admin = createOptionalAdminClient();
   if (!admin) {
+    logServerError("Interview storage is not configured", new Error("Missing Supabase admin client"));
     return NextResponse.json(
-      {
-        error:
-          "Secure interview storage is not configured. Add SUPABASE_SECRET_KEY to the server environment.",
-      },
+      { error: "Interview saving is temporarily unavailable. Please try again later." },
       { status: 503 }
     );
   }
@@ -202,6 +201,10 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (existingSessionError) {
+      logServerError("Interview duplicate check failed", existingSessionError, {
+        userId: user.id,
+        sessionAttemptId: questionSet.sessionId,
+      });
       return NextResponse.json(
         { error: "The interview result could not be checked." },
         { status: 500 }
@@ -442,6 +445,10 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (error) {
+      logServerError("Interview result insert failed", error, {
+        userId: user.id,
+        sessionAttemptId: questionSet.sessionId,
+      });
       return NextResponse.json(
         { error: "The interview result could not be saved." },
         { status: 500 }
@@ -455,7 +462,10 @@ export async function POST(req: NextRequest) {
       questionScores,
       summary,
     });
-  } catch {
+  } catch (error) {
+    logServerError("Interview session request failed", error, {
+      userId: user?.id,
+    });
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }

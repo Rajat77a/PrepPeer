@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { logServerError } from "@/lib/server/errorLog";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
@@ -16,11 +17,9 @@ export async function PATCH(req: NextRequest) {
 
   const admin = createOptionalAdminClient();
   if (!admin) {
+    logServerError("Profile storage is not configured", new Error("Missing Supabase admin client"));
     return NextResponse.json(
-      {
-        error:
-          "Secure profile storage is not configured. Add SUPABASE_SECRET_KEY to the server environment.",
-      },
+      { error: "Profile saving is temporarily unavailable. Please try again later." },
       { status: 503 }
     );
   }
@@ -87,6 +86,7 @@ export async function PATCH(req: NextRequest) {
     });
 
     if (error) {
+      logServerError("Profile update failed", error, { userId: user.id });
       return NextResponse.json(
         { error: "Profile could not be saved." },
         { status: 500 }
@@ -94,7 +94,8 @@ export async function PATCH(req: NextRequest) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    logServerError("Profile request failed", error, { userId: user.id });
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }

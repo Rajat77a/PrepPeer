@@ -345,7 +345,7 @@ export default function LoginPage() {
     if (authError) {
       setError(
         authError === "auth_not_configured"
-          ? "Authentication is not configured yet."
+          ? "Sign-in is temporarily unavailable. Please try again later."
           : authError === "session_changed"
             ? "Your session changed. Please sign in again."
           : "We could not complete authentication. Please try again."

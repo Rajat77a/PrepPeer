@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { logServerError } from "@/lib/server/errorLog";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import { generateInterviewSummary } from "@/lib/server/summary";
 import {
@@ -60,7 +61,8 @@ export async function POST(req: NextRequest) {
         input.questionReviews
       )
     );
-  } catch {
+  } catch (error) {
+    logServerError("Summary request failed", error, { userId: user.id });
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }

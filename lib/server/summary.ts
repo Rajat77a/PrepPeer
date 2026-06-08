@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { QuestionReview } from "@/lib/types";
+import { logServerError } from "@/lib/server/errorLog";
 import { getBoundedString, isPlainObject } from "@/lib/validation";
 
 type SummaryResult = {
@@ -126,14 +127,34 @@ Return:
       }
     );
 
-    if (!response.ok) return fallbackSummary(reviews);
+    if (!response.ok) {
+      logServerError("Summary provider failed", {
+        status: response.status,
+        statusText: response.statusText,
+      });
+      return fallbackSummary(reviews);
+    }
     const json = await response.json();
     const text = json.choices?.[0]?.message?.content ?? "";
     const match = text.match(/\{[\s\S]*\}/);
-    if (!match) return fallbackSummary(reviews);
+    if (!match) {
+      logServerError("Summary provider returned malformed content", {
+        textPreview: text.slice(0, 500),
+      });
+      return fallbackSummary(reviews);
+    }
 
-    return normalizeSummary(JSON.parse(match[0]), reviews) ?? fallbackSummary(reviews);
-  } catch {
+    const summary = normalizeSummary(JSON.parse(match[0]), reviews);
+    if (!summary) {
+      logServerError("Summary provider returned invalid payload", {
+        payloadPreview: match[0].slice(0, 500),
+      });
+      return fallbackSummary(reviews);
+    }
+
+    return summary;
+  } catch (error) {
+    logServerError("Summary generation failed", error);
     return fallbackSummary(reviews);
   } finally {
     clearTimeout(timeout);

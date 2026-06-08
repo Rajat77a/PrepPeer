@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { logServerError } from "@/lib/server/errorLog";
 import {
   createSessionGuard,
   sessionGuardCookieOptions,
@@ -14,8 +15,11 @@ export async function POST(request: NextRequest) {
 
   const guard = await createSessionGuard(request, user.id);
   if (!guard) {
+    logServerError("Session guard is not configured", new Error("Missing session guard secret"), {
+      userId: user.id,
+    });
     return NextResponse.json(
-      { error: "Session protection is not configured." },
+      { error: "Session protection is temporarily unavailable." },
       { status: 503 }
     );
   }

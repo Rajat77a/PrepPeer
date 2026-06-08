@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { logServerError } from "@/lib/server/errorLog";
 import {
   createInterviewProof,
   hashAnswer,
@@ -96,6 +97,7 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
+      logServerError("Evaluation is not configured", new Error("Missing GROQ_API_KEY"));
       return NextResponse.json(
         { error: "Evaluation is unavailable." },
         { status: 503 }
@@ -145,8 +147,12 @@ Return only:
     );
 
     if (!response.ok) {
+      logServerError("Evaluation provider failed", {
+        status: response.status,
+        statusText: response.statusText,
+      });
       return NextResponse.json(
-        { error: "Evaluation service failed." },
+        { error: "Evaluation is temporarily unavailable." },
         { status: 502 }
       );
     }
@@ -155,16 +161,22 @@ Return only:
     const text = json.choices?.[0]?.message?.content ?? "";
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) {
+      logServerError("Evaluation returned malformed content", {
+        textPreview: text.slice(0, 500),
+      });
       return NextResponse.json(
-        { error: "Evaluation returned an invalid response." },
+        { error: "Evaluation is temporarily unavailable." },
         { status: 502 }
       );
     }
 
     const feedback = normalizeFeedback(JSON.parse(match[0]));
     if (!feedback) {
+      logServerError("Evaluation returned invalid feedback payload", {
+        payloadPreview: match[0].slice(0, 500),
+      });
       return NextResponse.json(
-        { error: "Evaluation returned an invalid response." },
+        { error: "Evaluation is temporarily unavailable." },
         { status: 502 }
       );
     }
@@ -184,7 +196,10 @@ Return only:
     });
 
     return NextResponse.json({ feedback, evaluationToken });
-  } catch {
+  } catch (error) {
+    logServerError("Evaluation request failed", error, {
+      userId: user.id,
+    });
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }

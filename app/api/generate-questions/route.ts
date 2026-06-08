@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { createInterviewProof } from "@/lib/server/interviewProof";
+import { logServerError } from "@/lib/server/errorLog";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import {
@@ -55,6 +56,7 @@ export async function POST(req: NextRequest) {
     const { domain, experience, companyType } = input;
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
+      logServerError("Question generation is not configured", new Error("Missing GROQ_API_KEY"));
       return NextResponse.json(
         { error: "Question generation is unavailable." },
         { status: 503 }
@@ -93,8 +95,12 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`,
     );
 
     if (!response.ok) {
+      logServerError("Question generation provider failed", {
+        status: response.status,
+        statusText: response.statusText,
+      });
       return NextResponse.json(
-        { error: "Question generation failed." },
+        { error: "Question generation is temporarily unavailable." },
         { status: 502 }
       );
     }
@@ -103,8 +109,11 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`,
     const text = json.choices?.[0]?.message?.content ?? "";
     const match = text.match(/\[[\s\S]*\]/);
     if (!match) {
+      logServerError("Question generation returned malformed content", {
+        textPreview: text.slice(0, 500),
+      });
       return NextResponse.json(
-        { error: "Question generation returned an invalid response." },
+        { error: "Question generation is temporarily unavailable." },
         { status: 502 }
       );
     }
@@ -120,8 +129,11 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`,
           question.length > 1200
       )
     ) {
+      logServerError("Question generation returned invalid question payload", {
+        questions,
+      });
       return NextResponse.json(
-        { error: "Question generation returned an invalid response." },
+        { error: "Question generation is temporarily unavailable." },
         { status: 502 }
       );
     }
@@ -144,7 +156,10 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`,
       questions: normalizedQuestions,
       questionSetToken,
     });
-  } catch {
+  } catch (error) {
+    logServerError("Question generation request failed", error, {
+      userId: user.id,
+    });
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }
