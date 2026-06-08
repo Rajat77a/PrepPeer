@@ -253,16 +253,18 @@ export default function LoginPage() {
     setError("");
 
     const supabase = createClient();
-    const { data: verifyData, error: verifyError } =
-      await supabase.auth.verifyOtp({
+    const verifyResponse = await fetch("/api/auth/verify-otp", {
+      method: "POST",
+      headers: csrfHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify({
         email: email.trim(),
         token: code,
-        type: "email",
-      });
+      }),
+    });
 
-    if (verifyError) {
+    if (!verifyResponse.ok) {
       setLoading(false);
-      setError("Invalid code. Please try again.");
+      setError("Invalid email or password");
       return;
     }
 
@@ -284,13 +286,12 @@ export default function LoginPage() {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
-      const verifiedUser = user ?? verifyData.user;
-      if (userError || !verifiedUser) {
+      if (userError || !user) {
         setError("Account verified, but the session was not ready. Please sign in.");
         return;
       }
 
-      if (hasCompletedProfile(verifiedUser)) {
+      if (hasCompletedProfile(user)) {
         router.replace(nextPath);
         router.refresh();
         return;

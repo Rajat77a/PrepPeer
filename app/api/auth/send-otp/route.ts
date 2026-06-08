@@ -1,7 +1,12 @@
-import { createHash } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { withApiErrorHandler } from "@/lib/server/apiError";
+import {
+  getClientIp,
+  getLoginBlock,
+  hashLoginEmail,
+  INVALID_LOGIN_MESSAGE,
+} from "@/lib/server/loginAttempts";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { logSecurityEvent, logServerError } from "@/lib/server/errorLog";
 import {
@@ -12,15 +17,6 @@ import {
   sanitizePlainText,
 } from "@/lib/validation";
 import { getSupabaseConfig } from "@/utils/supabase/config";
-
-const getClientIp = (request: NextRequest) => {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor) return forwardedFor.split(",")[0]?.trim() || "unknown";
-  return request.headers.get("x-real-ip")?.trim() || "unknown";
-};
-
-const hashEmail = (email: string) =>
-  createHash("sha256").update(email).digest("hex").slice(0, 32);
 
 async function postSendOtp(request: NextRequest) {
   const body = await readJsonBody(request, 2_000);
@@ -56,9 +52,22 @@ async function postSendOtp(request: NextRequest) {
   }
 
   const ip = getClientIp(request);
+  const loginBlock = getLoginBlock(ip, email);
+  if (loginBlock.blocked) {
+    return NextResponse.json(
+      { error: INVALID_LOGIN_MESSAGE },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(loginBlock.retryAfterSeconds),
+        },
+      }
+    );
+  }
+
   const ipLimit = checkRateLimit(`auth:otp:ip:${ip}`, 10, 60 * 1000);
   const emailLimit = checkRateLimit(
-    `auth:otp:email:${hashEmail(email)}`,
+    `auth:otp:email:${hashLoginEmail(email)}`,
     5,
     10 * 60 * 1000
   );
@@ -105,9 +114,12 @@ async function postSendOtp(request: NextRequest) {
   });
 
   if (error) {
-    logServerError("OTP sign-in failed", error, { mode, emailHash: hashEmail(email) });
+    logServerError("OTP sign-in failed", error, {
+      mode,
+      emailHash: hashLoginEmail(email),
+    });
     return NextResponse.json(
-      { error: "We could not send your sign-in code. Please try again." },
+      { error: INVALID_LOGIN_MESSAGE },
       { status: 400 }
     );
   }
