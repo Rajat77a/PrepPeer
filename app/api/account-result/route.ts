@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import {
   getDisplayName,
@@ -11,21 +11,21 @@ import {
   type SupabaseLeaderboardRow,
 } from "@/lib/liveLeaderboard";
 import { getTrustedDisplayMetadata } from "@/lib/profile";
+import { requireProtectedRoute } from "@/lib/server/protectedRoute";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
-import { createClient } from "@/utils/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
-  const cookieStore = cookies();
-  const supabase = createClient(cookieStore);
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export async function GET(request: NextRequest) {
+  const access = await requireProtectedRoute({
+    request,
+    resource: "account result",
+    authorize: ({ user }) => Boolean(user.id),
+  });
 
-  if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!access.ok) return access.response;
+
+  const { supabase, user } = access;
 
   const { data: latestSession, error: latestSessionError } = await supabase
     .from("interview_sessions")
