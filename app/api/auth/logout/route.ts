@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import { clearSessionGuard } from "@/utils/sessionSecurity";
 
-export async function POST() {
+async function postLogout() {
   const { supabase, user } = await getAuthenticatedContext();
 
   if (user) {
@@ -19,3 +20,8 @@ export async function POST() {
   clearSessionGuard(response);
   return response;
 }
+
+export const POST = withApiErrorHandler(
+  postLogout,
+  "Unhandled logout API error"
+);

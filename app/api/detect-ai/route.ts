@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import { logServerError } from "@/lib/server/errorLog";
 import {
   createInterviewProof,
@@ -30,7 +31,7 @@ const createResponse = (
   }),
 });
 
-export async function POST(req: NextRequest) {
+async function postDetectAi(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -185,3 +186,8 @@ Gibberish is not AI. Only mark AI when the answer is coherent and shows strong, 
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }
+
+export const POST = withApiErrorHandler(
+  postDetectAi,
+  "Unhandled AI detection API error"
+);

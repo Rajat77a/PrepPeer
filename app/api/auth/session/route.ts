@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import { logServerError } from "@/lib/server/errorLog";
 import {
   createSessionGuard,
@@ -7,7 +8,7 @@ import {
   SESSION_GUARD_COOKIE,
 } from "@/utils/sessionSecurity";
 
-export async function POST(request: NextRequest) {
+async function postSessionGuard(request: NextRequest) {
   const { user } = await getAuthenticatedContext();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -32,3 +33,8 @@ export async function POST(request: NextRequest) {
   );
   return response;
 }
+
+export const POST = withApiErrorHandler(
+  postSessionGuard,
+  "Unhandled session guard API error"
+);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { logServerError } from "@/lib/server/errorLog";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
@@ -9,7 +10,7 @@ import {
   readJsonBody,
 } from "@/lib/validation";
 
-export async function POST(req: NextRequest) {
+async function postGenerateSummary(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -66,3 +67,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }
+
+export const POST = withApiErrorHandler(
+  postGenerateSummary,
+  "Unhandled summary generation API error"
+);

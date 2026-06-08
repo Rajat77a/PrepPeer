@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import { createInterviewProof } from "@/lib/server/interviewProof";
 import { logServerError } from "@/lib/server/errorLog";
 import { checkRateLimit } from "@/lib/server/rateLimit";
@@ -10,7 +11,7 @@ import {
   readJsonBody,
 } from "@/lib/validation";
 
-export async function POST(req: NextRequest) {
+async function postGenerateQuestions(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -163,3 +164,8 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`,
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }
+
+export const POST = withApiErrorHandler(
+  postGenerateQuestions,
+  "Unhandled question generation API error"
+);

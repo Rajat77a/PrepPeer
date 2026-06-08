@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import { logServerError } from "@/lib/server/errorLog";
 import {
   createInterviewProof,
@@ -15,7 +16,7 @@ import {
   readJsonBody,
 } from "@/lib/validation";
 
-export async function POST(req: NextRequest) {
+async function postEvaluateAnswer(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -203,3 +204,8 @@ Return only:
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }
+
+export const POST = withApiErrorHandler(
+  postEvaluateAnswer,
+  "Unhandled answer evaluation API error"
+);

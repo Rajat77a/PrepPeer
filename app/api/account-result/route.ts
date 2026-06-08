@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import {
   getDisplayName,
   getRankPercentileLabel,
@@ -17,7 +18,7 @@ import { createOptionalAdminClient } from "@/utils/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(request: NextRequest) {
+async function getAccountResult(request: NextRequest) {
   const access = await requireProtectedRoute({
     request,
     resource: "account result",
@@ -115,3 +116,8 @@ export async function GET(request: NextRequest) {
         : undefined,
   });
 }
+
+export const GET = withApiErrorHandler(
+  getAccountResult,
+  "Unhandled account result API error"
+);

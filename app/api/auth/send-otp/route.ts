@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { logSecurityEvent, logServerError } from "@/lib/server/errorLog";
 import {
@@ -21,7 +22,7 @@ const getClientIp = (request: NextRequest) => {
 const hashEmail = (email: string) =>
   createHash("sha256").update(email).digest("hex").slice(0, 32);
 
-export async function POST(request: NextRequest) {
+async function postSendOtp(request: NextRequest) {
   const body = await readJsonBody(request, 2_000);
   if (!body.ok || !isPlainObject(body.data)) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
@@ -113,3 +114,8 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ ok: true });
 }
+
+export const POST = withApiErrorHandler(
+  postSendOtp,
+  "Unhandled send OTP API error"
+);

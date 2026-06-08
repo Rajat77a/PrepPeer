@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { logServerError } from "@/lib/server/errorLog";
 import { isPlainObject, readJsonBody } from "@/lib/validation";
@@ -44,7 +45,7 @@ const isBreachedPassword = async (password: string) => {
     .some((line) => line.split(":")[0]?.trim().toUpperCase() === suffix);
 };
 
-export async function POST(request: NextRequest) {
+async function postPasswordUpdate(request: NextRequest) {
   const { supabase, user } = await getAuthenticatedContext();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -125,3 +126,8 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ ok: true });
 }
+
+export const POST = withApiErrorHandler(
+  postPasswordUpdate,
+  "Unhandled password API error"
+);

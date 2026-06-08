@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { evaluateAnswerQuality } from "@/lib/answerQuality";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { withApiErrorHandler } from "@/lib/server/apiError";
 import { logServerError } from "@/lib/server/errorLog";
 import {
   hashAnswer,
@@ -103,7 +104,7 @@ const parseReviews = (value: unknown): ReviewInput[] | null => {
   return parsed;
 };
 
-export async function POST(req: NextRequest) {
+async function postInterviewSession(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -469,3 +470,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }
+
+export const POST = withApiErrorHandler(
+  postInterviewSession,
+  "Unhandled interview session API error"
+);
