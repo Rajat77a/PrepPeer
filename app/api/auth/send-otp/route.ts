@@ -2,7 +2,7 @@ import { createHash } from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/server/rateLimit";
-import { logServerError } from "@/lib/server/errorLog";
+import { logSecurityEvent, logServerError } from "@/lib/server/errorLog";
 import {
   findAbusePattern,
   isPlainObject,
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
   const abuseMatch = findAbusePattern(body.data);
   if (abuseMatch) {
-    console.warn("Blocked suspicious auth request", {
+    logSecurityEvent("Blocked suspicious auth request", {
       fieldPath: abuseMatch.fieldPath,
       reason: abuseMatch.reason,
       ip: getClientIp(request),

@@ -3,6 +3,7 @@ import "server-only";
 import { NextRequest, NextResponse } from "next/server";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { getAuthenticatedContext } from "@/lib/server/auth";
+import { logSecurityEvent } from "@/lib/server/errorLog";
 
 type AccessContext = {
   supabase: SupabaseClient;
@@ -34,14 +35,13 @@ const logUnauthorizedAccess = ({
   resource: string;
   userId: string;
 }) => {
-  console.warn("Unauthorized resource access blocked", {
+  logSecurityEvent("Unauthorized resource access blocked", {
     resource,
     userId,
     method: request?.method ?? "unknown",
     path: request ? new URL(request.url).pathname : "unknown",
     ip: getRequestIp(request),
     userAgent: request?.headers.get("user-agent") ?? "unknown",
-    timestamp: new Date().toISOString(),
   });
 };
 

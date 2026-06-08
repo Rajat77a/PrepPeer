@@ -17,6 +17,7 @@ import {
   type SupabaseLeaderboardRow,
 } from "@/lib/liveLeaderboard";
 import { getTrustedProfile } from "@/lib/profile";
+import { logServerError } from "@/lib/server/errorLog";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
@@ -162,10 +163,7 @@ export default async function DashboardPage() {
   );
 
   if (leaderboardError) {
-    console.error(
-      "Unable to load the live dashboard leaderboard:",
-      leaderboardError.message
-    );
+    logServerError("Unable to load the live dashboard leaderboard", leaderboardError);
   }
 
   const userProfiles = await getLeaderboardUserProfiles(leaderboardSupabase);

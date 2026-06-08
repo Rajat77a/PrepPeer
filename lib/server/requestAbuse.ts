@@ -1,6 +1,7 @@
 import "server-only";
 import { NextResponse } from "next/server";
 import { checkRateLimit } from "./rateLimit";
+import { logSecurityEvent } from "@/lib/server/errorLog";
 import { findAbusePattern } from "@/lib/validation";
 
 const BURST_LIMIT = 10;
@@ -22,7 +23,7 @@ const logBlockedAttempt = (
   reason: string,
   fieldPath?: string
 ) => {
-  console.warn("Blocked suspicious PrepPeer request", {
+  logSecurityEvent("Blocked suspicious PrepPeer request", {
     route,
     userId,
     ip,

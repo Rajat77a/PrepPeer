@@ -11,3 +11,13 @@ export const logServerError = (
     timestamp: new Date().toISOString(),
   });
 };
+
+export const logSecurityEvent = (
+  context: string,
+  metadata?: Record<string, unknown>
+) => {
+  console.warn(context, {
+    metadata,
+    timestamp: new Date().toISOString(),
+  });
+};

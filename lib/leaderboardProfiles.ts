@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LeaderboardUserProfile } from "@/lib/ranking";
+import { logServerError } from "@/lib/server/errorLog";
 
 type LeaderboardProfileRow = {
   user_id: string;
@@ -20,7 +21,7 @@ export const getLeaderboardUserProfiles = async (
   });
 
   if (error) {
-    console.error("Unable to load leaderboard profiles:", error.message);
+    logServerError("Unable to load leaderboard profiles", error);
     return {};
   }
 
