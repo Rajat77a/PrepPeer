@@ -6,7 +6,7 @@ import {
   createInterviewProof,
   hashAnswer,
 } from "@/lib/server/interviewProof";
-import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import {
   getBoundedString,
@@ -37,20 +37,13 @@ async function postDetectAi(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const rateLimit = checkRateLimit(
-    `detect-ai:${user.id}`,
-    70,
-    10 * 60 * 1000
+  const costLimit = enforceCostRateLimit(
+    `ai:detect-answer:${user.id}`,
+    40,
+    undefined,
+    "Too many answer detection requests. Please wait and try again."
   );
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: "Too many detection requests. Please wait and try again." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
-      }
-    );
-  }
+  if (costLimit) return costLimit;
 
   const body = await readJsonBody(req);
   if (!body.ok) {

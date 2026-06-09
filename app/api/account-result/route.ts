@@ -13,6 +13,7 @@ import {
 } from "@/lib/liveLeaderboard";
 import { getTrustedDisplayMetadata } from "@/lib/profile";
 import { logServerError } from "@/lib/server/errorLog";
+import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { requireProtectedRoute } from "@/lib/server/protectedRoute";
 import {
   toPublicDimensions,
@@ -33,6 +34,14 @@ async function getAccountResult(request: NextRequest) {
   if (!access.ok) return access.response;
 
   const { supabase, user } = access;
+
+  const costLimit = enforceCostRateLimit(
+    `db:account-result:${user.id}`,
+    60,
+    undefined,
+    "Too many result refreshes. Please wait and try again."
+  );
+  if (costLimit) return costLimit;
 
   const { data: latestSession, error: latestSessionError } = await supabase
     .from("interview_sessions")

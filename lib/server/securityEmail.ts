@@ -1,8 +1,12 @@
 import "server-only";
 
 import type { NextRequest } from "next/server";
+import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { logServerError } from "@/lib/server/errorLog";
-import { createAccountUnlockToken } from "@/lib/server/loginAttempts";
+import {
+  createAccountUnlockToken,
+  hashLoginEmail,
+} from "@/lib/server/loginAttempts";
 
 type AccountLockEmailInput = {
   email: string;
@@ -84,6 +88,14 @@ export const sendAccountLockAlertEmail = async ({
     );
     return;
   }
+
+  const emailLimit = enforceCostRateLimit(
+    `email:security-alert:${hashLoginEmail(email)}`,
+    3,
+    undefined,
+    "Too many security emails."
+  );
+  if (emailLimit) return;
 
   const siteUrl = getSiteUrl(request);
   const unlockToken = createAccountUnlockToken(email, lockedUntil);

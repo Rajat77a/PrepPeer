@@ -13,6 +13,7 @@ import {
   toPublicSessionSummary,
 } from "@/lib/server/publicResponses";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import { generateInterviewSummary } from "@/lib/server/summary";
 import type { DimensionScore, QuestionReview } from "@/lib/types";
@@ -138,6 +139,14 @@ async function postInterviewSession(req: NextRequest) {
       }
     );
   }
+
+  const costLimit = enforceCostRateLimit(
+    `db-ai:interview-session:${user.id}`,
+    8,
+    undefined,
+    "Too many completed sessions. Please wait and try again."
+  );
+  if (costLimit) return costLimit;
 
   const body = await readJsonBody(req, 140_000);
   if (!body.ok) {

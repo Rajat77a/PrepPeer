@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { withApiErrorHandler } from "@/lib/server/apiError";
-import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { logServerError } from "@/lib/server/errorLog";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import { generateInterviewSummary } from "@/lib/server/summary";
@@ -16,20 +16,13 @@ async function postGenerateSummary(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const rateLimit = checkRateLimit(
-    `generate-summary:${user.id}`,
-    15,
-    10 * 60 * 1000
+  const costLimit = enforceCostRateLimit(
+    `ai:generate-summary:${user.id}`,
+    10,
+    undefined,
+    "Too many summary generation requests. Please wait and try again."
   );
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: "Too many summary requests. Please wait and try again." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
-      }
-    );
-  }
+  if (costLimit) return costLimit;
 
   const body = await readJsonBody(req, 64_000);
   if (!body.ok) {

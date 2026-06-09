@@ -4,7 +4,7 @@ import { getAuthenticatedContext } from "@/lib/server/auth";
 import { withApiErrorHandler } from "@/lib/server/apiError";
 import { createInterviewProof } from "@/lib/server/interviewProof";
 import { logServerError } from "@/lib/server/errorLog";
-import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import {
   isValidSetup,
@@ -17,20 +17,13 @@ async function postGenerateQuestions(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const rateLimit = checkRateLimit(
-    `generate-questions:${user.id}`,
-    12,
-    10 * 60 * 1000
+  const costLimit = enforceCostRateLimit(
+    `ai:generate-questions:${user.id}`,
+    8,
+    undefined,
+    "Too many question generation requests. Please wait and try again."
   );
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: "Too many question requests. Please wait and try again." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
-      }
-    );
-  }
+  if (costLimit) return costLimit;
 
   const body = await readJsonBody(req, 8_000);
   if (!body.ok) {

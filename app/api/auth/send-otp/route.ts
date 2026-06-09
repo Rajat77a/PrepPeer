@@ -8,6 +8,7 @@ import {
   INVALID_LOGIN_MESSAGE,
 } from "@/lib/server/loginAttempts";
 import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { logSecurityEvent, logServerError } from "@/lib/server/errorLog";
 import {
   findAbusePattern,
@@ -85,6 +86,22 @@ async function postSendOtp(request: NextRequest) {
       }
     );
   }
+
+  const hourlyEmailLimit = enforceCostRateLimit(
+    `email:otp:email:${hashLoginEmail(email)}`,
+    10,
+    undefined,
+    "Too many email code requests. Please wait and try again."
+  );
+  if (hourlyEmailLimit) return hourlyEmailLimit;
+
+  const hourlyIpLimit = enforceCostRateLimit(
+    `email:otp:ip:${ip}`,
+    30,
+    undefined,
+    "Too many email code requests. Please wait and try again."
+  );
+  if (hourlyIpLimit) return hourlyIpLimit;
 
   const { supabaseKey, supabaseUrl } = getSupabaseConfig();
   if (!supabaseUrl || !supabaseKey) {

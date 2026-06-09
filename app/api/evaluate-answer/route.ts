@@ -8,7 +8,7 @@ import {
   hashAnswer,
   verifyInterviewProof,
 } from "@/lib/server/interviewProof";
-import { checkRateLimit } from "@/lib/server/rateLimit";
+import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import {
   normalizeFeedback,
@@ -22,20 +22,13 @@ async function postEvaluateAnswer(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const rateLimit = checkRateLimit(
-    `evaluate-answer:${user.id}`,
-    70,
-    10 * 60 * 1000
+  const costLimit = enforceCostRateLimit(
+    `ai:evaluate-answer:${user.id}`,
+    40,
+    undefined,
+    "Too many answer evaluation requests. Please wait and try again."
   );
-  if (!rateLimit.allowed) {
-    return NextResponse.json(
-      { error: "Too many evaluation requests. Please wait and try again." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
-      }
-    );
-  }
+  if (costLimit) return costLimit;
 
   const body = await readJsonBody(req);
   if (!body.ok) {

@@ -2,6 +2,7 @@ import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { withApiErrorHandler } from "@/lib/server/apiError";
+import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { logServerError } from "@/lib/server/errorLog";
 import { isPlainObject, readJsonBody } from "@/lib/validation";
@@ -76,6 +77,14 @@ async function postPasswordUpdate(request: NextRequest) {
       }
     );
   }
+
+  const costLimit = enforceCostRateLimit(
+    `external:hibp-password:${user.id}`,
+    10,
+    undefined,
+    "Too many password safety checks. Please wait and try again."
+  );
+  if (costLimit) return costLimit;
 
   const body = await readJsonBody(request, 2_000);
   if (!body.ok || !isPlainObject(body.data)) {
