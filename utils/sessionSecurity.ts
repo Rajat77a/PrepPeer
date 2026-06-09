@@ -8,6 +8,7 @@ const encoder = new TextEncoder();
 export const sessionGuardCookieOptions = {
   ...authCookieOptions,
   httpOnly: true,
+  maxAge: 60 * 60 * 24,
 };
 
 type SessionGuard = {
