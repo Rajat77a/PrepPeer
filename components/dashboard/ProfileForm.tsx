@@ -211,7 +211,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             {textFields.map((field) => (
               <label key={field.id} className="block">
                 <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
-                  {field.label}
+                  {field.label} <span className="text-[#dc2626]">*</span>
                 </span>
 
                 <input
@@ -231,7 +231,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
             <label className="block">
               <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
-                Target role
+                Target role <span className="text-[#dc2626]">*</span>
               </span>
 
               <input
@@ -253,7 +253,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             {selectorFields.map((field) => (
               <div key={field.id}>
                 <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
-                  {field.label}
+                  {field.label} <span className="text-[#dc2626]">*</span>
                 </span>
 
                 <button
@@ -269,7 +269,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
             <label className="block">
               <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
-                Target company type
+                Target company type <span className="text-[#dc2626]">*</span>
               </span>
 
               <input

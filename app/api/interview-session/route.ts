@@ -93,7 +93,13 @@ const parseReviews = (value: unknown): ReviewInput[] | null => {
       return null;
     }
 
-    if (item.status !== "autoSkipped" && !answer) return null;
+    if (
+      item.status !== "autoSkipped" &&
+      item.status !== "skipped" &&
+      !answer
+    ) {
+      return null;
+    }
 
     seenQuestions.add(question);
     parsed.push({
@@ -262,13 +268,16 @@ async function postInterviewSession(req: NextRequest) {
         );
       }
 
-      if (submitted.status === "autoSkipped") {
+      if (submitted.status === "autoSkipped" || submitted.status === "skipped") {
         trustedReviews.push({
           question: submitted.question,
           prompt: submitted.prompt,
           score: 0,
-          status: "autoSkipped",
-          reason: "The session ended before this question was answered.",
+          status: submitted.status,
+          reason:
+            submitted.status === "skipped"
+              ? "You skipped this question, so it was not evaluated."
+              : "The session ended before this question was answered.",
         });
         continue;
       }
@@ -285,8 +294,9 @@ async function postInterviewSession(req: NextRequest) {
           prompt: submitted.prompt,
           answer,
           score: 0,
-          status: "answered",
-          reason: "The scoring service failed, so no credit was recorded.",
+          status: "autoSkipped",
+          reason:
+            "This answer was not scored because evaluation did not complete.",
         });
         continue;
       }
@@ -377,6 +387,7 @@ async function postInterviewSession(req: NextRequest) {
         answer,
         score: evaluation.feedback.compositeScore,
         status: "answered",
+        modelAnswer: evaluation.feedback.modelAnswer,
         reason: evaluation.feedback.dimensions
           .map((dimension) => `${dimension.label}: ${dimension.reason}`)
           .join(" "),
@@ -439,6 +450,7 @@ async function postInterviewSession(req: NextRequest) {
           ...review,
           summary: generated?.summary,
           improvement: generated?.improvement,
+          modelAnswer: review.modelAnswer ?? generated?.modelAnswer,
         };
       }),
     };

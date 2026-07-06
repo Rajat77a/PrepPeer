@@ -7,9 +7,12 @@ import { getBoundedString, isPlainObject } from "@/lib/validation";
 type SummaryResult = {
   overallSummary: string;
   needsImprovement: string[];
+  strongestPart?: string;
+  weakestPart?: string;
+  keyTakeaways?: string[];
   questionReviews: Pick<
     QuestionReview,
-    "question" | "summary" | "improvement"
+    "question" | "summary" | "improvement" | "modelAnswer"
   >[];
 };
 
@@ -23,6 +26,23 @@ const fallbackSummary = (reviews: QuestionReview[]): SummaryResult => ({
     "Use concrete examples, tradeoffs, and measurable outcomes.",
     "Explain your reasoning in a clear sequence.",
   ],
+  strongestPart:
+    reviews
+      .filter((review) => review.status === "answered")
+      .sort((left, right) => right.score - left.score)[0]?.question ??
+    "No clear strongest area was available.",
+  weakestPart:
+    reviews
+      .filter((review) => review.status === "answered")
+      .sort((left, right) => left.score - right.score)[0]?.question ??
+    "Skipped or unattempted questions need the most attention.",
+  keyTakeaways: [
+    `You answered ${
+      reviews.filter((review) => review.status === "answered").length
+    } out of ${reviews.length} questions.`,
+    "Skipped or unattempted questions are shown with model answers so you can still learn from them.",
+    "Retry short, specific answers for the weakest question types first.",
+  ],
   questionReviews: reviews.map((review) => ({
     question: review.question,
     summary: review.reason ?? "No detailed summary was available.",
@@ -30,6 +50,9 @@ const fallbackSummary = (reviews: QuestionReview[]): SummaryResult => ({
       review.status === "answered"
         ? "Add more question-specific evidence and explain the reasoning."
         : "Submit a complete, original answer to receive useful feedback.",
+    modelAnswer:
+      review.modelAnswer ??
+      `A strong answer should directly address: ${review.prompt}`,
   })),
 });
 
@@ -49,6 +72,13 @@ const normalizeSummary = (
 
   if (!overallSummary || needsImprovement.length === 0) return null;
 
+  const keyTakeaways = Array.isArray(value.keyTakeaways)
+    ? value.keyTakeaways
+        .slice(0, 5)
+        .map((item) => getBoundedString(item, 1, 500))
+        .filter((item): item is string => Boolean(item))
+    : [];
+
   const rawReviews = Array.isArray(value.questionReviews)
     ? value.questionReviews
     : [];
@@ -56,6 +86,11 @@ const normalizeSummary = (
   return {
     overallSummary,
     needsImprovement,
+    strongestPart:
+      getBoundedString(value.strongestPart, 1, 700) || undefined,
+    weakestPart:
+      getBoundedString(value.weakestPart, 1, 700) || undefined,
+    keyTakeaways: keyTakeaways.length ? keyTakeaways : undefined,
     questionReviews: reviews.map((review) => {
       const raw = rawReviews.find(
         (item) => isPlainObject(item) && item.question === review.question
@@ -72,6 +107,10 @@ const normalizeSummary = (
           (raw &&
             getBoundedString(raw.improvement, 1, 1000)) ||
           "Use clearer reasoning and more specific evidence.",
+        modelAnswer:
+          review.modelAnswer ||
+          (raw && getBoundedString(raw.modelAnswer, 1, 3000)) ||
+          `A strong answer should directly address: ${review.prompt}`,
       };
     }),
   };
@@ -106,6 +145,9 @@ export const generateInterviewSummary = async (
 Rules:
 - Use only the supplied statuses, scores, and reasons.
 - Do not invent scores or claims.
+- For skipped or unattempted questions, provide a concise modelAnswer that answers the supplied prompt.
+- For answered questions, preserve or improve the supplied modelAnswer only when it is present.
+- Identify the strongest part and weakest part from the supplied scores, statuses, and reasons.
 - Return only valid JSON.
 
 Completion reason: ${completionReason}
@@ -115,8 +157,11 @@ Return:
 {
   "overallSummary": "short paragraph",
   "needsImprovement": ["point 1", "point 2", "point 3"],
+  "strongestPart": "strongest area based on scores",
+  "weakestPart": "weakest area based on scores and skipped questions",
+  "keyTakeaways": ["takeaway 1", "takeaway 2", "takeaway 3"],
   "questionReviews": [
-    {"question": "Q1", "summary": "summary", "improvement": "advice"}
+    {"question": "Q1", "summary": "summary", "improvement": "advice", "modelAnswer": "model answer"}
   ]
 }`,
             },

@@ -84,6 +84,7 @@ export type QuestionReviewStatus =
   | "answered"
   | "ai"
   | "gibberish"
+  | "skipped"
   | "autoSkipped";
 
 export interface QuestionReview {
@@ -95,6 +96,7 @@ export interface QuestionReview {
   summary?: string;
   improvement?: string;
   reason?: string;
+  modelAnswer?: string;
   evaluationToken?: string;
   detectionToken?: string;
 }
@@ -103,6 +105,9 @@ export interface AISessionSummary {
   completionReason: "completed" | "autoSubmitted";
   overallSummary: string;
   needsImprovement: string[];
+  strongestPart?: string;
+  weakestPart?: string;
+  keyTakeaways?: string[];
   questionReviews: QuestionReview[];
 }
 

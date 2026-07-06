@@ -48,6 +48,7 @@ export const REVIEW_STATUSES: QuestionReviewStatus[] = [
   "answered",
   "ai",
   "gibberish",
+  "skipped",
   "autoSkipped",
 ];
 
@@ -244,6 +245,10 @@ export const parseSummaryInput = (value: unknown) => {
       item.summary === undefined
         ? undefined
         : getBoundedString(item.summary, 1, 1000);
+    const modelAnswer =
+      item.modelAnswer === undefined
+        ? undefined
+        : getBoundedString(item.modelAnswer, 1, 3000);
     const improvement =
       item.improvement === undefined
         ? undefined
@@ -262,6 +267,7 @@ export const parseSummaryInput = (value: unknown) => {
       !isAllowedValue(item.status, REVIEW_STATUSES) ||
       (item.answer !== undefined && !answer) ||
       (item.summary !== undefined && !summary) ||
+      (item.modelAnswer !== undefined && !modelAnswer) ||
       (item.improvement !== undefined && !improvement) ||
       (item.reason !== undefined && !reason)
     ) {
@@ -276,6 +282,7 @@ export const parseSummaryInput = (value: unknown) => {
       status: item.status,
       answer: answer ?? undefined,
       summary: summary ?? undefined,
+      modelAnswer: modelAnswer ?? undefined,
       improvement: improvement ?? undefined,
       reason: reason ?? undefined,
     });

@@ -145,7 +145,7 @@ export function OnboardingForm({
           <div className="mt-9 space-y-4 text-left">
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                Full name
+                Full name <span className="text-[#dc2626]">*</span>
               </span>
               <input
                 value={fullName}
@@ -163,7 +163,7 @@ export function OnboardingForm({
 
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                Target role
+                Target role <span className="text-[#dc2626]">*</span>
               </span>
               <input
                 value={role}
@@ -181,7 +181,7 @@ export function OnboardingForm({
 
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                Current Occupation
+                Current Occupation <span className="text-[#dc2626]">*</span>
               </span>
               <input
                 value={college}
@@ -200,7 +200,7 @@ export function OnboardingForm({
             {selectorFields.map((field) => (
               <div key={field.id}>
                 <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                  {field.label}
+                  {field.label} <span className="text-[#dc2626]">*</span>
                 </span>
 
                 <button
@@ -219,7 +219,7 @@ export function OnboardingForm({
 
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                Target company type
+                Target company type <span className="text-[#dc2626]">*</span>
               </span>
               <input
                 value={company}

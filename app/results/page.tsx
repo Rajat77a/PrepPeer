@@ -32,6 +32,7 @@ const REVIEW_STATUSES: QuestionReviewStatus[] = [
   "answered",
   "ai",
   "gibberish",
+  "skipped",
   "autoSkipped",
 ];
 
@@ -60,9 +61,16 @@ const cleanSummary = (value: unknown): SessionReport["summary"] | undefined => {
             summary: cleanText(item.summary, "", 700) || undefined,
             improvement: cleanText(item.improvement, "", 700) || undefined,
             reason: cleanText(item.reason, "", 500) || undefined,
+            modelAnswer: cleanText(item.modelAnswer, "", 3_000) || undefined,
           },
         ];
       })
+    : [];
+  const keyTakeaways = Array.isArray(value.keyTakeaways)
+    ? value.keyTakeaways
+        .map((item) => cleanText(item, "", 500))
+        .filter(Boolean)
+        .slice(0, 5)
     : [];
 
   return {
@@ -75,6 +83,9 @@ const cleanSummary = (value: unknown): SessionReport["summary"] | undefined => {
           .filter(Boolean)
           .slice(0, 8)
       : [],
+    strongestPart: cleanText(value.strongestPart, "", 700) || undefined,
+    weakestPart: cleanText(value.weakestPart, "", 700) || undefined,
+    keyTakeaways: keyTakeaways.length ? keyTakeaways : undefined,
     questionReviews,
   };
 };

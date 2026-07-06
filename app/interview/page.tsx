@@ -12,7 +12,7 @@ import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 import { createClient } from "@/utils/supabase/client";
 import { csrfHeaders } from "@/utils/csrf";
-import type { QuestionReview } from "@/lib/types";
+import type { FeedbackData, QuestionReview } from "@/lib/types";
 import { isValidSetup } from "@/lib/validation";
 import {
   AlertTriangle,
@@ -45,7 +45,12 @@ export default function InterviewPage() {
   const [directStarting, setDirectStarting] = useState(false);
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
+  const [feedbackByQuestion, setFeedbackByQuestion] = useState<
+    Record<number, FeedbackData>
+  >({});
   const [evaluating, setEvaluating] = useState(false);
+  const [answerDrafts, setAnswerDrafts] = useState<Record<number, string>>({});
+  const [evaluationErrors, setEvaluationErrors] = useState<Record<number, string>>({});
   const [aiDetected, setAiDetected] = useState<{
     isAI: boolean;
     confidence: number;
@@ -179,6 +184,80 @@ export default function InterviewPage() {
     }
   }, [questionSetToken, setup]);
 
+  const currentReview = questionReviews.find(
+    (review) => review.question === `Q${current}`
+  );
+  const displayedFeedback = feedbackByQuestion[current] ?? feedback;
+
+  const navigateToQuestion = useCallback(
+    (questionNumber: number) => {
+      const bounded = Math.max(1, Math.min(TOTAL, questionNumber));
+      const review = questionReviewsRef.current.find(
+        (item) => item.question === `Q${bounded}`
+      );
+
+      setCurrent(bounded);
+      setAiDetected(null);
+      resetTimer();
+      setStage(review ? "feedback" : "interview");
+    },
+    [resetTimer]
+  );
+
+  const getCompletionReviews = useCallback(() => {
+    const existing = questionReviewsRef.current;
+
+    return Array.from({ length: TOTAL }, (_, index) => {
+      const question = `Q${index + 1}`;
+      const review = existing.find((item) => item.question === question);
+
+      return (
+        review ?? {
+          question,
+          prompt: questions[index] ?? "",
+          score: 0,
+          status: "autoSkipped" as const,
+          reason: "The interview was completed before this question was answered.",
+        }
+      );
+    });
+  }, [questions]);
+
+  const completeInterview = useCallback(async () => {
+    if (endingSession || shouldAutoSubmit) return;
+
+    const reviews = getCompletionReviews();
+    const answeredCount = reviews.filter(
+      (review) => review.status === "answered"
+    ).length;
+
+    const confirmed = window.confirm(
+      `Complete this interview now? ${answeredCount} of ${TOTAL} questions are answered. Unanswered questions will be marked as skipped.`
+    );
+    if (!confirmed) return;
+
+    setEndingSession(true);
+    setEvaluating(true);
+    const saved = await saveResults(reviews, "completed");
+    setEvaluating(false);
+
+    if (saved) {
+      router.push("/results");
+    } else {
+      setEndingSession(false);
+    }
+  }, [endingSession, getCompletionReviews, router, saveResults, shouldAutoSubmit]);
+
+  const quitInterview = useCallback(() => {
+    const confirmed = window.confirm(
+      "Quit this interview? Your current interview will not be saved as a completed session."
+    );
+    if (!confirmed) return;
+
+    sessionStorage.removeItem("preppeer_results");
+    router.push("/dashboard");
+  }, [router]);
+
   useEffect(() => {
     if (
       !shouldAutoSubmit ||
@@ -281,6 +360,9 @@ export default function InterviewPage() {
         setQuestions(data.questions);
         setQuestionSetToken(data.questionSetToken);
         setQuestionReviews([]);
+        setFeedbackByQuestion({});
+        setAnswerDrafts({});
+        setEvaluationErrors({});
         questionReviewsRef.current = [];
         autoSubmitStartedRef.current = false;
         autoSubmitFailedRef.current = false;
@@ -336,7 +418,16 @@ export default function InterviewPage() {
       const zeroFeedback = createZeroFeedback(answerQuality.reason);
 
       setFeedback(zeroFeedback);
+      setFeedbackByQuestion((currentFeedback) => ({
+        ...currentFeedback,
+        [current]: zeroFeedback,
+      }));
       setAiDetected(null);
+      setEvaluationErrors((currentErrors) => {
+        const nextErrors = { ...currentErrors };
+        delete nextErrors[current];
+        return nextErrors;
+      });
       appendQuestionReview({
         question: `Q${current}`,
         prompt: questions[current - 1],
@@ -350,6 +441,7 @@ export default function InterviewPage() {
     }
 
     setEvaluating(true);
+    let evaluationSucceeded = false;
 
     try {
       const [evalRes, detectRes] = await Promise.all([
@@ -391,6 +483,15 @@ export default function InterviewPage() {
         );
 
         setFeedback(aiFeedback);
+        setFeedbackByQuestion((currentFeedback) => ({
+          ...currentFeedback,
+          [current]: aiFeedback,
+        }));
+        setEvaluationErrors((currentErrors) => {
+          const nextErrors = { ...currentErrors };
+          delete nextErrors[current];
+          return nextErrors;
+        });
         appendQuestionReview({
           question: `Q${current}`,
           prompt: questions[current - 1],
@@ -404,6 +505,15 @@ export default function InterviewPage() {
         const score = Number(evalData.feedback.compositeScore ?? 0);
 
         setFeedback(evalData.feedback);
+        setFeedbackByQuestion((currentFeedback) => ({
+          ...currentFeedback,
+          [current]: evalData.feedback,
+        }));
+        setEvaluationErrors((currentErrors) => {
+          const nextErrors = { ...currentErrors };
+          delete nextErrors[current];
+          return nextErrors;
+        });
         appendQuestionReview({
           question: `Q${current}`,
           prompt: questions[current - 1],
@@ -419,48 +529,91 @@ export default function InterviewPage() {
               .join(" ") ?? "",
           evaluationToken: evalData.evaluationToken,
           detectionToken: detectData.detectionToken,
+          modelAnswer: evalData.feedback.modelAnswer,
         });
+      } else {
+        throw new Error("This answer could not be evaluated. Please retry.");
       }
 
+      evaluationSucceeded = true;
       if (detectData) setAiDetected(detectData);
-    } catch {
-      const zeroFeedback = createZeroFeedback(
-        "This answer could not be evaluated because the scoring service failed."
-      );
-
-      setFeedback(zeroFeedback);
+    } catch (submitError) {
       setAiDetected(null);
-      appendQuestionReview({
-        question: `Q${current}`,
-        prompt: questions[current - 1],
-        answer,
-        score: 0,
-        status: "answered",
-        reason: "The scoring service failed.",
-      });
+      setEvaluationErrors((currentErrors) => ({
+        ...currentErrors,
+        [current]:
+          submitError instanceof Error
+            ? submitError.message
+            : "This answer could not be evaluated. Please retry.",
+      }));
+      setStage("interview");
+      return;
     } finally {
       setEvaluating(false);
-      setStage("feedback");
+      if (evaluationSucceeded) {
+        setStage("feedback");
+      }
     }
+  };
+
+  const handleSkip = () => {
+    if (endingSession || shouldAutoSubmit) return;
+
+    const confirmed = window.confirm(
+      "Skip this question? It will receive 0, but the model answer will still appear in your final report."
+    );
+    if (!confirmed) return;
+
+    appendQuestionReview({
+      question: `Q${current}`,
+      prompt: questions[current - 1],
+      score: 0,
+      status: "skipped",
+      reason: "You skipped this question, so it was not evaluated.",
+    });
+    setEvaluationErrors((currentErrors) => {
+      const nextErrors = { ...currentErrors };
+      delete nextErrors[current];
+      return nextErrors;
+    });
+    const skippedFeedback = createZeroFeedback(
+      "You skipped this question, so it was not evaluated."
+    );
+    setFeedback(skippedFeedback);
+    setFeedbackByQuestion((currentFeedback) => ({
+      ...currentFeedback,
+      [current]: skippedFeedback,
+    }));
+    setAiDetected(null);
+    setStage("feedback");
   };
 
   const handleNext = () => {
     if (endingSession || shouldAutoSubmit) return;
 
     if (current >= TOTAL) {
-      setEndingSession(true);
-      saveResults(questionReviewsRef.current, "completed").then((saved) => {
-        if (saved) {
-          router.push("/results");
-        } else {
-          setEndingSession(false);
-        }
-      });
+      void completeInterview();
     } else {
-      setCurrent((c) => c + 1);
-      setAiDetected(null);
-      resetTimer();
-      setStage("interview");
+      navigateToQuestion(current + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (endingSession || shouldAutoSubmit || current <= 1) return;
+    navigateToQuestion(current - 1);
+  };
+
+  const updateDraft = (answer: string) => {
+    setAnswerDrafts((currentDrafts) => ({
+      ...currentDrafts,
+      [current]: answer,
+    }));
+    if (evaluationErrors[current]) {
+      setEvaluationErrors((currentErrors) => {
+        const nextErrors = { ...currentErrors };
+        delete nextErrors[current];
+        return nextErrors;
+      });
     }
   };
 
@@ -648,7 +801,17 @@ export default function InterviewPage() {
                   questionNumber={current}
                   totalQuestions={TOTAL}
                   question={questions[current - 1]}
+                  answer={answerDrafts[current] ?? ""}
+                  evaluationError={evaluationErrors[current]}
+                  canGoPrevious={current > 1}
+                  canGoNext={current < TOTAL}
+                  onAnswerChange={updateDraft}
                   onSubmit={handleSubmit}
+                  onPrevious={handlePrevious}
+                  onNext={handleNext}
+                  onSkip={handleSkip}
+                  onComplete={completeInterview}
+                  onQuit={quitInterview}
                   antiCheatProps={textareaProps}
                 />
               </motion.div>
@@ -663,7 +826,10 @@ export default function InterviewPage() {
             >
               <div className="rounded-3xl p-10 bg-white border border-[rgba(0,132,255,0.15)] opacity-60">
                 <p className="font-inter text-sm text-muted mb-2">
-                  Question {current} of {TOTAL} - submitted
+                  Question {current} of {TOTAL} -{" "}
+                  {currentReview?.status === "skipped"
+                    ? "skipped"
+                    : "submitted"}
                 </p>
               </div>
 
@@ -700,11 +866,50 @@ export default function InterviewPage() {
                 </div>
               ) : (
                 <FeedbackPanel
-                  feedback={feedback}
+                  feedback={displayedFeedback}
                   onNext={handleNext}
                   isFinalQuestion={current === TOTAL}
                 />
               )}
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="grid grid-cols-2 gap-3 sm:flex">
+                  <button
+                    type="button"
+                    onClick={handlePrevious}
+                    disabled={current <= 1 || endingSession}
+                    className="rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white px-4 py-2.5 font-inter text-sm font-bold text-text transition hover:border-blue/35 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    disabled={endingSession}
+                    className="rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white px-4 py-2.5 font-inter text-sm font-bold text-text transition hover:border-blue/35"
+                  >
+                    {current >= TOTAL ? "Finish" : "Next"}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:flex">
+                  <button
+                    type="button"
+                    onClick={quitInterview}
+                    disabled={endingSession}
+                    className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 font-inter text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Quit Interview
+                  </button>
+                  <button
+                    type="button"
+                    onClick={completeInterview}
+                    disabled={endingSession}
+                    className="rounded-2xl bg-navy px-4 py-2.5 font-inter text-sm font-bold text-white transition hover:bg-[#10205A] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Complete Interview
+                  </button>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>

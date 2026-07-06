@@ -12,6 +12,7 @@ const SUMMARY_STATUSES: QuestionReview["status"][] = [
   "answered",
   "ai",
   "gibberish",
+  "skipped",
   "autoSkipped",
 ];
 
@@ -72,6 +73,13 @@ export const toPublicSessionSummary = (
         .filter(Boolean)
         .slice(0, 8)
     : [];
+  const keyTakeaways = Array.isArray(value.keyTakeaways)
+    ? value.keyTakeaways
+        .filter((item): item is string => typeof item === "string")
+        .map((item) => getSafeOptionalString(item, 500))
+        .filter(Boolean)
+        .slice(0, 5)
+    : [];
   const questionReviews = Array.isArray(value.questionReviews)
     ? value.questionReviews.slice(0, 10).flatMap((item) => {
         if (!isPlainObject(item)) return [];
@@ -92,6 +100,7 @@ export const toPublicSessionSummary = (
             improvement:
               getString(item.improvement, "", 700) || undefined,
             reason: getString(item.reason, "", 500) || undefined,
+            modelAnswer: getString(item.modelAnswer, "", 3_000) || undefined,
           },
         ];
       })
@@ -101,6 +110,9 @@ export const toPublicSessionSummary = (
     completionReason,
     overallSummary,
     needsImprovement,
+    strongestPart: getString(value.strongestPart, "", 700) || undefined,
+    weakestPart: getString(value.weakestPart, "", 700) || undefined,
+    keyTakeaways: keyTakeaways.length ? keyTakeaways : undefined,
     questionReviews,
   };
 };
