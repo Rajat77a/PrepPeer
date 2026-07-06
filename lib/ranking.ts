@@ -270,6 +270,7 @@ const benchmarkRoles = [
   "Operations",
   "Data Analyst",
   "MBA",
+  "Lead Site Reliability Engineer (SRE)",
 ];
 
 const benchmarkCompanies = [
@@ -329,7 +330,11 @@ const getBenchmarkSessions = (
       user_id: `benchmark-${index + 1}`,
       role: profile.role,
       experience:
-        index % 3 === 0 ? "0-1 years" : index % 3 === 1 ? "1-3 years" : "3-6 years",
+        index % 3 === 0
+          ? "0-1 years"
+          : index % 3 === 1
+            ? "1-3 years"
+            : "3-6 years",
       company_type: profile.company,
       composite_score: getBenchmarkScore(index, windowId),
       created_at: new Date(referenceTime - index * 3600000).toISOString(),
@@ -450,8 +455,7 @@ const getPreviousRank = (
   return (
     rankSessions(getBestByUser(previousBenchmarked)).find(
       (session) => session.user_id === userId
-    )
-      ?.rank ?? null
+    )?.rank ?? null
   );
 };
 
@@ -580,7 +584,11 @@ export const toLeaderboardEntries = (
   const rankedSessions = rankSessions(getBestByUser(benchmarkedSessions));
 
   const entries: LeaderboardEntry[] = rankedSessions.map((session) => {
-    const previousRank = getPreviousRank(benchmarkedSessions, session.user_id, session.id);
+    const previousRank = getPreviousRank(
+      benchmarkedSessions,
+      session.user_id,
+      session.id
+    );
     const benchmarkProfile = session.user_id.startsWith("benchmark-")
       ? getBenchmarkProfile(session)
       : null;
@@ -599,7 +607,9 @@ export const toLeaderboardEntries = (
             "PrepPeer user",
       subtitle:
         session.user_id === currentUserId
-          ? `${currentUserName}${currentUserCollege ? ` - ${currentUserCollege}` : ""} - ${
+          ? `${currentUserName}${
+              currentUserCollege ? ` - ${currentUserCollege}` : ""
+            } - ${
               realUserProfile?.role ?? session.role ?? "Interview"
             } - ${realUserProfile?.companyType ?? session.company_type ?? "General"}`
           : `${
@@ -637,7 +647,9 @@ export const toLeaderboardEntries = (
     entries.push({
       rank: entries.length + 1,
       name: "You",
-      subtitle: `${currentUserName}${currentUserCollege ? ` - ${currentUserCollege}` : ""}`,
+      subtitle: `${currentUserName}${
+        currentUserCollege ? ` - ${currentUserCollege}` : ""
+      }`,
       role: undefined,
       companyType: undefined,
       score: 0,
@@ -652,4 +664,3 @@ export const toLeaderboardEntries = (
 
   return entries;
 };
-
