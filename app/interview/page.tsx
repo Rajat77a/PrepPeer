@@ -70,6 +70,21 @@ export default function InterviewPage() {
     questionReviewsRef.current = questionReviews;
   }, [questionReviews]);
 
+  const appendQuestionReview = useCallback((review: QuestionReview) => {
+    const nextReviews = [
+      ...questionReviewsRef.current.filter(
+        (existing) => existing.question !== review.question
+      ),
+      review,
+    ].sort(
+      (left, right) =>
+        Number(left.question.slice(1)) - Number(right.question.slice(1))
+    );
+
+    questionReviewsRef.current = nextReviews;
+    setQuestionReviews(nextReviews);
+  }, []);
+
   const {
     // strikeCount,
     // showWarningModal,
@@ -316,17 +331,14 @@ export default function InterviewPage() {
 
       setFeedback(zeroFeedback);
       setAiDetected(null);
-      setQuestionReviews((prev) => [
-        ...prev,
-        {
-          question: `Q${current}`,
-          prompt: questions[current - 1],
-          answer,
-          score: 0,
-          status: "gibberish",
-          reason: answerQuality.reason,
-        },
-      ]);
+      appendQuestionReview({
+        question: `Q${current}`,
+        prompt: questions[current - 1],
+        answer,
+        score: 0,
+        status: "gibberish",
+        reason: answerQuality.reason,
+      });
       setStage("feedback");
       return;
     }
@@ -373,41 +385,35 @@ export default function InterviewPage() {
         );
 
         setFeedback(aiFeedback);
-        setQuestionReviews((prev) => [
-          ...prev,
-          {
-            question: `Q${current}`,
-            prompt: questions[current - 1],
-            answer,
-            score: 0,
-            status: "ai",
-            reason: detectData.reason,
-            detectionToken: detectData.detectionToken,
-          },
-        ]);
+        appendQuestionReview({
+          question: `Q${current}`,
+          prompt: questions[current - 1],
+          answer,
+          score: 0,
+          status: "ai",
+          reason: detectData.reason,
+          detectionToken: detectData.detectionToken,
+        });
       } else if (evalData.feedback) {
         const score = Number(evalData.feedback.compositeScore ?? 0);
 
         setFeedback(evalData.feedback);
-        setQuestionReviews((prev) => [
-          ...prev,
-          {
-            question: `Q${current}`,
-            prompt: questions[current - 1],
-            answer,
-            score,
-            status: "answered",
-            reason:
-              evalData.feedback.dimensions
-                ?.map(
-                  (dimension: { label: string; reason?: string }) =>
-                    `${dimension.label}: ${dimension.reason}`
-                )
-                .join(" ") ?? "",
-            evaluationToken: evalData.evaluationToken,
-            detectionToken: detectData.detectionToken,
-          },
-        ]);
+        appendQuestionReview({
+          question: `Q${current}`,
+          prompt: questions[current - 1],
+          answer,
+          score,
+          status: "answered",
+          reason:
+            evalData.feedback.dimensions
+              ?.map(
+                (dimension: { label: string; reason?: string }) =>
+                  `${dimension.label}: ${dimension.reason}`
+              )
+              .join(" ") ?? "",
+          evaluationToken: evalData.evaluationToken,
+          detectionToken: detectData.detectionToken,
+        });
       }
 
       if (detectData) setAiDetected(detectData);
@@ -418,17 +424,14 @@ export default function InterviewPage() {
 
       setFeedback(zeroFeedback);
       setAiDetected(null);
-      setQuestionReviews((prev) => [
-        ...prev,
-        {
-          question: `Q${current}`,
-          prompt: questions[current - 1],
-          answer,
-          score: 0,
-          status: "answered",
-          reason: "The scoring service failed.",
-        },
-      ]);
+      appendQuestionReview({
+        question: `Q${current}`,
+        prompt: questions[current - 1],
+        answer,
+        score: 0,
+        status: "answered",
+        reason: "The scoring service failed.",
+      });
     } finally {
       setEvaluating(false);
       setStage("feedback");
@@ -440,7 +443,7 @@ export default function InterviewPage() {
 
     if (current >= TOTAL) {
       setEndingSession(true);
-      saveResults(questionReviews, "completed").then((saved) => {
+      saveResults(questionReviewsRef.current, "completed").then((saved) => {
         if (saved) {
           router.push("/results");
         } else {
@@ -690,7 +693,11 @@ export default function InterviewPage() {
                   </div>
                 </div>
               ) : (
-                <FeedbackPanel feedback={feedback} onNext={handleNext} isFinalQuestion={current === TOTAL} />
+                <FeedbackPanel
+                  feedback={feedback}
+                  onNext={handleNext}
+                  isFinalQuestion={current === TOTAL}
+                />
               )}
             </motion.div>
           )}
