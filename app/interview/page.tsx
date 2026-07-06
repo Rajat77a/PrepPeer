@@ -244,16 +244,22 @@ export default function InterviewPage() {
   ]);
 
   const handleStart = async (profileSetup = setup) => {
+    const normalizedSetup = {
+      domain: profileSetup.domain.trim(),
+      experience: profileSetup.experience.trim(),
+      companyType: profileSetup.companyType.trim(),
+    };
+
     if (
-      !profileSetup.domain ||
-      !profileSetup.experience ||
-      !profileSetup.companyType
+      !normalizedSetup.domain ||
+      !normalizedSetup.experience ||
+      !normalizedSetup.companyType
     ) {
       setError("Please fill in all fields.");
       return;
     }
 
-    setSetup(profileSetup);
+    setSetup(normalizedSetup);
     setError("");
     setLoading(true);
 
@@ -261,7 +267,7 @@ export default function InterviewPage() {
       const res = await fetch("/api/generate-questions", {
         method: "POST",
         headers: csrfHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify(profileSetup),
+        body: JSON.stringify(normalizedSetup),
       });
 
       const data = await res.json();

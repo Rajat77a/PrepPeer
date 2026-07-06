@@ -45,7 +45,8 @@ async function postGenerateQuestions(req: NextRequest) {
     }
 
     const { domain, experience, companyType } = input;
-    const isLeadSreRole = domain === "Lead Site Reliability Engineer (SRE)";
+    const isLeadSreRole =
+      /\bsite reliability\b|\bsre\b/i.test(domain) && /\blead\b/i.test(domain);
 
     const questionPrompt = isLeadSreRole
       ? `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for a Lead Site Reliability Engineer role at a ${companyType} company.
@@ -89,13 +90,14 @@ Technical Accuracy 30%, Problem Solving 20%, System Design 20%, Reliability & Op
 Calibrate difficulty to ${experience}. Avoid generic questions. Each question must be one clear sentence or two short sentences and require senior-level reasoning.
 
 Return a JSON array of exactly 5 strings. No preamble or markdown.`
-      : `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for a ${domain} role at a ${companyType} company.
+      : `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for this user-entered target role: "${domain}".
+Company or interview environment entered by the user: "${companyType}".
 
 Question mix:
-- 2 role-specific technical questions that test real ${domain} knowledge, tradeoffs, debugging, implementation details, or architecture decisions
+- 2 role-specific technical questions that test real "${domain}" knowledge, tradeoffs, debugging, implementation details, or architecture decisions
 - 1 practical problem-solving scenario with a clear constraint
 - 1 behavioral question requiring a specific example, actions, outcome, and reflection
-- 1 company-fit question tailored to a ${companyType} environment
+- 1 company-fit question tailored to a "${companyType}" environment
 
 Calibrate difficulty to ${experience}. Avoid generic questions. Each question must be one clear sentence or two short sentences and require reasoning.
 

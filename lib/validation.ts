@@ -52,9 +52,9 @@ export const REVIEW_STATUSES: QuestionReviewStatus[] = [
 ];
 
 export type InterviewSetup = {
-  domain: (typeof PROFILE_ROLES)[number];
+  domain: string;
   experience: (typeof EXPERIENCE_LEVELS)[number];
-  companyType: (typeof COMPANY_TYPES)[number];
+  companyType: string;
 };
 
 export const isPlainObject = (
@@ -144,10 +144,13 @@ export const isAllowedValue = <T extends readonly string[]>(
 
 export const isValidSetup = (value: unknown): value is InterviewSetup => {
   if (!isPlainObject(value)) return false;
+  const domain = getBoundedString(value.domain, 2, 80);
+  const companyType = getBoundedString(value.companyType, 2, 80);
+
   return (
-    isAllowedValue(value.domain, PROFILE_ROLES) &&
+    Boolean(domain) &&
     isAllowedValue(value.experience, EXPERIENCE_LEVELS) &&
-    isAllowedValue(value.companyType, COMPANY_TYPES)
+    Boolean(companyType)
   );
 };
 
@@ -156,13 +159,15 @@ export const parseProfileInput = (value: unknown) => {
 
   const fullName = getBoundedString(value.fullName, 2, 80);
   const college = getBoundedString(value.college, 2, 120);
+  const role = getBoundedString(value.role, 2, 80);
+  const company = getBoundedString(value.company, 2, 80);
 
   if (
     !fullName ||
     !college ||
-    !isAllowedValue(value.role, PROFILE_ROLES) ||
+    !role ||
     !isAllowedValue(value.experience, EXPERIENCE_LEVELS) ||
-    !isAllowedValue(value.company, COMPANY_TYPES)
+    !company
   ) {
     return null;
   }
@@ -170,9 +175,9 @@ export const parseProfileInput = (value: unknown) => {
   return {
     fullName,
     college,
-    role: value.role,
+    role,
     experience: value.experience,
-    company: value.company,
+    company,
   };
 };
 
@@ -183,13 +188,14 @@ export const parseEvaluationInput = (value: unknown) => {
   const answer = getBoundedString(value.answer, 1, 8000);
   const questionSetToken = getBoundedString(value.questionSetToken, 20, 24_000);
   const questionIndex = getBoundedNumber(value.questionIndex, 0, 4, true);
+  const domain = getBoundedString(value.domain, 2, 80);
 
   if (
     !question ||
     !answer ||
     !questionSetToken ||
     questionIndex === null ||
-    !isAllowedValue(value.domain, PROFILE_ROLES) ||
+    !domain ||
     !isAllowedValue(value.experience, EXPERIENCE_LEVELS)
   ) {
     return null;
@@ -200,7 +206,7 @@ export const parseEvaluationInput = (value: unknown) => {
     answer,
     questionSetToken,
     questionIndex,
-    domain: value.domain,
+    domain,
     experience: value.experience,
   };
 };

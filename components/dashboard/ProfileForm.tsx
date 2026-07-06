@@ -27,7 +27,8 @@ type ProfileValues = {
 };
 
 type TextFieldKey = "fullName" | "college";
-type SelectorKey = "role" | "experience" | "company";
+type SelectorKey = "experience";
+type ContextKey = "role" | "experience" | "company";
 
 const textFields: { id: TextFieldKey; label: string }[] = [
   { id: "fullName", label: "Full name" },
@@ -42,23 +43,6 @@ const selectorFields: {
   options: string[];
 }[] = [
   {
-    id: "role",
-    label: "Target role",
-    title: "Choose target role",
-    description:
-      "This role will be used to generate your next interview questions.",
-    options: [
-      "SDE",
-      "SDE Fresher",
-      "Product Manager",
-      "Operations",
-      "MBA",
-      "Consulting",
-      "Data Analyst",
-      "Lead Site Reliability Engineer (SRE)",
-    ],
-  },
-  {
     id: "experience",
     label: "Experience level",
     title: "Choose experience level",
@@ -72,28 +56,9 @@ const selectorFields: {
       "Senior (7+ Years)",
     ],
   },
-  {
-    id: "company",
-    label: "Target company type",
-    title: "Choose company type",
-    description: "This changes the style and benchmark of your next interview.",
-    options: [
-      "FAANG",
-      "Product startup",
-      "Product Company",
-      "Service Company",
-      "Consulting firm",
-      "PSU / Govt",
-      "Mid-size tech",
-      "Marketplace",
-      "Fintech",
-      "Consumer App",
-      "Logistics",
-    ],
-  },
 ];
 
-const profileContextLabels: Record<SelectorKey, string> = {
+const profileContextLabels: Record<ContextKey, string> = {
   role: "Target role",
   experience: "Experience",
   company: "Company type",
@@ -105,9 +70,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
   const [values, setValues] = useState<ProfileValues>({
     fullName: user.name,
     college: user.college ?? "",
-    role: user.role ?? "SDE Fresher",
+    role: user.role ?? "",
     experience: user.experience ?? "0-1 years",
-    company: user.company ?? "Product startup",
+    company: user.company ?? "",
   });
   const [activeSelector, setActiveSelector] = useState<SelectorKey | null>(null);
   const [saving, setSaving] = useState(false);
@@ -118,8 +83,13 @@ export function ProfileForm({ user }: ProfileFormProps) {
   );
 
   const saveProfile = async () => {
-    if (values.fullName.trim().length < 2 || values.college.trim().length < 2) {
-      setMessage("Please enter a valid name and college.");
+    if (
+      values.fullName.trim().length < 2 ||
+      values.college.trim().length < 2 ||
+      values.role.trim().length < 2 ||
+      values.company.trim().length < 2
+    ) {
+      setMessage("Please enter valid profile details.");
       return;
     }
 
@@ -129,7 +99,13 @@ export function ProfileForm({ user }: ProfileFormProps) {
     const response = await fetch("/api/profile", {
       method: "PATCH",
       headers: csrfHeaders({ "Content-Type": "application/json" }),
-      body: JSON.stringify(values),
+      body: JSON.stringify({
+        ...values,
+        fullName: values.fullName.trim(),
+        college: values.college.trim(),
+        role: values.role.trim(),
+        company: values.company.trim(),
+      }),
     });
     const result = await response.json();
 
@@ -194,7 +170,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               </p>
 
               <div className="mt-4 divide-y divide-[rgba(0,132,255,0.12)]">
-                {(["role", "experience", "company"] as SelectorKey[]).map(
+                {(["role", "experience", "company"] as ContextKey[]).map(
                   (key) => (
                     <div
                       key={key}
@@ -253,6 +229,27 @@ export function ProfileForm({ user }: ProfileFormProps) {
               </label>
             ))}
 
+            <label className="block">
+              <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
+                Target role
+              </span>
+
+              <input
+                value={values.role}
+                minLength={2}
+                maxLength={80}
+                placeholder="e.g. Backend Engineer, MBA Marketing, Data Analyst"
+                autoComplete="organization-title"
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    role: event.target.value,
+                  }))
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-[rgba(0,132,255,0.12)] bg-[#f7fbff] px-4 font-inter text-sm font-semibold text-[#07111f] outline-none transition placeholder:text-[#9aa9bb] focus:border-[#006cff]/60 focus:bg-white focus:shadow-[0_0_24px_rgba(0,108,255,0.12)]"
+              />
+            </label>
+
             {selectorFields.map((field) => (
               <div key={field.id}>
                 <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
@@ -269,6 +266,27 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 </button>
               </div>
             ))}
+
+            <label className="block">
+              <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
+                Target company type
+              </span>
+
+              <input
+                value={values.company}
+                minLength={2}
+                maxLength={80}
+                placeholder="e.g. Fintech startup, FAANG, Consulting firm"
+                autoComplete="organization"
+                onChange={(event) =>
+                  setValues((current) => ({
+                    ...current,
+                    company: event.target.value,
+                  }))
+                }
+                className="mt-2 h-12 w-full rounded-xl border border-[rgba(0,132,255,0.12)] bg-[#f7fbff] px-4 font-inter text-sm font-semibold text-[#07111f] outline-none transition placeholder:text-[#9aa9bb] focus:border-[#006cff]/60 focus:bg-white focus:shadow-[0_0_24px_rgba(0,108,255,0.12)]"
+              />
+            </label>
           </div>
 
           <button

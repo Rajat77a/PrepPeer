@@ -13,7 +13,7 @@ type OnboardingFormProps = {
   postSubmitPath?: string;
 };
 
-type SelectorKey = "role" | "experience" | "company";
+type SelectorKey = "experience";
 
 const selectorFields: {
   id: SelectorKey;
@@ -22,23 +22,6 @@ const selectorFields: {
   description: string;
   options: string[];
 }[] = [
-  {
-    id: "role",
-    label: "Target role",
-    title: "Choose target role",
-    description:
-      "This role will be used to generate your first interview questions.",
-    options: [
-      "SDE",
-      "SDE Fresher",
-      "Product Manager",
-      "Operations",
-      "MBA",
-      "Consulting",
-      "Data Analyst",
-      "Lead Site Reliability Engineer (SRE)",
-    ],
-  },
   {
     id: "experience",
     label: "Experience level",
@@ -53,25 +36,6 @@ const selectorFields: {
       "Senior (7+ Years)",
     ],
   },
-  {
-    id: "company",
-    label: "Target company type",
-    title: "Choose company type",
-    description: "This changes the style and benchmark of your interview.",
-    options: [
-      "FAANG",
-      "Product startup",
-      "Product Company",
-      "Service Company",
-      "Consulting firm",
-      "PSU / Govt",
-      "Mid-size tech",
-      "Marketplace",
-      "Fintech",
-      "Consumer App",
-      "Logistics",
-    ],
-  },
 ];
 
 export function OnboardingForm({
@@ -83,9 +47,9 @@ export function OnboardingForm({
 
   const [fullName, setFullName] = useState(initialName);
   const [college, setCollege] = useState(initialCollege);
-  const [role, setRole] = useState("SDE Fresher");
+  const [role, setRole] = useState("");
   const [experience, setExperience] = useState("0-1 years");
-  const [company, setCompany] = useState("Product startup");
+  const [company, setCompany] = useState("");
   const [activeSelector, setActiveSelector] = useState<SelectorKey | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -94,23 +58,17 @@ export function OnboardingForm({
     (field) => field.id === activeSelector
   );
 
-  const selectedValues = {
-    role,
-    experience,
-    company,
-  };
+  const selectedValues = { experience };
 
   const canSubmit =
     fullName.trim().length >= 2 &&
     college.trim().length >= 2 &&
-    role.trim().length > 0 &&
+    role.trim().length >= 2 &&
     experience.trim().length > 0 &&
-    company.trim().length > 0;
+    company.trim().length >= 2;
 
   const setSelectorValue = (key: SelectorKey, value: string) => {
-    if (key === "role") setRole(value);
     if (key === "experience") setExperience(value);
-    if (key === "company") setCompany(value);
   };
 
   const saveProfile = async (event: FormEvent<HTMLFormElement>) => {
@@ -126,9 +84,9 @@ export function OnboardingForm({
       body: JSON.stringify({
         fullName,
         college,
-        role,
+        role: role.trim(),
         experience,
-        company,
+        company: company.trim(),
       }),
     });
     const result = await response.json();
@@ -205,6 +163,24 @@ export function OnboardingForm({
 
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
+                Target role
+              </span>
+              <input
+                value={role}
+                onChange={(event) => {
+                  setError("");
+                  setRole(event.target.value);
+                }}
+                placeholder="e.g. Backend Engineer, MBA Marketing, Data Analyst"
+                autoComplete="organization-title"
+                minLength={2}
+                maxLength={80}
+                className="mt-2 h-14 w-full rounded-2xl border border-[#d8ebff] bg-white/80 px-5 font-inter text-base font-bold text-[#07111f] outline-none transition placeholder:text-[#a5b4c8] focus:border-[#0084ff]/70 focus:shadow-[0_0_0_4px_rgba(0,132,255,0.12)]"
+              />
+            </label>
+
+            <label className="block">
+              <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
                 College
               </span>
               <input
@@ -240,6 +216,24 @@ export function OnboardingForm({
                 </button>
               </div>
             ))}
+
+            <label className="block">
+              <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
+                Target company type
+              </span>
+              <input
+                value={company}
+                onChange={(event) => {
+                  setError("");
+                  setCompany(event.target.value);
+                }}
+                placeholder="e.g. Fintech startup, FAANG, Consulting firm"
+                autoComplete="organization"
+                minLength={2}
+                maxLength={80}
+                className="mt-2 h-14 w-full rounded-2xl border border-[#d8ebff] bg-white/80 px-5 font-inter text-base font-bold text-[#07111f] outline-none transition placeholder:text-[#a5b4c8] focus:border-[#0084ff]/70 focus:shadow-[0_0_0_4px_rgba(0,132,255,0.12)]"
+              />
+            </label>
           </div>
 
           {error && (
