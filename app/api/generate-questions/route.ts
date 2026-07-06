@@ -48,9 +48,70 @@ async function postGenerateQuestions(req: NextRequest) {
     }
 
     const { domain, experience, companyType } = input;
+    const isLeadSreRole =
+      domain === "Lead Site Reliability Engineer (SRE)" ||
+      domain === "Lead Site Reliability Engineer";
+
+    const questionPrompt = isLeadSreRole
+      ? `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for a Lead Site Reliability Engineer role at a ${companyType} company.
+
+Role context:
+A Lead Site Reliability Engineer is responsible for ensuring highly available, scalable, secure, and cost-efficient cloud infrastructure. The role combines software engineering and operations to build reliable distributed systems, automate infrastructure, improve observability, optimize performance, manage incidents, and collaborate with development teams to improve system reliability.
+
+The interviewer should behave like a Senior Engineering Manager at Google, Amazon, Microsoft, or Meta hiring for a Lead SRE position.
+
+Question mix:
+- 2 deeply technical questions covering Linux, networking, cloud infrastructure, Kubernetes, Docker, Terraform, Helm, CI/CD, observability, databases, distributed systems, scalability, high availability, disaster recovery, security, or cost optimization
+- 1 production incident scenario focused on real production incidents, debugging distributed systems, Kubernetes troubleshooting, RCA, post-mortems, SLOs, SLIs, alerting, incident response, or escalation
+- 1 leadership question covering mentoring, ownership, cross-functional collaboration, decision making under pressure, communication, reliability culture, or leading through incidents
+- 1 behavioral question requiring a specific example, actions, tradeoffs, outcome, and reflection
+
+Difficulty distribution for this 5-question interview:
+- 1 Medium
+- 2 Hard
+- 2 Expert
+
+Primary responsibilities to test:
+- Develop and improve observability using monitoring, logging, tracing, and alerting tools
+- Optimize system performance and troubleshoot production incidents
+- Conduct Root Cause Analysis and post-mortems after incidents
+- Collaborate closely with software engineers to improve reliability, scalability, and performance
+- Drive cloud infrastructure cost optimization initiatives
+- Monitor and manage databases like MongoDB, Redis, Elasticsearch, and queue-based systems
+- Build automation for infrastructure and operational tasks
+- Improve deployment reliability using CI/CD pipelines
+- Define and maintain SLOs, SLIs, and incident response processes
+
+Required skills to emphasize:
+AWS, Google Cloud Platform, Docker, Kubernetes, GKE, Terraform, Helm, Prometheus, Grafana, ELK Stack, OpenTelemetry, Jenkins, GitHub Actions, ArgoCD, MongoDB, Redis, Elasticsearch, queue-based messaging systems, Python, Bash, shell scripting, Linux, networking, REST APIs, JSON parsing, on-call rotations, SLIs, SLOs, SLAs, escalation policies, and incident response.
+
+Interview focus areas:
+Linux and operating systems, networking fundamentals, cloud infrastructure, Kubernetes, Docker, infrastructure as code, CI/CD pipelines, monitoring and observability, incident response, performance optimization, distributed systems, scalability, reliability engineering, automation, security best practices, cost optimization, database scaling, disaster recovery, high availability, leadership, and team collaboration.
+
+Evaluation criteria:
+Technical Accuracy 30%, Problem Solving 20%, System Design 20%, Reliability & Operational Excellence 15%, Leadership & Communication 10%, Best Practices & Security 5%.
+
+Calibrate difficulty to ${experience}. Avoid generic questions. Each question must be one clear sentence or two short sentences and require senior-level reasoning.
+
+Return a JSON array of exactly 5 strings. No preamble or markdown.`
+      : `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for a ${domain} role at a ${companyType} company.
+
+Question mix:
+- 2 role-specific technical questions that test real ${domain} knowledge, tradeoffs, debugging, implementation details, or architecture decisions
+- 1 practical problem-solving scenario with a clear constraint
+- 1 behavioral question requiring a specific example, actions, outcome, and reflection
+- 1 company-fit question tailored to a ${companyType} environment
+
+Calibrate difficulty to ${experience}. Avoid generic questions. Each question must be one clear sentence or two short sentences and require reasoning.
+
+Return a JSON array of exactly 5 strings. No preamble or markdown.`;
+
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      logServerError("Question generation is not configured", new Error("Missing GROQ_API_KEY"));
+      logServerError(
+        "Question generation is not configured",
+        new Error("Missing GROQ_API_KEY")
+      );
       return NextResponse.json(
         { error: "Question generation is unavailable." },
         { status: 503 }
@@ -70,17 +131,7 @@ async function postGenerateQuestions(req: NextRequest) {
           messages: [
             {
               role: "user",
-              content: `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for a ${domain} role at a ${companyType} company.
-
-Question mix:
-- 2 role-specific technical questions that test real ${domain} knowledge, tradeoffs, debugging, implementation details, or architecture decisions
-- 1 practical problem-solving scenario with a clear constraint
-- 1 behavioral question requiring a specific example, actions, outcome, and reflection
-- 1 company-fit question tailored to a ${companyType} environment
-
-Calibrate difficulty to ${experience}. Avoid generic questions. Each question must be one clear sentence or two short sentences and require reasoning.
-
-Return a JSON array of exactly 5 strings. No preamble or markdown.`,
+              content: questionPrompt,
             },
           ],
           max_tokens: 1024,
