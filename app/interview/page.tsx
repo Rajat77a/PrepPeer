@@ -690,7 +690,7 @@ export default function InterviewPage() {
                   </div>
                 </div>
               ) : (
-                <FeedbackPanel feedback={feedback} onNext={handleNext} />
+                <FeedbackPanel feedback={feedback} onNext={handleNext} isFinalQuestion={current === TOTAL} />
               )}
             </motion.div>
           )}
