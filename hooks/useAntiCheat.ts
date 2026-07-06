@@ -64,128 +64,128 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
   }, []);
 
   // ── Layer 1: Keyboard Disabling ─────────────────────────
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-      blockShortcut(e);
-    },
-    [blockShortcut]
-  );
+  // const handleKeyDown = useCallback(
+  //   (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  //     blockShortcut(e);
+  //   },
+  //   [blockShortcut]
+  // );
 
   // ── Layer 1: Right-Click Disabling ──────────────────────
-  const handleContextMenu = useCallback(
-    (e: React.MouseEvent<HTMLTextAreaElement>) => {
-      e.preventDefault();
-    },
-    []
-  );
+  // const handleContextMenu = useCallback(
+  //   (e: React.MouseEvent<HTMLTextAreaElement>) => {
+  //     e.preventDefault();
+  //   },
+  //   []
+  // );
 
   // ── Layer 2: Paste Event Detection ──────────────────────
-  const handlePaste = useCallback(
-    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-      e.preventDefault();
-      const pastedText = e.clipboardData.getData("text");
-      if (pastedText.length >= PASTE_CHAR_THRESHOLD) {
-        setState((prev) => ({
-          ...prev,
-          pasteDetected: true,
-          pasteCharCount: prev.pasteCharCount + pastedText.length,
-        }));
-      }
-    },
-    []
-  );
+  // const handlePaste = useCallback(
+  //   (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+  //     e.preventDefault();
+  //     const pastedText = e.clipboardData.getData("text");
+  //     if (pastedText.length >= PASTE_CHAR_THRESHOLD) {
+  //       setState((prev) => ({
+  //         ...prev,
+  //         pasteDetected: true,
+  //         pasteCharCount: prev.pasteCharCount + pastedText.length,
+  //       }));
+  //     }
+  //   },
+  //   []
+  // );
 
   // ── Layer 2: Copy Disabling ──────────────────────────────
-  const handleCopy = useCallback(
-    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-      e.preventDefault();
-    },
-    []
-  );
+  // const handleCopy = useCallback(
+  //   (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+  //     e.preventDefault();
+  //   },
+  //   []
+  // );
 
   // ── Layer 2: Cut Disabling ───────────────────────────────
-  const handleCut = useCallback(
-    (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-      e.preventDefault();
-    },
-    []
-  );
+  // const handleCut = useCallback(
+  //   (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+  //     e.preventDefault();
+  //   },
+  //   []
+  // );
 
-  useEffect(() => {
-    if (!active) return;
+  // useEffect(() => {
+  //   if (!active) return;
 
-    const preventDefault = (e: Event) => e.preventDefault();
-    const handleDocumentPaste = (e: ClipboardEvent) => {
-      e.preventDefault();
-      const pastedText = e.clipboardData?.getData("text") ?? "";
+  //   const preventDefault = (e: Event) => e.preventDefault();
+  //   const handleDocumentPaste = (e: ClipboardEvent) => {
+  //     e.preventDefault();
+  //     const pastedText = e.clipboardData?.getData("text") ?? "";
 
-      if (pastedText.length >= PASTE_CHAR_THRESHOLD) {
-        setState((prev) => ({
-          ...prev,
-          pasteDetected: true,
-          pasteCharCount: prev.pasteCharCount + pastedText.length,
-        }));
-      }
-    };
+  //     if (pastedText.length >= PASTE_CHAR_THRESHOLD) {
+  //       setState((prev) => ({
+  //         ...prev,
+  //         pasteDetected: true,
+  //         pasteCharCount: prev.pasteCharCount + pastedText.length,
+  //       }));
+  //     }
+  //   };
 
-    document.addEventListener("keydown", blockShortcut);
-    document.addEventListener("contextmenu", preventDefault);
-    document.addEventListener("copy", preventDefault);
-    document.addEventListener("cut", preventDefault);
-    document.addEventListener("paste", handleDocumentPaste);
+  //   document.addEventListener("keydown", blockShortcut);
+  //   document.addEventListener("contextmenu", preventDefault);
+  //   document.addEventListener("copy", preventDefault);
+  //   document.addEventListener("cut", preventDefault);
+  //   document.addEventListener("paste", handleDocumentPaste);
 
-    return () => {
-      document.removeEventListener("keydown", blockShortcut);
-      document.removeEventListener("contextmenu", preventDefault);
-      document.removeEventListener("copy", preventDefault);
-      document.removeEventListener("cut", preventDefault);
-      document.removeEventListener("paste", handleDocumentPaste);
-    };
-  }, [active, blockShortcut]);
+  //   return () => {
+  //     document.removeEventListener("keydown", blockShortcut);
+  //     document.removeEventListener("contextmenu", preventDefault);
+  //     document.removeEventListener("copy", preventDefault);
+  //     document.removeEventListener("cut", preventDefault);
+  //     document.removeEventListener("paste", handleDocumentPaste);
+  //   };
+  // }, [active, blockShortcut]);
 
   // ── Layer 3: Tab Switch Detection ───────────────────────
-  const recordSwitch = useCallback(() => {
-    if (!active || autoSubmitTriggeredRef.current) return;
-    const now = Date.now();
-    if (now - lastSwitchTime.current < DEBOUNCE_MS) return;
-    lastSwitchTime.current = now;
+  // const recordSwitch = useCallback(() => {
+  //   if (!active || autoSubmitTriggeredRef.current) return;
+  //   const now = Date.now();
+  //   if (now - lastSwitchTime.current < DEBOUNCE_MS) return;
+  //   lastSwitchTime.current = now;
 
-    const newCount = switchCountRef.current + 1;
-    switchCountRef.current = newCount;
-    setState((prev) => ({ ...prev, tabSwitchCount: newCount }));
+  //   const newCount = switchCountRef.current + 1;
+  //   switchCountRef.current = newCount;
+  //   setState((prev) => ({ ...prev, tabSwitchCount: newCount }));
 
-    if (newCount >= 3) {
-      autoSubmitTriggeredRef.current = true;
-      setShowWarningModal(false);
-      setShouldAutoSubmit(true);
-      return;
-    }
+  //   if (newCount >= 3) {
+  //     autoSubmitTriggeredRef.current = true;
+  //     setShowWarningModal(false);
+  //     setShouldAutoSubmit(true);
+  //     return;
+  //   }
 
-    setShowWarningModal(true);
-  }, [active]);
+  //   setShowWarningModal(true);
+  // }, [active]);
 
-  useEffect(() => {
-    if (!active) return;
+  // useEffect(() => {
+  //   if (!active) return;
 
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        recordSwitch();
-      }
-    };
+  //   const handleVisibilityChange = () => {
+  //     if (document.hidden) {
+  //       recordSwitch();
+  //     }
+  //   };
 
-    const handleWindowBlur = () => {
-      if (document.hidden) return;
-      recordSwitch();
-    };
+  //   const handleWindowBlur = () => {
+  //     if (document.hidden) return;
+  //     recordSwitch();
+  //   };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("blur", handleWindowBlur);
+  //   document.addEventListener("visibilitychange", handleVisibilityChange);
+  //   window.addEventListener("blur", handleWindowBlur);
 
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("blur", handleWindowBlur);
-    };
-  }, [active, recordSwitch]);
+  //   return () => {
+  //     document.removeEventListener("visibilitychange", handleVisibilityChange);
+  //     window.removeEventListener("blur", handleWindowBlur);
+  //   };
+  // }, [active, recordSwitch]);
 
   // ── Layer 4: Answer Timer ───────────────────────────────
   useEffect(() => {
