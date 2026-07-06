@@ -28,19 +28,39 @@ const steps: Step[] = [
     key: "jobRole",
     title: "Choose your job role",
     eyebrow: "Step 1",
-    options: ["SDE", "Product Manager", "Operations", "MBA", "Consulting", "Data Analyst"],
+    options: [
+      "SDE",
+      "Product Manager",
+      "Operations",
+      "MBA",
+      "Consulting",
+      "Data Analyst",
+      "Lead Site Reliability Engineer (SRE)",
+    ],
   },
   {
     key: "experienceLevel",
     title: "Pick your experience level",
     eyebrow: "Step 2",
-    options: ["Fresher", "1-3 years", "3-6 years", "6+ years"],
+    options: [
+      "Fresher",
+      "1-3 years",
+      "3-6 years",
+      "6+ years",
+      "Senior (7+ Years)",
+    ],
   },
   {
     key: "companyType",
     title: "Select company type",
     eyebrow: "Step 3",
-    options: ["FAANG", "Product startup", "Consulting firm", "PSU / Govt", "Mid-size tech"],
+    options: [
+      "FAANG",
+      "Product startup",
+      "Consulting firm",
+      "PSU / Govt",
+      "Mid-size tech",
+    ],
   },
 ];
 
@@ -58,8 +78,14 @@ export default function ProfileStepper({ onComplete }: ProfileStepperProps) {
   const isLastStep = stepIndex === steps.length - 1;
 
   const helperText = useMemo(() => {
-    if (stepIndex === 0) return "We will tailor question style and difficulty around this role.";
-    if (stepIndex === 1) return "Your level helps calibrate depth, expectations, and examples.";
+    if (stepIndex === 0) {
+      return "We will tailor question style and difficulty around this role.";
+    }
+
+    if (stepIndex === 1) {
+      return "Your level helps calibrate depth, expectations, and examples.";
+    }
+
     return "Company type decides the interview tone and evaluation benchmark.";
   }, [stepIndex]);
 
