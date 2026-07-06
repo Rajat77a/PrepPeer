@@ -251,15 +251,15 @@ export function useAntiCheat(active: boolean = false): UseAntiCheatReturn {
 
   return {
     textareaProps: {
-      onKeyDown: handleKeyDown,
-      onContextMenu: handleContextMenu,
-      onPaste: handlePaste,
-      onCopy: handleCopy,
-      onCut: handleCut,
+      onKeyDown: () => {},
+      onContextMenu: () => {},
+      onPaste: () => {},
+      onCopy: () => {},
+      onCut: () => {},
     },
     state,
     strikeCount: state.tabSwitchCount,
-    showWarningModal,
+    showWarningModal: false,
     dismissWarning,
     shouldAutoSubmit,
     timerDisplay,
