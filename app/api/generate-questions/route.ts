@@ -6,10 +6,7 @@ import { createInterviewProof } from "@/lib/server/interviewProof";
 import { logServerError } from "@/lib/server/errorLog";
 import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
-import {
-  isValidSetup,
-  readJsonBody,
-} from "@/lib/validation";
+import { isValidSetup, readJsonBody } from "@/lib/validation";
 
 async function postGenerateQuestions(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
@@ -48,9 +45,7 @@ async function postGenerateQuestions(req: NextRequest) {
     }
 
     const { domain, experience, companyType } = input;
-    const isLeadSreRole =
-      domain === "Lead Site Reliability Engineer (SRE)" ||
-      domain === "Lead Site Reliability Engineer";
+    const isLeadSreRole = domain === "Lead Site Reliability Engineer (SRE)";
 
     const questionPrompt = isLeadSreRole
       ? `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for a Lead Site Reliability Engineer role at a ${companyType} company.
@@ -153,6 +148,7 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`;
     const json = await response.json();
     const text = json.choices?.[0]?.message?.content ?? "";
     const match = text.match(/\[[\s\S]*\]/);
+
     if (!match) {
       logServerError("Question generation returned malformed content", {
         textPreview: text.slice(0, 500),
@@ -185,6 +181,7 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`;
 
     const normalizedQuestions = questions.map((question) => question.trim());
     const sessionId = randomUUID();
+
     const questionSetToken = createInterviewProof({
       kind: "questionSet",
       version: 1,
