@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "@/lib/types";
 import { RefreshTableButton } from "@/components/dashboard/RefreshTableButton";
 
-const tabs = ["All Roles", "SDE", "PM", "Operations", "MBA"];
+const tabs = ["All Roles", "SDE", "PM", "Operations", "MBA", "SRE"];
 
 const roleMatches: Record<string, string[]> = {
   "All Roles": [],
@@ -14,6 +14,7 @@ const roleMatches: Record<string, string[]> = {
   PM: ["Product Manager"],
   Operations: ["Operations"],
   MBA: ["MBA"],
+  SRE: ["Lead Site Reliability Engineer", "SRE"],
 };
 
 const formatMovement = (
@@ -154,21 +155,27 @@ export function LeaderboardClient({
               >
                 #{entry.rank}
               </span>
+
               <span className="font-inter text-sm font-bold text-[#07111f]">
                 {entry.name}
               </span>
+
               <span className="font-inter text-sm font-semibold text-[#64748b]">
                 {entry.subtitle ?? "-"}
               </span>
+
               <span className="font-inter text-sm font-semibold text-[#64748b]">
                 {entry.sessions ? `${entry.sessions} sessions` : "No sessions yet"}
               </span>
+
               <span className="font-inter text-sm font-bold text-[#07111f]">
                 {entry.score}
               </span>
+
               <span className="font-inter text-sm font-semibold text-[#64748b]">
                 {entry.sessions}
               </span>
+
               <span
                 className={cn(
                   "inline-flex items-center font-inter text-sm font-black tracking-[-0.01em]",
