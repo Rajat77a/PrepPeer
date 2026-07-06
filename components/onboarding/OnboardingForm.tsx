@@ -36,6 +36,7 @@ const selectorFields: {
       "MBA",
       "Consulting",
       "Data Analyst",
+      "Lead Site Reliability Engineer (SRE)",
     ],
   },
   {
@@ -43,7 +44,14 @@ const selectorFields: {
     label: "Experience level",
     title: "Choose experience level",
     description: "This helps PrepPeer set the right difficulty and expectations.",
-    options: ["Fresher", "0-1 years", "1-3 years", "3-6 years", "6+ years"],
+    options: [
+      "Fresher",
+      "0-1 years",
+      "1-3 years",
+      "3-6 years",
+      "6+ years",
+      "Senior (7+ Years)",
+    ],
   },
   {
     id: "company",
