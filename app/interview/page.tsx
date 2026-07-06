@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
 import { FeedbackPanel } from "@/components/interview/FeedbackPanel";
-import { TabSwitchWarning } from "@/components/interview/TabSwitchWarning";
+// import { TabSwitchWarning } from "@/components/interview/TabSwitchWarning";
 import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
@@ -71,9 +71,9 @@ export default function InterviewPage() {
   }, [questionReviews]);
 
   const {
-    strikeCount,
-    showWarningModal,
-    dismissWarning,
+    // strikeCount,
+    // showWarningModal,
+    // dismissWarning,
     shouldAutoSubmit,
     timerDisplay,
     resetTimer,
@@ -528,15 +528,15 @@ export default function InterviewPage() {
   return (
     <div
       className="min-h-screen bg-white"
-      onContextMenu={(e) => e.preventDefault()}
-      onCopy={(e) => e.preventDefault()}
-      onCut={(e) => e.preventDefault()}
+      // onContextMenu={(e) => e.preventDefault()}
+      // onCopy={(e) => e.preventDefault()}
+      // onCut={(e) => e.preventDefault()}
     >
-      <TabSwitchWarning
+      {/* <TabSwitchWarning
         strikeCount={strikeCount}
         onDismiss={dismissWarning}
         visible={showWarningModal}
-      />
+      /> */}
 
       <Navbar
         variant="inner"
