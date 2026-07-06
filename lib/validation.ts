@@ -13,6 +13,7 @@ export const PROFILE_ROLES = [
   "MBA",
   "Consulting",
   "Data Analyst",
+  "Lead Site Reliability Engineer (SRE)",
 ] as const;
 
 export const EXPERIENCE_LEVELS = [
@@ -21,6 +22,7 @@ export const EXPERIENCE_LEVELS = [
   "1-3 years",
   "3-6 years",
   "6+ years",
+  "Senior (7+ Years)",
 ] as const;
 
 export const COMPANY_TYPES = [
