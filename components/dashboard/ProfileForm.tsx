@@ -32,7 +32,7 @@ type ContextKey = "role" | "experience" | "company";
 
 const textFields: { id: TextFieldKey; label: string }[] = [
   { id: "fullName", label: "Full name" },
-  { id: "college", label: "College/University" },
+  { id: "college", label: "Current Occupation" },
 ];
 
 const selectorFields: {
@@ -190,7 +190,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               {values.college && (
                 <div className="mt-4 border-t border-[rgba(0,132,255,0.12)] pt-4">
                   <p className="font-inter text-xs font-bold uppercase tracking-[0.14em] text-[#8ba0b8]">
-                    College
+                    Current Occupation
                   </p>
                   <p className="mt-1 font-inter text-sm font-black text-[#07111f]">
                     {values.college}

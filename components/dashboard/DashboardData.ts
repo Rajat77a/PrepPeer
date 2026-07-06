@@ -133,7 +133,7 @@ export const leaderboardEntries = Array.from({ length: 250 }, (_, index) => {
   return {
     rank,
     name: isUser ? "You" : base[0],
-    college: isUser ? "Your college" : base[1],
+    college: isUser ? "Your occupation" : base[1],
     role: isUser ? "SDE Fresher" : base[2],
     score: isUser ? 72 : score,
     sessions: 1 + ((index * 3) % 12),

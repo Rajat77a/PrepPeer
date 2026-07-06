@@ -181,7 +181,7 @@ export function OnboardingForm({
 
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                College
+                Current Occupation
               </span>
               <input
                 value={college}
@@ -189,7 +189,7 @@ export function OnboardingForm({
                   setError("");
                   setCollege(event.target.value);
                 }}
-                placeholder="Your college or university"
+                placeholder="e.g. Software Engineer at Google"
                 autoComplete="organization"
                 minLength={2}
                 maxLength={120}

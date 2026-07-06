@@ -92,7 +92,7 @@ export function LeaderboardClient({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search name, college, role"
+              placeholder="Search name, occupation, role"
               className="h-12 w-full rounded-full border border-[rgba(0,132,255,0.14)] bg-white/88 pl-11 pr-4 font-inter text-sm font-semibold text-[#07111f] outline-none shadow-[0_12px_32px_rgba(0,108,255,0.07)] transition placeholder:text-[#9aa9bb] focus:border-[#006cff]/60 focus:shadow-[0_0_24px_rgba(0,108,255,0.14)]"
             />
           </div>
