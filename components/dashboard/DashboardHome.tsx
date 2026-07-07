@@ -225,6 +225,7 @@ export function DashboardHome({
       sessions={sessions}
       leaderboardEntries={leaderboardEntries}
       rankSummary={rankSummary}
+      profileContext={profileContext}
       recentSessionScore={
         recentSessionScore ?? sessions[0]?.score ?? rankSummary.score
       }
@@ -393,12 +394,14 @@ function ReturningDashboard({
   sessions,
   leaderboardEntries,
   rankSummary,
+  profileContext,
   recentSessionScore,
 }: {
   firstName: string;
   sessions: DashboardSession[];
   leaderboardEntries: LeaderboardEntry[];
   rankSummary: DashboardRankSummary;
+  profileContext: DashboardProfileContext;
   recentSessionScore: number;
 }) {
   const [shareState, setShareState] = useState<
@@ -421,10 +424,15 @@ function ReturningDashboard({
   const latestSession = sessions[0];
 
   const practiceAgainHref = `/interview?mode=account&autostart=1&role=${encodeURIComponent(
-    rankSummary.role
+    profileContext.role || rankSummary.role
   )}&experience=${encodeURIComponent(
-    rankSummary.experience ?? latestSession?.experience ?? "Not set"
-  )}&company=${encodeURIComponent(rankSummary.companyType)}`;
+    profileContext.experience ||
+      rankSummary.experience ||
+      latestSession?.experience ||
+      "Not set"
+  )}&company=${encodeURIComponent(
+    profileContext.companyType || rankSummary.companyType
+  )}`;
 
   const shareLabel =
     shareState === "creating"

@@ -32,12 +32,20 @@ type SetupData = {
   companyType: string;
 };
 
-type Stage = "setup" | "terms" | "interview" | "feedback";
+type Stage = "setup" | "terms" | "ready" | "interview" | "feedback";
+
+const reportLoadingSteps = [
+  "Checking your answers against the interview rubric...",
+  "Preparing your strongest and weakest areas...",
+  "Building model answers for skipped questions...",
+  "Saving your final session report...",
+];
 
 export default function InterviewPage() {
   const router = useRouter();
   const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
+  const [readyCountdown, setReadyCountdown] = useState(5);
   const [current, setCurrent] = useState(1);
   const [questions, setQuestions] = useState<string[]>([]);
   const [questionSetToken, setQuestionSetToken] = useState("");
@@ -103,6 +111,26 @@ export default function InterviewPage() {
       (stage === "interview" || stage === "feedback") &&
       !endingSession
   );
+
+  useEffect(() => {
+    if (stage !== "ready") return;
+
+    setReadyCountdown(5);
+    const interval = window.setInterval(() => {
+      setReadyCountdown((value) => {
+        if (value <= 1) {
+          window.clearInterval(interval);
+          resetTimer();
+          setStage("interview");
+          return 0;
+        }
+
+        return value - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [resetTimer, stage]);
 
   useEffect(() => {
     const checkAccountAccess = async () => {
@@ -370,7 +398,7 @@ export default function InterviewPage() {
         setCompletionError("");
         sessionStorage.removeItem("preppeer_results");
         setError("");
-        setStage("interview");
+        setStage("ready");
       } else {
         setError("Failed to generate questions. Try again.");
       }
@@ -741,7 +769,32 @@ export default function InterviewPage() {
         )}
 
         <AnimatePresence mode="wait">
-          {stage === "interview" ? (
+          {stage === "ready" ? (
+            <motion.div
+              key="ready"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -14 }}
+              transition={{ duration: 0.35, ease: EASE_OUT }}
+              className="mx-auto max-w-xl py-16 text-center"
+            >
+              <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border border-[rgba(0,132,255,0.16)] bg-[#F4FAFF] shadow-[0_24px_70px_rgba(0,132,255,0.14)]">
+                <span className="font-inter text-5xl font-black tabular-nums text-[#0084FF]">
+                  {readyCountdown}
+                </span>
+              </div>
+              <p className="mt-7 font-inter text-[11px] font-bold uppercase tracking-[0.2em] text-[#0084FF]">
+                Interview starts soon
+              </p>
+              <h2 className="mt-3 font-fustat text-3xl font-extrabold text-text">
+                Take a breath. Get ready.
+              </h2>
+              <p className="mx-auto mt-3 max-w-md font-inter text-sm font-medium leading-6 text-muted">
+                Your questions are ready for {setup.domain}. The first question
+                will open automatically after this short cool-off.
+              </p>
+            </motion.div>
+          ) : stage === "interview" ? (
             completionError ? (
               <motion.div
                 key="completion-error"
@@ -780,14 +833,33 @@ export default function InterviewPage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center py-20 gap-4"
+                className="flex flex-col items-center justify-center py-20 text-center"
               >
-                <div className="w-10 h-10 border-4 border-[#319AFF] border-t-transparent rounded-full animate-spin" />
-                <p className="font-inter text-muted text-sm">
-                  {endingSession
-                    ? "Completing your session after the final integrity strike..."
-                    : "Evaluating your answer..."}
-                </p>
+                <div className="w-10 h-10 rounded-full border-4 border-[#319AFF] border-t-transparent animate-spin" />
+                {endingSession ? (
+                  <div className="mt-6 max-w-lg">
+                    <p className="font-inter text-[11px] font-bold uppercase tracking-[0.2em] text-[#0084FF]">
+                      Preparing final report
+                    </p>
+                    <h2 className="mt-3 font-fustat text-2xl font-extrabold text-text">
+                      Your session is being wrapped up.
+                    </h2>
+                    <div className="mt-5 space-y-2">
+                      {reportLoadingSteps.map((step) => (
+                        <p
+                          key={step}
+                          className="rounded-2xl border border-[rgba(0,132,255,0.12)] bg-[#F8FBFF] px-4 py-3 font-inter text-sm font-semibold text-muted"
+                        >
+                          {step}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="mt-4 font-inter text-sm text-muted">
+                    Evaluating your answer...
+                  </p>
+                )}
               </motion.div>
             ) : (
               <motion.div
