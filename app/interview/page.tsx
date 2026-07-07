@@ -77,7 +77,6 @@ export default function InterviewPage() {
     shouldAutoSubmit,
     timerDisplay,
     resetTimer,
-    textareaProps,
   } = useAntiCheat(
     questions.length === TOTAL &&
       (stage === "interview" || stage === "feedback") &&
@@ -151,6 +150,7 @@ export default function InterviewPage() {
             summary: result.summary,
           })
         );
+
         setError("");
         return true;
       } catch (saveError) {
@@ -526,18 +526,7 @@ export default function InterviewPage() {
   }
 
   return (
-    <div
-      className="min-h-screen bg-white"
-      // onContextMenu={(e) => e.preventDefault()}
-      // onCopy={(e) => e.preventDefault()}
-      // onCut={(e) => e.preventDefault()}
-    >
-      {/* <TabSwitchWarning
-        strikeCount={strikeCount}
-        onDismiss={dismissWarning}
-        visible={showWarningModal}
-      /> */}
-
+    <div className="min-h-screen bg-white">
       <Navbar
         variant="inner"
         sessionLabel={`${setup.domain} - ${setup.experience} - ${setup.companyType}`}
@@ -662,7 +651,6 @@ export default function InterviewPage() {
                   totalQuestions={TOTAL}
                   question={questions[current - 1]}
                   onSubmit={handleSubmit}
-                  antiCheatProps={textareaProps}
                 />
               </motion.div>
             )
