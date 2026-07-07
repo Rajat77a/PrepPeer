@@ -12,7 +12,7 @@ import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 import { createClient } from "@/utils/supabase/client";
 import { csrfHeaders } from "@/utils/csrf";
-import type { FeedbackData, QuestionReview } from "@/lib/types";
+import type { QuestionReview } from "@/lib/types";
 import { isValidSetup } from "@/lib/validation";
 import {
   AlertTriangle,
@@ -32,20 +32,12 @@ type SetupData = {
   companyType: string;
 };
 
-type Stage = "setup" | "terms" | "ready" | "interview" | "feedback";
-
-const reportLoadingSteps = [
-  "Checking your answers against the interview rubric...",
-  "Preparing your strongest and weakest areas...",
-  "Building model answers for skipped questions...",
-  "Saving your final session report...",
-];
+type Stage = "setup" | "terms" | "interview" | "feedback";
 
 export default function InterviewPage() {
   const router = useRouter();
   const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
-  const [readyCountdown, setReadyCountdown] = useState(5);
   const [current, setCurrent] = useState(1);
   const [questions, setQuestions] = useState<string[]>([]);
   const [questionSetToken, setQuestionSetToken] = useState("");
@@ -53,12 +45,7 @@ export default function InterviewPage() {
   const [directStarting, setDirectStarting] = useState(false);
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
-  const [feedbackByQuestion, setFeedbackByQuestion] = useState<
-    Record<number, FeedbackData>
-  >({});
   const [evaluating, setEvaluating] = useState(false);
-  const [answerDrafts, setAnswerDrafts] = useState<Record<number, string>>({});
-  const [evaluationErrors, setEvaluationErrors] = useState<Record<number, string>>({});
   const [aiDetected, setAiDetected] = useState<{
     isAI: boolean;
     confidence: number;
@@ -83,21 +70,6 @@ export default function InterviewPage() {
     questionReviewsRef.current = questionReviews;
   }, [questionReviews]);
 
-  const appendQuestionReview = useCallback((review: QuestionReview) => {
-    const nextReviews = [
-      ...questionReviewsRef.current.filter(
-        (existing) => existing.question !== review.question
-      ),
-      review,
-    ].sort(
-      (left, right) =>
-        Number(left.question.slice(1)) - Number(right.question.slice(1))
-    );
-
-    questionReviewsRef.current = nextReviews;
-    setQuestionReviews(nextReviews);
-  }, []);
-
   const {
     // strikeCount,
     // showWarningModal,
@@ -111,26 +83,6 @@ export default function InterviewPage() {
       (stage === "interview" || stage === "feedback") &&
       !endingSession
   );
-
-  useEffect(() => {
-    if (stage !== "ready") return;
-
-    setReadyCountdown(5);
-    const interval = window.setInterval(() => {
-      setReadyCountdown((value) => {
-        if (value <= 1) {
-          window.clearInterval(interval);
-          resetTimer();
-          setStage("interview");
-          return 0;
-        }
-
-        return value - 1;
-      });
-    }, 1000);
-
-    return () => window.clearInterval(interval);
-  }, [resetTimer, stage]);
 
   useEffect(() => {
     const checkAccountAccess = async () => {
@@ -158,133 +110,64 @@ export default function InterviewPage() {
     void checkAccountAccess();
   }, [router]);
 
-  const saveResults = useCallback(async (
-    reviews: QuestionReview[],
-    completionReason: "completed" | "autoSubmitted"
-  ) => {
-    const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 20_000);
+  const saveResults = useCallback(
+    async (
+      reviews: QuestionReview[],
+      completionReason: "completed" | "autoSubmitted"
+    ) => {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 20_000);
 
-    try {
-      const response = await fetch("/api/interview-session", {
-        method: "POST",
-        headers: csrfHeaders({ "Content-Type": "application/json" }),
-        signal: controller.signal,
-        body: JSON.stringify({
-          setup,
-          completionReason,
-          questionReviews: reviews,
-          questionSetToken,
-        }),
-      });
+      try {
+        const response = await fetch("/api/interview-session", {
+          method: "POST",
+          headers: csrfHeaders({ "Content-Type": "application/json" }),
+          signal: controller.signal,
+          body: JSON.stringify({
+            setup,
+            completionReason,
+            questionReviews: reviews,
+            questionSetToken,
+          }),
+        });
 
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.error ?? "The interview result could not be saved.");
-      }
-
-      sessionStorage.setItem(
-        "preppeer_results",
-        JSON.stringify({
-          source: "account",
-          role: setup.domain,
-          companyType: setup.companyType,
-          unlockedSessionId: result.sessionId,
-          compositeScore: result.compositeScore,
-          dimensions: result.dimensions,
-          questionScores: result.questionScores,
-          summary: result.summary,
-        })
-      );
-      setError("");
-      return true;
-    } catch (saveError) {
-      setError(
-        saveError instanceof DOMException && saveError.name === "AbortError"
-          ? "The session save took too long. Retrying securely..."
-          : saveError instanceof Error
-          ? saveError.message
-          : "The interview result could not be saved."
-      );
-      return false;
-    } finally {
-      window.clearTimeout(timeout);
-    }
-  }, [questionSetToken, setup]);
-
-  const currentReview = questionReviews.find(
-    (review) => review.question === `Q${current}`
-  );
-  const displayedFeedback = feedbackByQuestion[current] ?? feedback;
-
-  const navigateToQuestion = useCallback(
-    (questionNumber: number) => {
-      const bounded = Math.max(1, Math.min(TOTAL, questionNumber));
-      const review = questionReviewsRef.current.find(
-        (item) => item.question === `Q${bounded}`
-      );
-
-      setCurrent(bounded);
-      setAiDetected(null);
-      resetTimer();
-      setStage(review ? "feedback" : "interview");
-    },
-    [resetTimer]
-  );
-
-  const getCompletionReviews = useCallback(() => {
-    const existing = questionReviewsRef.current;
-
-    return Array.from({ length: TOTAL }, (_, index) => {
-      const question = `Q${index + 1}`;
-      const review = existing.find((item) => item.question === question);
-
-      return (
-        review ?? {
-          question,
-          prompt: questions[index] ?? "",
-          score: 0,
-          status: "autoSkipped" as const,
-          reason: "The interview was completed before this question was answered.",
+        const result = await response.json();
+        if (!response.ok) {
+          throw new Error(
+            result.error ?? "The interview result could not be saved."
+          );
         }
-      );
-    });
-  }, [questions]);
 
-  const completeInterview = useCallback(async () => {
-    if (endingSession || shouldAutoSubmit) return;
-
-    const reviews = getCompletionReviews();
-    const answeredCount = reviews.filter(
-      (review) => review.status === "answered"
-    ).length;
-
-    const confirmed = window.confirm(
-      `Complete this interview now? ${answeredCount} of ${TOTAL} questions are answered. Unanswered questions will be marked as skipped.`
-    );
-    if (!confirmed) return;
-
-    setEndingSession(true);
-    setEvaluating(true);
-    const saved = await saveResults(reviews, "completed");
-    setEvaluating(false);
-
-    if (saved) {
-      router.push("/results");
-    } else {
-      setEndingSession(false);
-    }
-  }, [endingSession, getCompletionReviews, router, saveResults, shouldAutoSubmit]);
-
-  const quitInterview = useCallback(() => {
-    const confirmed = window.confirm(
-      "Quit this interview? Your current interview will not be saved as a completed session."
-    );
-    if (!confirmed) return;
-
-    sessionStorage.removeItem("preppeer_results");
-    router.push("/dashboard");
-  }, [router]);
+        sessionStorage.setItem(
+          "preppeer_results",
+          JSON.stringify({
+            source: "account",
+            role: setup.domain,
+            companyType: setup.companyType,
+            unlockedSessionId: result.sessionId,
+            compositeScore: result.compositeScore,
+            dimensions: result.dimensions,
+            questionScores: result.questionScores,
+            summary: result.summary,
+          })
+        );
+        setError("");
+        return true;
+      } catch (saveError) {
+        setError(
+          saveError instanceof DOMException && saveError.name === "AbortError"
+            ? "The session save took too long. Retrying securely..."
+            : saveError instanceof Error
+              ? saveError.message
+              : "The interview result could not be saved."
+        );
+        return false;
+      } finally {
+        window.clearTimeout(timeout);
+      }
+    },
+    [questionSetToken, setup]
+  );
 
   useEffect(() => {
     if (
@@ -306,10 +189,7 @@ export default function InterviewPage() {
 
       let saved = false;
       for (let attempt = 0; attempt < 3 && !saved; attempt += 1) {
-        saved = await saveResults(
-          questionReviewsRef.current,
-          "autoSubmitted"
-        );
+        saved = await saveResults(questionReviewsRef.current, "autoSubmitted");
         if (!saved && attempt < 2) {
           await new Promise((resolve) => window.setTimeout(resolve, 500));
         }
@@ -342,31 +222,19 @@ export default function InterviewPage() {
     }
 
     void finalizeSession();
-  }, [
-    completionRetry,
-    evaluating,
-    router,
-    saveResults,
-    shouldAutoSubmit,
-  ]);
+  }, [completionRetry, evaluating, router, saveResults, shouldAutoSubmit]);
 
   const handleStart = async (profileSetup = setup) => {
-    const normalizedSetup = {
-      domain: profileSetup.domain.trim(),
-      experience: profileSetup.experience.trim(),
-      companyType: profileSetup.companyType.trim(),
-    };
-
     if (
-      !normalizedSetup.domain ||
-      !normalizedSetup.experience ||
-      !normalizedSetup.companyType
+      !profileSetup.domain ||
+      !profileSetup.experience ||
+      !profileSetup.companyType
     ) {
       setError("Please fill in all fields.");
       return;
     }
 
-    setSetup(normalizedSetup);
+    setSetup(profileSetup);
     setError("");
     setLoading(true);
 
@@ -374,7 +242,7 @@ export default function InterviewPage() {
       const res = await fetch("/api/generate-questions", {
         method: "POST",
         headers: csrfHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify(normalizedSetup),
+        body: JSON.stringify(profileSetup),
       });
 
       const data = await res.json();
@@ -388,9 +256,6 @@ export default function InterviewPage() {
         setQuestions(data.questions);
         setQuestionSetToken(data.questionSetToken);
         setQuestionReviews([]);
-        setFeedbackByQuestion({});
-        setAnswerDrafts({});
-        setEvaluationErrors({});
         questionReviewsRef.current = [];
         autoSubmitStartedRef.current = false;
         autoSubmitFailedRef.current = false;
@@ -398,7 +263,7 @@ export default function InterviewPage() {
         setCompletionError("");
         sessionStorage.removeItem("preppeer_results");
         setError("");
-        setStage("ready");
+        setStage("interview");
       } else {
         setError("Failed to generate questions. Try again.");
       }
@@ -446,30 +311,23 @@ export default function InterviewPage() {
       const zeroFeedback = createZeroFeedback(answerQuality.reason);
 
       setFeedback(zeroFeedback);
-      setFeedbackByQuestion((currentFeedback) => ({
-        ...currentFeedback,
-        [current]: zeroFeedback,
-      }));
       setAiDetected(null);
-      setEvaluationErrors((currentErrors) => {
-        const nextErrors = { ...currentErrors };
-        delete nextErrors[current];
-        return nextErrors;
-      });
-      appendQuestionReview({
-        question: `Q${current}`,
-        prompt: questions[current - 1],
-        answer,
-        score: 0,
-        status: "gibberish",
-        reason: answerQuality.reason,
-      });
+      setQuestionReviews((prev) => [
+        ...prev,
+        {
+          question: `Q${current}`,
+          prompt: questions[current - 1],
+          answer,
+          score: 0,
+          status: "gibberish",
+          reason: answerQuality.reason,
+        },
+      ]);
       setStage("feedback");
       return;
     }
 
     setEvaluating(true);
-    let evaluationSucceeded = false;
 
     try {
       const [evalRes, detectRes] = await Promise.all([
@@ -511,137 +369,89 @@ export default function InterviewPage() {
         );
 
         setFeedback(aiFeedback);
-        setFeedbackByQuestion((currentFeedback) => ({
-          ...currentFeedback,
-          [current]: aiFeedback,
-        }));
-        setEvaluationErrors((currentErrors) => {
-          const nextErrors = { ...currentErrors };
-          delete nextErrors[current];
-          return nextErrors;
-        });
-        appendQuestionReview({
-          question: `Q${current}`,
-          prompt: questions[current - 1],
-          answer,
-          score: 0,
-          status: "ai",
-          reason: detectData.reason,
-          detectionToken: detectData.detectionToken,
-        });
+        setQuestionReviews((prev) => [
+          ...prev,
+          {
+            question: `Q${current}`,
+            prompt: questions[current - 1],
+            answer,
+            score: 0,
+            status: "ai",
+            reason: detectData.reason,
+            detectionToken: detectData.detectionToken,
+          },
+        ]);
       } else if (evalData.feedback) {
         const score = Number(evalData.feedback.compositeScore ?? 0);
 
         setFeedback(evalData.feedback);
-        setFeedbackByQuestion((currentFeedback) => ({
-          ...currentFeedback,
-          [current]: evalData.feedback,
-        }));
-        setEvaluationErrors((currentErrors) => {
-          const nextErrors = { ...currentErrors };
-          delete nextErrors[current];
-          return nextErrors;
-        });
-        appendQuestionReview({
+        setQuestionReviews((prev) => [
+          ...prev,
+          {
+            question: `Q${current}`,
+            prompt: questions[current - 1],
+            answer,
+            score,
+            status: "answered",
+            reason:
+              evalData.feedback.dimensions
+                ?.map(
+                  (dimension: { label: string; reason?: string }) =>
+                    `${dimension.label}: ${dimension.reason}`
+                )
+                .join(" ") ?? "",
+            evaluationToken: evalData.evaluationToken,
+            detectionToken: detectData.detectionToken,
+          },
+        ]);
+      }
+
+      if (detectData) setAiDetected(detectData);
+    } catch {
+      const zeroFeedback = createZeroFeedback(
+        "This answer could not be evaluated because the scoring service failed."
+      );
+
+      setFeedback(zeroFeedback);
+      setAiDetected(null);
+      setQuestionReviews((prev) => [
+        ...prev,
+        {
           question: `Q${current}`,
           prompt: questions[current - 1],
           answer,
-          score,
+          score: 0,
           status: "answered",
-          reason:
-            evalData.feedback.dimensions
-              ?.map(
-                (dimension: { label: string; reason?: string }) =>
-                  `${dimension.label}: ${dimension.reason}`
-              )
-              .join(" ") ?? "",
-          evaluationToken: evalData.evaluationToken,
-          detectionToken: detectData.detectionToken,
-          modelAnswer: evalData.feedback.modelAnswer,
-        });
-      } else {
-        throw new Error("This answer could not be evaluated. Please retry.");
-      }
-
-      evaluationSucceeded = true;
-      if (detectData) setAiDetected(detectData);
-    } catch (submitError) {
-      setAiDetected(null);
-      setEvaluationErrors((currentErrors) => ({
-        ...currentErrors,
-        [current]:
-          submitError instanceof Error
-            ? submitError.message
-            : "This answer could not be evaluated. Please retry.",
-      }));
-      setStage("interview");
-      return;
+          reason: "The scoring service failed.",
+        },
+      ]);
     } finally {
       setEvaluating(false);
-      if (evaluationSucceeded) {
-        setStage("feedback");
-      }
+      setStage("feedback");
     }
-  };
-
-  const handleSkip = () => {
-    if (endingSession || shouldAutoSubmit) return;
-
-    const confirmed = window.confirm(
-      "Skip this question? It will receive 0, but the model answer will still appear in your final report."
-    );
-    if (!confirmed) return;
-
-    appendQuestionReview({
-      question: `Q${current}`,
-      prompt: questions[current - 1],
-      score: 0,
-      status: "skipped",
-      reason: "You skipped this question, so it was not evaluated.",
-    });
-    setEvaluationErrors((currentErrors) => {
-      const nextErrors = { ...currentErrors };
-      delete nextErrors[current];
-      return nextErrors;
-    });
-    const skippedFeedback = createZeroFeedback(
-      "You skipped this question, so it was not evaluated."
-    );
-    setFeedback(skippedFeedback);
-    setFeedbackByQuestion((currentFeedback) => ({
-      ...currentFeedback,
-      [current]: skippedFeedback,
-    }));
-    setAiDetected(null);
-    setStage("feedback");
   };
 
   const handleNext = () => {
     if (endingSession || shouldAutoSubmit) return;
 
     if (current >= TOTAL) {
-      void completeInterview();
-    } else {
-      navigateToQuestion(current + 1);
-    }
-  };
+      setEndingSession(true);
+      setCompletionError("");
+      setEvaluating(true);
 
-  const handlePrevious = () => {
-    if (endingSession || shouldAutoSubmit || current <= 1) return;
-    navigateToQuestion(current - 1);
-  };
-
-  const updateDraft = (answer: string) => {
-    setAnswerDrafts((currentDrafts) => ({
-      ...currentDrafts,
-      [current]: answer,
-    }));
-    if (evaluationErrors[current]) {
-      setEvaluationErrors((currentErrors) => {
-        const nextErrors = { ...currentErrors };
-        delete nextErrors[current];
-        return nextErrors;
+      saveResults(questionReviews, "completed").then((saved) => {
+        if (saved) {
+          router.push("/results");
+        } else {
+          setEndingSession(false);
+          setEvaluating(false);
+        }
       });
+    } else {
+      setCurrent((c) => c + 1);
+      setAiDetected(null);
+      resetTimer();
+      setStage("interview");
     }
   };
 
@@ -735,7 +545,7 @@ export default function InterviewPage() {
       />
 
       <div className="max-w-[800px] mx-auto px-6 py-20">
-        {stage === "interview" && !evaluating && (
+        {stage === "interview" && !evaluating && !endingSession && (
           <div className="mb-6 border-y border-[rgba(0,0,0,0.08)] py-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
@@ -769,97 +579,75 @@ export default function InterviewPage() {
         )}
 
         <AnimatePresence mode="wait">
-          {stage === "ready" ? (
+          {completionError ? (
             <motion.div
-              key="ready"
-              initial={{ opacity: 0, y: 14 }}
+              key="completion-error"
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -14 }}
-              transition={{ duration: 0.35, ease: EASE_OUT }}
-              className="mx-auto max-w-xl py-16 text-center"
+              exit={{ opacity: 0, y: -10 }}
+              className="mx-auto flex max-w-xl flex-col items-center py-20 text-center"
             >
-              <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full border border-[rgba(0,132,255,0.16)] bg-[#F4FAFF] shadow-[0_24px_70px_rgba(0,132,255,0.14)]">
-                <span className="font-inter text-5xl font-black tabular-nums text-[#0084FF]">
-                  {readyCountdown}
-                </span>
-              </div>
-              <p className="mt-7 font-inter text-[11px] font-bold uppercase tracking-[0.2em] text-[#0084FF]">
-                Interview starts soon
-              </p>
-              <h2 className="mt-3 font-fustat text-3xl font-extrabold text-text">
-                Take a breath. Get ready.
+              <AlertTriangle size={34} color="#D83A3A" strokeWidth={1.8} />
+
+              <h2 className="mt-5 font-fustat text-2xl font-extrabold text-text">
+                Session completion paused
               </h2>
-              <p className="mx-auto mt-3 max-w-md font-inter text-sm font-medium leading-6 text-muted">
-                Your questions are ready for {setup.domain}. The first question
-                will open automatically after this short cool-off.
+
+              <p className="mt-3 font-inter text-sm font-medium leading-6 text-muted">
+                {completionError}
+              </p>
+
+              {error && (
+                <p className="mt-2 font-inter text-sm font-semibold text-red-500">
+                  {error}
+                </p>
+              )}
+
+              <button
+                type="button"
+                onClick={() => {
+                  autoSubmitFailedRef.current = false;
+                  setCompletionError("");
+                  setCompletionRetry((value) => value + 1);
+                }}
+                className="mt-7 bg-[#0084FF] px-6 py-3 font-inter text-sm font-bold text-white shadow-[0_12px_30px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:bg-[#006FCC]"
+              >
+                Retry secure completion
+              </button>
+            </motion.div>
+          ) : endingSession ? (
+            <motion.div
+              key="ending-session"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.35, ease: EASE_OUT }}
+              className="flex flex-col items-center justify-center py-24 text-center"
+            >
+              <div className="mb-5 h-12 w-12 animate-spin rounded-full border-4 border-[#D7ECFF] border-t-[#0084FF]" />
+
+              <h2 className="font-fustat text-2xl font-extrabold text-text">
+                Completing your interview...
+              </h2>
+
+              <p className="mt-3 max-w-md font-inter text-sm font-medium leading-6 text-muted">
+                We are saving your answers, calculating your score, and
+                preparing your session result.
               </p>
             </motion.div>
           ) : stage === "interview" ? (
-            completionError ? (
-              <motion.div
-                key="completion-error"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mx-auto flex max-w-xl flex-col items-center py-20 text-center"
-              >
-                <AlertTriangle size={34} color="#D83A3A" strokeWidth={1.8} />
-                <h2 className="mt-5 font-fustat text-2xl font-extrabold text-text">
-                  Session completion paused
-                </h2>
-                <p className="mt-3 font-inter text-sm font-medium leading-6 text-muted">
-                  {completionError}
-                </p>
-                {error && (
-                  <p className="mt-2 font-inter text-sm font-semibold text-red-500">
-                    {error}
-                  </p>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    autoSubmitFailedRef.current = false;
-                    setCompletionError("");
-                    setCompletionRetry((value) => value + 1);
-                  }}
-                  className="mt-7 bg-[#0084FF] px-6 py-3 font-inter text-sm font-bold text-white shadow-[0_12px_30px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:bg-[#006FCC]"
-                >
-                  Retry secure completion
-                </button>
-              </motion.div>
-            ) : evaluating ? (
+            evaluating ? (
               <motion.div
                 key="evaluating"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col items-center justify-center py-20 text-center"
+                className="flex flex-col items-center justify-center py-20 gap-4"
               >
-                <div className="w-10 h-10 rounded-full border-4 border-[#319AFF] border-t-transparent animate-spin" />
-                {endingSession ? (
-                  <div className="mt-6 max-w-lg">
-                    <p className="font-inter text-[11px] font-bold uppercase tracking-[0.2em] text-[#0084FF]">
-                      Preparing final report
-                    </p>
-                    <h2 className="mt-3 font-fustat text-2xl font-extrabold text-text">
-                      Your session is being wrapped up.
-                    </h2>
-                    <div className="mt-5 space-y-2">
-                      {reportLoadingSteps.map((step) => (
-                        <p
-                          key={step}
-                          className="rounded-2xl border border-[rgba(0,132,255,0.12)] bg-[#F8FBFF] px-4 py-3 font-inter text-sm font-semibold text-muted"
-                        >
-                          {step}
-                        </p>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="mt-4 font-inter text-sm text-muted">
-                    Evaluating your answer...
-                  </p>
-                )}
+                <div className="w-10 h-10 border-4 border-[#319AFF] border-t-transparent rounded-full animate-spin" />
+                <p className="font-inter text-muted text-sm">
+                  Evaluating your answer...
+                </p>
               </motion.div>
             ) : (
               <motion.div
@@ -873,17 +661,7 @@ export default function InterviewPage() {
                   questionNumber={current}
                   totalQuestions={TOTAL}
                   question={questions[current - 1]}
-                  answer={answerDrafts[current] ?? ""}
-                  evaluationError={evaluationErrors[current]}
-                  canGoPrevious={current > 1}
-                  canGoNext={current < TOTAL}
-                  onAnswerChange={updateDraft}
                   onSubmit={handleSubmit}
-                  onPrevious={handlePrevious}
-                  onNext={handleNext}
-                  onSkip={handleSkip}
-                  onComplete={completeInterview}
-                  onQuit={quitInterview}
                   antiCheatProps={textareaProps}
                 />
               </motion.div>
@@ -898,10 +676,7 @@ export default function InterviewPage() {
             >
               <div className="rounded-3xl p-10 bg-white border border-[rgba(0,132,255,0.15)] opacity-60">
                 <p className="font-inter text-sm text-muted mb-2">
-                  Question {current} of {TOTAL} -{" "}
-                  {currentReview?.status === "skipped"
-                    ? "skipped"
-                    : "submitted"}
+                  Question {current} of {TOTAL} - submitted
                 </p>
               </div>
 
@@ -938,50 +713,11 @@ export default function InterviewPage() {
                 </div>
               ) : (
                 <FeedbackPanel
-                  feedback={displayedFeedback}
+                  feedback={feedback}
                   onNext={handleNext}
                   isFinalQuestion={current === TOTAL}
                 />
               )}
-              <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="grid grid-cols-2 gap-3 sm:flex">
-                  <button
-                    type="button"
-                    onClick={handlePrevious}
-                    disabled={current <= 1 || endingSession}
-                    className="rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white px-4 py-2.5 font-inter text-sm font-bold text-text transition hover:border-blue/35 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    Previous
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={endingSession}
-                    className="rounded-2xl border border-[rgba(0,0,0,0.10)] bg-white px-4 py-2.5 font-inter text-sm font-bold text-text transition hover:border-blue/35"
-                  >
-                    {current >= TOTAL ? "Finish" : "Next"}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 sm:flex">
-                  <button
-                    type="button"
-                    onClick={quitInterview}
-                    disabled={endingSession}
-                    className="rounded-2xl border border-red-200 bg-red-50 px-4 py-2.5 font-inter text-sm font-bold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Quit Interview
-                  </button>
-                  <button
-                    type="button"
-                    onClick={completeInterview}
-                    disabled={endingSession}
-                    className="rounded-2xl bg-navy px-4 py-2.5 font-inter text-sm font-bold text-white transition hover:bg-[#10205A] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Complete Interview
-                  </button>
-                </div>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
