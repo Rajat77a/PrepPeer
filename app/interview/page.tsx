@@ -39,10 +39,12 @@ export default function InterviewPage() {
   const [stage, setStage] = useState<Stage>("setup");
   const [current, setCurrent] = useState(1);
   const [questions, setQuestions] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<string[]>(Array(TOTAL).fill(""));
   const [questionSetToken, setQuestionSetToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [directStarting, setDirectStarting] = useState(false);
   const [error, setError] = useState("");
+  const [evaluationError, setEvaluationError] = useState("");
   const [feedback, setFeedback] = useState(MOCK_FEEDBACK);
   const [evaluating, setEvaluating] = useState(false);
   const [aiDetected, setAiDetected] = useState<{
@@ -127,6 +129,7 @@ export default function InterviewPage() {
         });
 
         const result = await response.json();
+
         if (!response.ok) {
           throw new Error(
             result.error ?? "The interview result could not be saved."
@@ -165,6 +168,26 @@ export default function InterviewPage() {
     [questionSetToken, setup]
   );
 
+  const completeInterview = useCallback(
+    (reviews = questionReviewsRef.current) => {
+      if (endingSession || shouldAutoSubmit) return;
+
+      setEndingSession(true);
+      setCompletionError("");
+      setEvaluating(true);
+
+      saveResults(reviews, "completed").then((saved) => {
+        if (saved) {
+          router.push("/results");
+        } else {
+          setEndingSession(false);
+          setEvaluating(false);
+        }
+      });
+    },
+    [endingSession, router, saveResults, shouldAutoSubmit]
+  );
+
   useEffect(() => {
     if (
       !shouldAutoSubmit ||
@@ -184,8 +207,10 @@ export default function InterviewPage() {
       setEvaluating(true);
 
       let saved = false;
+
       for (let attempt = 0; attempt < 3 && !saved; attempt += 1) {
         saved = await saveResults(questionReviewsRef.current, "autoSubmitted");
+
         if (!saved && attempt < 2) {
           await new Promise((resolve) => window.setTimeout(resolve, 500));
         }
@@ -218,7 +243,13 @@ export default function InterviewPage() {
     }
 
     void finalizeSession();
-  }, [completionRetry, evaluating, router, saveResults, shouldAutoSubmit]);
+  }, [
+    completionRetry,
+    evaluating,
+    router,
+    saveResults,
+    shouldAutoSubmit,
+  ]);
 
   const handleStart = async (profileSetup = setup) => {
     if (
@@ -250,9 +281,11 @@ export default function InterviewPage() {
         typeof data.questionSetToken === "string"
       ) {
         setQuestions(data.questions);
+        setAnswers(Array(TOTAL).fill(""));
         setQuestionSetToken(data.questionSetToken);
         setQuestionReviews([]);
         questionReviewsRef.current = [];
+        setEvaluationError("");
         autoSubmitStartedRef.current = false;
         autoSubmitFailedRef.current = false;
         setEndingSession(false);
@@ -298,6 +331,72 @@ export default function InterviewPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
 
+  const handleAnswerChange = (answer: string) => {
+    setEvaluationError("");
+    setAnswers((currentAnswers) => {
+      const nextAnswers = [...currentAnswers];
+      nextAnswers[current - 1] = answer;
+      return nextAnswers;
+    });
+  };
+
+  const handlePreviousQuestion = () => {
+    if (endingSession || shouldAutoSubmit || evaluating) return;
+
+    setCurrent((value) => Math.max(1, value - 1));
+    setAiDetected(null);
+    setEvaluationError("");
+    resetTimer();
+    setStage("interview");
+  };
+
+  const handleNextQuestion = () => {
+    if (endingSession || shouldAutoSubmit || evaluating) return;
+
+    setCurrent((value) => Math.min(TOTAL, value + 1));
+    setAiDetected(null);
+    setEvaluationError("");
+    resetTimer();
+    setStage("interview");
+  };
+
+  const handleSkipQuestion = () => {
+    if (endingSession || shouldAutoSubmit || evaluating) return;
+
+    const skippedReview: QuestionReview = {
+      question: `Q${current}`,
+      prompt: questions[current - 1],
+      score: 0,
+      status: "autoSkipped",
+      reason: "The question was skipped by the candidate.",
+    };
+
+    const nextReviews = [
+      ...questionReviewsRef.current.filter(
+        (review) => review.question !== skippedReview.question
+      ),
+      skippedReview,
+    ];
+
+    setQuestionReviews(nextReviews);
+    questionReviewsRef.current = nextReviews;
+
+    if (current >= TOTAL) {
+      completeInterview(nextReviews);
+      return;
+    }
+
+    setCurrent((value) => value + 1);
+    setAiDetected(null);
+    setEvaluationError("");
+    resetTimer();
+    setStage("interview");
+  };
+
+  const handleQuitInterview = () => {
+    completeInterview(questionReviewsRef.current);
+  };
+
   const handleSubmit = async (answer: string) => {
     if (endingSession || shouldAutoSubmit) return;
 
@@ -305,24 +404,31 @@ export default function InterviewPage() {
 
     if (!answerQuality.valid) {
       const zeroFeedback = createZeroFeedback(answerQuality.reason);
+      const nextReview: QuestionReview = {
+        question: `Q${current}`,
+        prompt: questions[current - 1],
+        answer,
+        score: 0,
+        status: "gibberish",
+        reason: answerQuality.reason,
+      };
+
+      const nextReviews = [
+        ...questionReviewsRef.current.filter(
+          (review) => review.question !== nextReview.question
+        ),
+        nextReview,
+      ];
 
       setFeedback(zeroFeedback);
       setAiDetected(null);
-      setQuestionReviews((prev) => [
-        ...prev,
-        {
-          question: `Q${current}`,
-          prompt: questions[current - 1],
-          answer,
-          score: 0,
-          status: "gibberish",
-          reason: answerQuality.reason,
-        },
-      ]);
+      setQuestionReviews(nextReviews);
+      questionReviewsRef.current = nextReviews;
       setStage("feedback");
       return;
     }
 
+    setEvaluationError("");
     setEvaluating(true);
 
     try {
@@ -364,66 +470,66 @@ export default function InterviewPage() {
           "AI-generated answer detected, so this question receives no interview credit."
         );
 
-        setFeedback(aiFeedback);
-        setQuestionReviews((prev) => [
-          ...prev,
-          {
-            question: `Q${current}`,
-            prompt: questions[current - 1],
-            answer,
-            score: 0,
-            status: "ai",
-            reason: detectData.reason,
-            detectionToken: detectData.detectionToken,
-          },
-        ]);
-      } else if (evalData.feedback) {
-        const score = Number(evalData.feedback.compositeScore ?? 0);
-
-        setFeedback(evalData.feedback);
-        setQuestionReviews((prev) => [
-          ...prev,
-          {
-            question: `Q${current}`,
-            prompt: questions[current - 1],
-            answer,
-            score,
-            status: "answered",
-            reason:
-              evalData.feedback.dimensions
-                ?.map(
-                  (dimension: { label: string; reason?: string }) =>
-                    `${dimension.label}: ${dimension.reason}`
-                )
-                .join(" ") ?? "",
-            evaluationToken: evalData.evaluationToken,
-            detectionToken: detectData.detectionToken,
-          },
-        ]);
-      }
-
-      if (detectData) setAiDetected(detectData);
-    } catch {
-      const zeroFeedback = createZeroFeedback(
-        "This answer could not be evaluated because the scoring service failed."
-      );
-
-      setFeedback(zeroFeedback);
-      setAiDetected(null);
-      setQuestionReviews((prev) => [
-        ...prev,
-        {
+        const nextReview: QuestionReview = {
           question: `Q${current}`,
           prompt: questions[current - 1],
           answer,
           score: 0,
+          status: "ai",
+          reason: detectData.reason,
+          detectionToken: detectData.detectionToken,
+        };
+
+        const nextReviews = [
+          ...questionReviewsRef.current.filter(
+            (review) => review.question !== nextReview.question
+          ),
+          nextReview,
+        ];
+
+        setFeedback(aiFeedback);
+        setQuestionReviews(nextReviews);
+        questionReviewsRef.current = nextReviews;
+      } else if (evalData.feedback) {
+        const score = Number(evalData.feedback.compositeScore ?? 0);
+
+        const nextReview: QuestionReview = {
+          question: `Q${current}`,
+          prompt: questions[current - 1],
+          answer,
+          score,
           status: "answered",
-          reason: "The scoring service failed.",
-        },
-      ]);
+          reason:
+            evalData.feedback.dimensions
+              ?.map(
+                (dimension: { label: string; reason?: string }) =>
+                  `${dimension.label}: ${dimension.reason}`
+              )
+              .join(" ") ?? "",
+          evaluationToken: evalData.evaluationToken,
+          detectionToken: detectData.detectionToken,
+        };
+
+        const nextReviews = [
+          ...questionReviewsRef.current.filter(
+            (review) => review.question !== nextReview.question
+          ),
+          nextReview,
+        ];
+
+        setFeedback(evalData.feedback);
+        setQuestionReviews(nextReviews);
+        questionReviewsRef.current = nextReviews;
+      }
+
+      if (detectData) setAiDetected(detectData);
+      setStage("feedback");
+    } catch {
+      setEvaluationError(
+        "This answer could not be evaluated because the scoring service failed."
+      );
     } finally {
       setEvaluating(false);
-      setStage("feedback");
     }
   };
 
@@ -431,21 +537,11 @@ export default function InterviewPage() {
     if (endingSession || shouldAutoSubmit) return;
 
     if (current >= TOTAL) {
-      setEndingSession(true);
-      setCompletionError("");
-      setEvaluating(true);
-
-      saveResults(questionReviews, "completed").then((saved) => {
-        if (saved) {
-          router.push("/results");
-        } else {
-          setEndingSession(false);
-          setEvaluating(false);
-        }
-      });
+      completeInterview(questionReviewsRef.current);
     } else {
       setCurrent((c) => c + 1);
       setAiDetected(null);
+      setEvaluationError("");
       resetTimer();
       setStage("interview");
     }
@@ -646,9 +742,19 @@ export default function InterviewPage() {
                   questionNumber={current}
                   totalQuestions={TOTAL}
                   question={questions[current - 1]}
+                  answer={answers[current - 1] ?? ""}
+                  evaluationError={evaluationError}
+                  canGoPrevious={current > 1}
+                  canGoNext={current < TOTAL}
+                  onAnswerChange={handleAnswerChange}
                   onSubmit={(answer) => {
                     void handleSubmit(answer);
                   }}
+                  onPrevious={handlePreviousQuestion}
+                  onNext={handleNextQuestion}
+                  onSkip={handleSkipQuestion}
+                  onComplete={() => completeInterview(questionReviewsRef.current)}
+                  onQuit={handleQuitInterview}
                 />
               </motion.div>
             )
