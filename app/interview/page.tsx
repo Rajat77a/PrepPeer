@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/ui/Navbar";
 import { QuestionCard } from "@/components/interview/QuestionCard";
 import { FeedbackPanel } from "@/components/interview/FeedbackPanel";
-// import { TabSwitchWarning } from "@/components/interview/TabSwitchWarning";
 import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
@@ -71,9 +70,6 @@ export default function InterviewPage() {
   }, [questionReviews]);
 
   const {
-    // strikeCount,
-    // showWarningModal,
-    // dismissWarning,
     shouldAutoSubmit,
     timerDisplay,
     resetTimer,
@@ -650,7 +646,9 @@ export default function InterviewPage() {
                   questionNumber={current}
                   totalQuestions={TOTAL}
                   question={questions[current - 1]}
-                  onSubmit={handleSubmit}
+                  onSubmit={(answer) => {
+                    void handleSubmit(answer);
+                  }}
                 />
               </motion.div>
             )
