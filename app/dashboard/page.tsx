@@ -95,38 +95,6 @@ const normalizeScoreBreakdown = (
   }));
 };
 
-const getAverageScoreBreakdown = (
-  sessions: InterviewSessionRow[]
-): ScoreDimension[] => {
-  const validBreakdowns = sessions
-    .map((session) =>
-      normalizeScoreBreakdown(
-        session.dimensions,
-        Number(session.composite_score ?? 0)
-      )
-    )
-    .filter((dimensions) =>
-      dimensions.some((dimension) => Number(dimension.value) > 0)
-    );
-
-  if (validBreakdowns.length === 0) {
-    return zeroDimensions;
-  }
-
-  return zeroDimensions.map((baseDimension, index) => {
-    const average =
-      validBreakdowns.reduce(
-        (total, dimensions) => total + Number(dimensions[index]?.value ?? 0),
-        0
-      ) / validBreakdowns.length;
-
-    return {
-      ...baseDimension,
-      value: Number(average.toFixed(1)),
-    };
-  });
-};
-
 export default async function DashboardPage() {
   const cookieStore = await cookies();
   const user = await getCurrentUser();
@@ -154,16 +122,16 @@ export default async function DashboardPage() {
     .limit(1000);
 
   const { data: leaderboardRows, error: leaderboardError } =
-    await leaderboardSupabase.rpc(
-    "get_leaderboard",
-    {
+    await leaderboardSupabase.rpc("get_leaderboard", {
       p_role: null,
       p_company_type: null,
-    }
-  );
+    });
 
   if (leaderboardError) {
-    logServerError("Unable to load the live dashboard leaderboard", leaderboardError);
+    logServerError(
+      "Unable to load the live dashboard leaderboard",
+      leaderboardError
+    );
   }
 
   const userProfiles = await getLeaderboardUserProfiles(leaderboardSupabase);
@@ -189,12 +157,13 @@ export default async function DashboardPage() {
     userProfiles
   );
 
-  const leaderboardEntries = !leaderboardError && leaderboardRows
-    ? toLiveLeaderboardEntries(
-        (leaderboardRows ?? []) as SupabaseLeaderboardRow[],
-        user.id
-      )
-    : fallbackLeaderboardEntries;
+  const leaderboardEntries =
+    !leaderboardError && leaderboardRows
+      ? toLiveLeaderboardEntries(
+          (leaderboardRows ?? []) as SupabaseLeaderboardRow[],
+          user.id
+        )
+      : fallbackLeaderboardEntries;
 
   const liveUserEntry = leaderboardEntries.find((entry) => entry.isYou);
   const unifiedRank = liveUserEntry?.rank ?? sessionRankSummary?.rank;
@@ -205,7 +174,11 @@ export default async function DashboardPage() {
 
   const userRank = unifiedRank;
   const latestScore = Number(latestUserSession?.composite_score ?? 0);
-  const averageDimensions = getAverageScoreBreakdown(userSessions);
+
+  const latestDimensions =
+    latestUserSession && latestScore > 0
+      ? normalizeScoreBreakdown(latestUserSession.dimensions, latestScore)
+      : zeroDimensions;
 
   const dashboardSessions: DashboardSession[] = userSessions
     .slice(0, 10)
@@ -253,7 +226,7 @@ export default async function DashboardPage() {
               role: profileRole,
               companyType: profileCompanyType,
               experience: profileExperience,
-              dimensions: averageDimensions,
+              dimensions: latestDimensions,
             }
           : null
       }
