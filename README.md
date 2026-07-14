@@ -25,3 +25,7 @@ Optimized for [Vercel](https://vercel.com): import this repo, add the environmen
 - Supabase
 - Groq
 - Framer Motion, Lenis, Recharts, Lucide
+
+## License
+
+This project is licensed under the MIT License — see the LICENSE file for details.
