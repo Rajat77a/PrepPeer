@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { hasCompletedProfile } from "@/lib/profile";
-import { safeDashboardPath } from "@/lib/validation";
+import { safeAuthenticatedPath } from "@/lib/validation";
 import { authCookieOptions } from "@/utils/authCookieOptions";
 import {
   createSessionGuard,
@@ -23,7 +23,7 @@ const isFreshAuthUser = (createdAt?: string) => {
 export async function GET(request: Request) {
   const { origin, searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = safeDashboardPath(searchParams.get("next"));
+  const next = safeAuthenticatedPath(searchParams.get("next"));
   const mode = searchParams.get("mode");
   const siteUrl = (
     process.env.NEXT_PUBLIC_SITE_URL ??

@@ -121,7 +121,12 @@ function LoginBackground() {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [mode, setMode] = useState<AuthMode>("signin");
+  const [mode, setMode] = useState<AuthMode>(() => {
+    if (typeof window === "undefined") return "signin";
+
+    const requestedMode = new URLSearchParams(window.location.search).get("mode");
+    return requestedMode === "signup" ? "signup" : "signin";
+  });
   const [step, setStep] = useState<AuthStep>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -136,24 +141,35 @@ export default function LoginPage() {
     "!h-14 !w-12 rounded-xl !border-white/25 !bg-white/14 text-xl !text-white shadow-[0_16px_34px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.18)] transition-all duration-300 data-[filled=true]:!border-white/55 data-[filled=true]:!bg-white/22 data-[active=true]:!border-white data-[active=true]:!shadow-[0_0_0_3px_rgba(255,255,255,0.18),0_0_24px_rgba(255,255,255,0.18)]";
 
   const getAuthRedirectUrl = (nextPath: string) => {
-    const next =
-      nextPath.startsWith("/dashboard") && !nextPath.startsWith("//")
-        ? nextPath
-        : "/dashboard";
+    const next = getSafePostAuthPath(nextPath);
 
     return `${window.location.origin}/auth/callback?next=${encodeURIComponent(
       next
     )}&mode=${mode}`;
   };
 
-  const getPostAuthPath = () => {
-    const params = new URLSearchParams(window.location.search);
-    const next = params.get("next");
+  const getSafePostAuthPath = (next: string | null) => {
+    if (
+      next &&
+      next.length <= 300 &&
+      !next.startsWith("//") &&
+      !next.includes("\\") &&
+      !/[\r\n]/.test(next) &&
+      ["/dashboard", "/interview", "/results"].some(
+        (prefix) =>
+          next === prefix ||
+          next.startsWith(`${prefix}/`) ||
+          next.startsWith(`${prefix}?`)
+      )
+    ) {
+      return next;
+    }
 
-    return next?.startsWith("/dashboard") && !next.startsWith("//")
-      ? next
-      : "/dashboard";
+    return "/dashboard";
   };
+
+  const getPostAuthPath = () =>
+    getSafePostAuthPath(new URLSearchParams(window.location.search).get("next"));
 
   const resetForMode = (nextMode: AuthMode) => {
     setMode(nextMode);

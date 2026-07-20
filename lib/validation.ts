@@ -137,6 +137,26 @@ export const safeDashboardPath = (next: string | null | undefined) => {
   return value;
 };
 
+export const safeAuthenticatedPath = (next: string | null | undefined) => {
+  const value = typeof next === "string" ? sanitizePlainText(next) : "";
+  const allowedPrefixes = ["/dashboard", "/interview", "/results"];
+
+  if (
+    !value ||
+    value.length > 300 ||
+    value.startsWith("//") ||
+    value.includes("\\") ||
+    /[\r\n]/.test(value) ||
+    !allowedPrefixes.some(
+      (prefix) => value === prefix || value.startsWith(`${prefix}/`) || value.startsWith(`${prefix}?`)
+    )
+  ) {
+    return "/dashboard";
+  }
+
+  return value;
+};
+
 export const isAllowedValue = <T extends readonly string[]>(
   value: unknown,
   allowed: T
