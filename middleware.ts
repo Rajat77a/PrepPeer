@@ -12,6 +12,44 @@ const shouldRedirectToHttps = (request: NextRequest) => {
   return request.nextUrl.protocol === "http:" || forwardedProto === "http";
 };
 
+const createNonce = () =>
+  btoa(crypto.randomUUID()).replace(/=+$/g, "");
+
+const createContentSecurityPolicy = (nonce: string) =>
+  [
+    "default-src 'self'",
+    "base-uri 'self'",
+    "object-src 'none'",
+    "frame-ancestors 'none'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${
+      process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""
+    }`,
+    "script-src-attr 'none'",
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self' data:",
+    "img-src 'self' data: blob: https://images.unsplash.com https://*.googleusercontent.com",
+    "media-src 'self'",
+    "connect-src 'self' https://*.supabase.co",
+    "frame-src 'none'",
+    "form-action 'self'",
+    "worker-src 'self' blob:",
+    "manifest-src 'self'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+
+const getCanonicalOrigin = (request: NextRequest) => {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (configuredUrl) {
+    try {
+      return new URL(configuredUrl).origin;
+    } catch {
+      // Fall through to the request origin when deployment configuration is invalid.
+    }
+  }
+
+  return request.nextUrl.origin;
+};
+
 export async function middleware(request: NextRequest) {
   if (shouldRedirectToHttps(request)) {
     const secureUrl = request.nextUrl.clone();
@@ -19,7 +57,16 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(secureUrl, 308);
   }
 
-  return updateSession(request);
+  const nonce = createNonce();
+  const contentSecurityPolicy = createContentSecurityPolicy(nonce);
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", contentSecurityPolicy);
+
+  const response = await updateSession(request, requestHeaders);
+  response.headers.set("Content-Security-Policy", contentSecurityPolicy);
+  response.headers.set("Access-Control-Allow-Origin", getCanonicalOrigin(request));
+  return response;
 }
 
 export const config = {

@@ -153,23 +153,6 @@ interface HeroOrbProps {
 }
 
 function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps) {
-  const [videoFailed, setVideoFailed] = useState(false);
-  const [canPlayOrbVideo, setCanPlayOrbVideo] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 768px)");
-    const isIOSLike =
-      /iPad|iPhone|iPod/.test(window.navigator.userAgent) ||
-      (window.navigator.platform === "MacIntel" &&
-        window.navigator.maxTouchPoints > 1);
-    const syncVideoMode = () => setCanPlayOrbVideo(media.matches || !isIOSLike);
-
-    syncVideoMode();
-    media.addEventListener("change", syncVideoMode);
-
-    return () => media.removeEventListener("change", syncVideoMode);
-  }, []);
-
   return (
     <motion.div variants={orbVariants} className="shrink-0 transform-gpu">
       <Link
@@ -199,21 +182,6 @@ function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps
                 "0 0 80px rgba(49,154,255,0.45), inset 0 0 40px rgba(255,255,255,0.15)",
             }}
           />
-          {canPlayOrbVideo && !videoFailed && (
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="absolute right-0 bottom-0 z-[2] h-full w-full object-cover orb-video"
-              onError={() => setVideoFailed(true)}
-            >
-              <source
-                src="https://future.co/images/homepage/glassy-orb/orb-purple.webm"
-                type="video/webm"
-              />
-            </video>
-          )}
           <HeroMysteryBadge />
         </motion.div>
       </Link>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Fustat, Inter } from "next/font/google";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
 import "lenis/dist/lenis.css";
@@ -10,6 +10,15 @@ const inter = Inter({
   variable: "--font-inter",
   display: "swap",
 });
+
+const fustat = Fustat({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  variable: "--font-fustat",
+  display: "swap",
+});
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
@@ -39,14 +48,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={inter.variable}>
-      <head>
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7070440298437956"
-          crossOrigin="anonymous"
-        />
-      </head>
+    <html lang="en" className={`${inter.variable} ${fustat.variable}`}>
       <body className="font-inter antialiased relative">
         <Providers>{children}</Providers>
       </body>

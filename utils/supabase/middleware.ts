@@ -21,7 +21,10 @@ const ensureCsrfCookie = (request: NextRequest, response: NextResponse) => {
   return response;
 };
 
-export const updateSession = async (request: NextRequest) => {
+export const updateSession = async (
+  request: NextRequest,
+  downstreamHeaders = new Headers(request.headers)
+) => {
   const { isConfigured, supabaseKey, supabaseUrl } = getSupabaseConfig();
 
   if (!isConfigured || !supabaseUrl || !supabaseKey) {
@@ -29,7 +32,7 @@ export const updateSession = async (request: NextRequest) => {
       request,
       NextResponse.next({
         request: {
-          headers: request.headers,
+          headers: downstreamHeaders,
         },
       })
     );
@@ -37,7 +40,7 @@ export const updateSession = async (request: NextRequest) => {
 
   let supabaseResponse = NextResponse.next({
     request: {
-      headers: request.headers,
+      headers: downstreamHeaders,
     },
   });
 
@@ -52,8 +55,14 @@ export const updateSession = async (request: NextRequest) => {
           request.cookies.set(name, value)
         );
 
+        const refreshedHeaders = new Headers(request.headers);
+        downstreamHeaders.forEach((value, key) =>
+          refreshedHeaders.set(key, value)
+        );
         supabaseResponse = NextResponse.next({
-          request,
+          request: {
+            headers: refreshedHeaders,
+          },
         });
 
         cookiesToSet.forEach(({ name, value, options }) =>
