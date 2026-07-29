@@ -78,34 +78,26 @@ function LoginBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden">
       <div className="absolute inset-0 bg-[#031b4f]" />
-
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(0,132,255,0.34)_0%,rgba(3,27,79,0.96)_38%,#01143d_100%)]" />
-
       <div
         className="absolute -right-[260px] -top-[260px] h-[620px] w-[720px] rotate-[28deg] rounded-[46%] bg-[radial-gradient(ellipse_at_35%_35%,rgba(255,255,255,0.96)_0%,rgba(235,246,255,0.82)_28%,rgba(182,215,245,0.52)_52%,rgba(255,255,255,0.18)_72%,transparent_100%)] opacity-95 blur-[2px]"
         aria-hidden="true"
       />
-
       <div
         className="absolute -right-[220px] -top-[210px] h-[560px] w-[650px] rotate-[29deg] rounded-[46%] bg-[linear-gradient(135deg,rgba(255,255,255,0.82)_0%,rgba(255,255,255,0.42)_24%,rgba(147,188,230,0.28)_48%,rgba(255,255,255,0.10)_72%,transparent_100%)] opacity-80 blur-[18px]"
         aria-hidden="true"
       />
-
       <div
         className="absolute -left-[280px] bottom-[-350px] h-[720px] w-[850px] rotate-[38deg] rounded-[44%] bg-[radial-gradient(ellipse_at_60%_35%,rgba(255,255,255,0.98)_0%,rgba(230,244,255,0.82)_24%,rgba(172,211,244,0.46)_48%,rgba(255,255,255,0.16)_72%,transparent_100%)] opacity-95 blur-[3px]"
         aria-hidden="true"
       />
-
       <div
         className="absolute -left-[240px] bottom-[-300px] h-[650px] w-[760px] rotate-[39deg] rounded-[44%] bg-[linear-gradient(135deg,transparent_0%,rgba(255,255,255,0.22)_34%,rgba(255,255,255,0.88)_56%,rgba(207,231,255,0.42)_74%,transparent_100%)] opacity-90 blur-[16px]"
         aria-hidden="true"
       />
-
       <div className="absolute left-[18%] top-[28%] h-[280px] w-[420px] rounded-full bg-[#0084ff]/18 blur-[110px]" />
       <div className="absolute right-[18%] bottom-[24%] h-[260px] w-[360px] rounded-full bg-[#7dffd9]/10 blur-[100px]" />
-
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,10,35,0.10)_52%,rgba(0,8,28,0.38)_100%)]" />
-
       <div
         className="absolute inset-0 opacity-[0.13] mix-blend-soft-light"
         style={{
@@ -113,7 +105,6 @@ function LoginBackground() {
             "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E\")",
         }}
       />
-
       <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px)] bg-[size:72px_72px] opacity-20" />
     </div>
   );
@@ -121,12 +112,14 @@ function LoginBackground() {
 
 export default function LoginPage() {
   const router = useRouter();
+
   const [mode, setMode] = useState<AuthMode>(() => {
     if (typeof window === "undefined") return "signin";
 
     const requestedMode = new URLSearchParams(window.location.search).get("mode");
     return requestedMode === "signup" ? "signup" : "signin";
   });
+
   const [step, setStep] = useState<AuthStep>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -139,14 +132,6 @@ export default function LoginPage() {
 
   const otpSlotClass =
     "!h-14 !w-12 rounded-xl !border-white/25 !bg-white/14 text-xl !text-white shadow-[0_16px_34px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.18)] transition-all duration-300 data-[filled=true]:!border-white/55 data-[filled=true]:!bg-white/22 data-[active=true]:!border-white data-[active=true]:!shadow-[0_0_0_3px_rgba(255,255,255,0.18),0_0_24px_rgba(255,255,255,0.18)]";
-
-  const getAuthRedirectUrl = (nextPath: string) => {
-    const next = getSafePostAuthPath(nextPath);
-
-    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(
-      next
-    )}&mode=${mode}`;
-  };
 
   const getSafePostAuthPath = (next: string | null) => {
     if (
@@ -170,6 +155,14 @@ export default function LoginPage() {
 
   const getPostAuthPath = () =>
     getSafePostAuthPath(new URLSearchParams(window.location.search).get("next"));
+
+  const getAuthRedirectUrl = (nextPath: string) => {
+    const next = getSafePostAuthPath(nextPath);
+
+    return `${window.location.origin}/auth/callback?next=${encodeURIComponent(
+      next
+    )}&mode=${mode}`;
+  };
 
   const resetForMode = (nextMode: AuthMode) => {
     setMode(nextMode);
@@ -215,6 +208,7 @@ export default function LoginPage() {
 
   const sendOtp = async () => {
     const normalizedEmail = email.trim().toLowerCase();
+
     if (
       normalizedEmail.length > 254 ||
       !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
@@ -251,6 +245,7 @@ export default function LoginPage() {
       const payload = (await response.json().catch(() => null)) as {
         error?: string;
       } | null;
+
       setSignupNonce("");
       setError(friendlyAuthError(payload?.error ?? "Could not send the code."));
       return;
@@ -269,6 +264,7 @@ export default function LoginPage() {
     setError("");
 
     const supabase = createClient();
+
     const verifyResponse = await fetch("/api/auth/verify-otp", {
       method: "POST",
       headers: csrfHeaders({ "Content-Type": "application/json" }),
@@ -288,6 +284,7 @@ export default function LoginPage() {
       method: "POST",
       headers: csrfHeaders(),
     });
+
     setLoading(false);
 
     if (!sessionResponse.ok) {
@@ -302,6 +299,7 @@ export default function LoginPage() {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
+
       if (userError || !user) {
         setError("Account verified, but the session was not ready. Please sign in.");
         return;
@@ -339,6 +337,7 @@ export default function LoginPage() {
       const payload = (await response.json().catch(() => null)) as {
         error?: string;
       } | null;
+
       setError(
         friendlyAuthError(payload?.error ?? "Password could not be saved.")
       );
@@ -347,6 +346,29 @@ export default function LoginPage() {
 
     setStep("success");
   };
+
+  useEffect(() => {
+    const redirectExistingSession = async () => {
+      const params = new URLSearchParams(window.location.search);
+
+      if (params.get("error") || params.get("auth") === "create-password") {
+        return;
+      }
+
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      router.replace(getPostAuthPath());
+      router.refresh();
+    };
+
+    void redirectExistingSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (step !== "otp" || otp.length !== 6 || loading) return;
@@ -369,7 +391,7 @@ export default function LoginPage() {
           ? "Sign-in is temporarily unavailable. Please try again later."
           : authError === "session_changed"
             ? "Your session changed. Please sign in again."
-          : "We could not complete authentication. Please try again."
+            : "We could not complete authentication. Please try again."
       );
       window.history.replaceState(null, "", "/login");
       return;
@@ -483,9 +505,7 @@ export default function LoginPage() {
                     className="space-y-4 text-left"
                   >
                     <label className="block" aria-label="Email">
-                      <div
-                        className="group/email relative flex h-12 w-full items-center overflow-hidden rounded-2xl border border-white/22 bg-white/14 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-[#06142b] hover:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)] focus-within:-translate-y-0.5 focus-within:border-white focus-within:bg-white focus-within:text-[#06142b] focus-within:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)]"
-                      >
+                      <div className="group/email relative flex h-12 w-full items-center overflow-hidden rounded-2xl border border-white/22 bg-white/14 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-[#06142b] hover:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)] focus-within:-translate-y-0.5 focus-within:border-white focus-within:bg-white focus-within:text-[#06142b] focus-within:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)]">
                         <input
                           type="email"
                           value={email}
