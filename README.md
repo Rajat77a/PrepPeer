@@ -21,8 +21,10 @@ node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
 ```
 
 Set that output as `INTERVIEW_PROOF_SECRET` locally and in the production
-environment. It must be at least 32 characters and must not reuse another API
-key. Changing it invalidates interviews that are currently open.
+environment. It must be at least 32 characters. When it is absent, PrepPeer
+derives a domain-separated migration key from existing server-only key material
+so deployments remain available, but a dedicated secret is preferred. Changing
+the root secret invalidates interviews that are currently open.
 
 ## Deploy
 

@@ -4,6 +4,7 @@ import {
   createCipheriv,
   createDecipheriv,
   createHash,
+  hkdfSync,
   randomBytes,
 } from "crypto";
 import type { FeedbackData } from "@/lib/types";
@@ -52,10 +53,13 @@ export type InterviewProofPayload =
   | QuestionSetPayload;
 
 const getSigningSecret = () => {
-  const secret = process.env.INTERVIEW_PROOF_SECRET;
-  if (!secret) throw new Error("Interview proof signing is not configured.");
+  const secret =
+    process.env.INTERVIEW_PROOF_SECRET ||
+    process.env.SESSION_BINDING_SECRET ||
+    process.env.GROQ_API_KEY;
+  if (!secret) throw new Error("Interview proof encryption is not configured.");
   if (secret.length < 32) {
-    throw new Error("INTERVIEW_PROOF_SECRET must be at least 32 characters.");
+    throw new Error("Interview proof key material must be at least 32 characters.");
   }
   return secret;
 };
@@ -68,7 +72,15 @@ const IV_BYTES = 12;
 const AUTH_TAG_BYTES = 16;
 
 const getEncryptionKey = () =>
-  createHash("sha256").update(getSigningSecret(), "utf8").digest();
+  Buffer.from(
+    hkdfSync(
+      "sha256",
+      getSigningSecret(),
+      "PrepPeer interview encryption",
+      "interview-proof/aes-256-gcm/v1",
+      32
+    )
+  );
 
 export const createInterviewProof = (payload: InterviewProofPayload) => {
   const iv = randomBytes(IV_BYTES);
