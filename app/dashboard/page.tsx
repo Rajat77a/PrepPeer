@@ -16,7 +16,7 @@ import {
   toLiveLeaderboardEntries,
   type SupabaseLeaderboardRow,
 } from "@/lib/liveLeaderboard";
-import { getTrustedProfile } from "@/lib/profile";
+import { getAlphabeticNameFromEmail, getTrustedProfile } from "@/lib/profile";
 import { logServerError } from "@/lib/server/errorLog";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
 import { createClient } from "@/utils/supabase/server";
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/login");
 
   const profile = getTrustedProfile(user);
-  const name = profile.fullName || user.email?.split("@")[0] || "PrepPeer user";
+  const name = profile.fullName || getAlphabeticNameFromEmail(user.email);
 
   const firstName = name.split(" ")[0] ?? "there";
   const profileRole = profile.role || "Interview";
