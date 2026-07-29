@@ -18,6 +18,30 @@ const asRecord = (value: unknown): Record<string, unknown> =>
 const text = (value: unknown, maxLength = 120) =>
   getSafeOptionalString(value, maxLength);
 
+export const getAlphabeticDisplayName = (value: unknown, maxLength = 80) => {
+  const cleaned = text(value, maxLength)
+    .replace(/[^A-Za-z\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleaned
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(" ")
+    .slice(0, maxLength);
+};
+
+export const getAlphabeticNameFromEmail = (
+  email: string | null | undefined,
+  fallback = "PrepPeer user"
+) => {
+  const localPart = email?.split("@")[0] ?? "";
+  const name = getAlphabeticDisplayName(localPart);
+
+  return name || fallback;
+};
+
 export const getTrustedProfile = (
   user: Pick<User, "app_metadata" | "user_metadata">
 ): ProfileMetadata => {
@@ -27,8 +51,8 @@ export const getTrustedProfile = (
   return {
     fullName:
       text(trusted.fullName, 80) ||
-      text(fallback.full_name, 80) ||
-      text(fallback.name, 80),
+      getAlphabeticDisplayName(fallback.full_name, 80) ||
+      getAlphabeticDisplayName(fallback.name, 80),
     college: text(trusted.college, 120) || text(fallback.college, 120),
     role: text(trusted.role, 80) || text(fallback.target_role, 80),
     experience:
@@ -45,6 +69,7 @@ export const hasCompletedProfile = (
   user: Pick<User, "app_metadata" | "user_metadata">
 ) => {
   const profile = getTrustedProfile(user);
+
   return (
     profile.onboardingComplete &&
     Boolean(
@@ -61,6 +86,7 @@ export const getTrustedDisplayMetadata = (
   user: Pick<User, "app_metadata" | "user_metadata">
 ) => {
   const profile = getTrustedProfile(user);
+
   return {
     ...user.user_metadata,
     full_name: profile.fullName,
