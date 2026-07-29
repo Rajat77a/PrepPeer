@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { authCookieOptions } from "@/utils/authCookieOptions";
+import { authCookieOptions, AUTH_COOKIE_MAX_AGE_SECONDS } from "@/utils/authCookieOptions";
 
 export const SESSION_GUARD_COOKIE = "pp_session_guard";
 
@@ -8,9 +8,8 @@ const encoder = new TextEncoder();
 export const sessionGuardCookieOptions = {
   ...authCookieOptions,
   httpOnly: true,
-  maxAge: 60 * 60 * 24,
+  maxAge: AUTH_COOKIE_MAX_AGE_SECONDS,
 };
-
 type SessionGuard = {
   uid: string;
   ua: string;
