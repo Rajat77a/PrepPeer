@@ -89,6 +89,7 @@ export function OnboardingForm({
         company: company.trim(),
       }),
     });
+
     const result = await response.json();
 
     setLoading(false);
@@ -102,6 +103,7 @@ export function OnboardingForm({
       sessionStorage.getItem("preppeer_post_onboarding_next") ??
       postSubmitPath ??
       "/dashboard";
+
     sessionStorage.removeItem("preppeer_post_onboarding_next");
 
     router.replace(nextPath);
@@ -181,7 +183,7 @@ export function OnboardingForm({
 
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                Current Occupation <span className="text-[#dc2626]">*</span>
+                College name <span className="text-[#dc2626]">*</span>
               </span>
               <input
                 value={college}
@@ -189,7 +191,7 @@ export function OnboardingForm({
                   setError("");
                   setCollege(event.target.value);
                 }}
-                placeholder="e.g. Software Engineer at Google"
+                placeholder="e.g. IIT Delhi, VIT Vellore, Delhi University"
                 autoComplete="organization"
                 minLength={2}
                 maxLength={120}
