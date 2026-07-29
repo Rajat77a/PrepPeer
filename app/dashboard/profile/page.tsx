@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ProfileForm } from "@/components/dashboard/ProfileForm";
-import { getTrustedProfile } from "@/lib/profile";
+import { getAlphabeticNameFromEmail, getTrustedProfile } from "@/lib/profile";
 import { getCurrentUser } from "@/utils/supabase/user";
 
 export const metadata: Metadata = {
@@ -16,7 +16,7 @@ export default async function DashboardProfilePage() {
   if (!user) redirect("/login");
 
   const profile = getTrustedProfile(user);
-  const name = profile.fullName || user.email?.split("@")[0] || "PrepPeer user";
+  const name = profile.fullName || getAlphabeticNameFromEmail(user.email);
 
   return (
     <ProfileForm
