@@ -39,14 +39,17 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
 
   const signOut = async () => {
     setSignOutError("");
+
     const response = await fetch("/api/auth/logout", {
       method: "POST",
       headers: csrfHeaders(),
     });
+
     if (!response.ok) {
       setSignOutError("Could not sign out. Please try again.");
       return;
     }
+
     router.push("/");
     router.refresh();
   };
@@ -77,9 +80,11 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
         className="pointer-events-none fixed inset-0 bg-[linear-gradient(rgba(0,108,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(0,108,255,0.035)_1px,transparent_1px)] bg-[size:54px_54px]"
         aria-hidden="true"
       />
+
       <aside className="fixed left-0 top-0 z-40 hidden h-screen w-[240px] border-r border-[rgba(0,132,255,0.14)] bg-white/76 px-4 py-5 shadow-[24px_0_80px_rgba(0,108,255,0.10)] backdrop-blur-2xl lg:block">
         <div className="pointer-events-none absolute -left-16 top-0 h-56 w-56 rounded-full bg-[#006cff]/13 blur-[70px]" />
         <div className="pointer-events-none absolute bottom-20 right-[-70px] h-48 w-48 rounded-full bg-[#7dffd9]/16 blur-[72px]" />
+
         <div className="relative z-10">
           <Logo size="md" href={null} />
         </div>
@@ -89,6 +94,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
             const active =
               pathname === item.href ||
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
+
             const Icon = item.icon;
 
             return (
@@ -114,29 +120,32 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
         <div className="absolute bottom-5 left-4 right-4">
           <div className="relative overflow-hidden rounded-2xl border border-[rgba(0,132,255,0.14)] bg-white/78 p-3 shadow-[0_18px_44px_rgba(0,108,255,0.12)] backdrop-blur-xl">
             <div className="pointer-events-none absolute -right-8 -top-8 h-20 w-20 rounded-full bg-[#006cff]/12 blur-2xl" />
+
             <div className="relative z-10 flex items-center gap-3">
-            {user.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.avatarUrl}
-                alt={user.name}
-                className="h-9 w-9 rounded-full object-cover"
-              />
-            ) : (
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#006cff] font-inter text-sm font-bold text-white">
-                {user.name.charAt(0).toUpperCase()}
+              {user.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.avatarUrl}
+                  alt={user.name}
+                  className="h-9 w-9 rounded-full object-cover"
+                />
+              ) : (
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#006cff] font-inter text-sm font-bold text-white">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-inter text-sm font-bold text-[#07111f]">
+                  {user.name}
+                </p>
+                <p className="truncate font-inter text-xs font-semibold text-[#64748b]">
+                  {user.email}
+                </p>
               </div>
-            )}
-            <div className="min-w-0 flex-1">
-              <p className="truncate font-inter text-sm font-bold text-[#07111f]">
-                {user.name}
-              </p>
-              <p className="truncate font-inter text-xs font-semibold text-[#64748b]">
-                {user.email}
-              </p>
-            </div>
             </div>
           </div>
+
           <button
             type="button"
             onClick={signOut}
@@ -145,6 +154,7 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
             <LogOut className="h-3.5 w-3.5" />
             Sign out everywhere
           </button>
+
           {signOutError ? (
             <p className="px-3 font-inter text-[11px] font-semibold text-[#dc2626]">
               {signOutError}
@@ -153,13 +163,16 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
         </div>
       </aside>
 
-      <main className="relative z-10 min-h-screen pb-24 lg:ml-[240px] lg:pb-0">{children}</main>
+      <main className="relative z-10 min-h-screen pb-24 lg:ml-[240px] lg:pb-0">
+        {children}
+      </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 border-t border-[rgba(0,132,255,0.12)] bg-white/88 px-3 py-2 shadow-[0_-18px_50px_rgba(0,108,255,0.12)] backdrop-blur-2xl lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 border-t border-[rgba(0,132,255,0.12)] bg-white/88 px-3 py-2 shadow-[0_-18px_50px_rgba(0,108,255,0.12)] backdrop-blur-2xl lg:hidden">
         {navItems.map((item) => {
           const active =
             pathname === item.href ||
             (item.href !== "/dashboard" && pathname.startsWith(item.href));
+
           const Icon = item.icon;
 
           return (
@@ -179,6 +192,15 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
             </Link>
           );
         })}
+
+        <button
+          type="button"
+          onClick={signOut}
+          className="flex flex-col items-center justify-center gap-1 rounded-xl py-2 font-inter text-[11px] font-bold text-[#64748b] transition hover:bg-[#eaf5ff] hover:text-[#006cff]"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </button>
       </nav>
     </div>
   );
