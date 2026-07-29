@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronRight, Loader2, X } from "lucide-react";
+import { Check, ChevronRight, Loader2, LogOut, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { csrfHeaders } from "@/utils/csrf";
@@ -119,6 +119,23 @@ export function ProfileForm({ user }: ProfileFormProps) {
     }
 
     setMessage("Profile saved.");
+    router.refresh();
+  };
+
+  const signOut = async () => {
+    setMessage("");
+
+    const response = await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: csrfHeaders(),
+    });
+
+    if (!response.ok) {
+      setMessage("Could not sign out. Please try again.");
+      return;
+    }
+
+    router.push("/");
     router.refresh();
   };
 
@@ -309,6 +326,15 @@ export function ProfileForm({ user }: ProfileFormProps) {
             ) : (
               "Save profile"
             )}
+          </button>
+
+          <button
+            type="button"
+            onClick={signOut}
+            className="mt-3 inline-flex items-center justify-center gap-2 rounded-full border border-[rgba(220,38,38,0.16)] bg-white px-6 py-3 font-inter text-sm font-bold text-[#dc2626] transition hover:border-[#dc2626]/35 hover:bg-[#fff5f5] hover:shadow-[0_0_20px_rgba(220,38,38,0.10)]"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout account
           </button>
 
           {message && (
