@@ -163,11 +163,28 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
         </div>
       </aside>
 
+      <div className="fixed right-4 top-4 z-50 lg:hidden">
+        <button
+          type="button"
+          onClick={signOut}
+          className="inline-flex h-10 items-center gap-2 rounded-full border border-[rgba(0,132,255,0.16)] bg-white/90 px-3 font-inter text-xs font-black text-[#64748b] shadow-[0_14px_34px_rgba(0,108,255,0.14)] backdrop-blur-xl transition hover:border-[#006cff]/35 hover:bg-white hover:text-[#006cff]"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </button>
+
+        {signOutError ? (
+          <p className="mt-2 max-w-[180px] rounded-xl border border-red-100 bg-white/95 px-3 py-2 text-right font-inter text-[11px] font-semibold text-[#dc2626] shadow-[0_12px_30px_rgba(220,38,38,0.10)]">
+            {signOutError}
+          </p>
+        ) : null}
+      </div>
+
       <main className="relative z-10 min-h-screen pb-24 lg:ml-[240px] lg:pb-0">
         {children}
       </main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 border-t border-[rgba(0,132,255,0.12)] bg-white/88 px-3 py-2 shadow-[0_-18px_50px_rgba(0,108,255,0.12)] backdrop-blur-2xl lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-4 border-t border-[rgba(0,132,255,0.12)] bg-white/88 px-3 py-2 shadow-[0_-18px_50px_rgba(0,108,255,0.12)] backdrop-blur-2xl lg:hidden">
         {navItems.map((item) => {
           const active =
             pathname === item.href ||
@@ -192,15 +209,6 @@ export function DashboardShell({ children, user }: DashboardShellProps) {
             </Link>
           );
         })}
-
-        <button
-          type="button"
-          onClick={signOut}
-          className="flex flex-col items-center justify-center gap-1 rounded-xl py-2 font-inter text-[11px] font-bold text-[#64748b] transition hover:bg-[#eaf5ff] hover:text-[#006cff]"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </button>
       </nav>
     </div>
   );
