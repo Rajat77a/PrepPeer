@@ -32,7 +32,7 @@ type ContextKey = "role" | "experience" | "company";
 
 const textFields: { id: TextFieldKey; label: string }[] = [
   { id: "fullName", label: "Full name" },
-  { id: "college", label: "Current Occupation" },
+  { id: "college", label: "College name" },
 ];
 
 const selectorFields: {
@@ -74,6 +74,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     experience: user.experience ?? "0-1 years",
     company: user.company ?? "",
   });
+
   const [activeSelector, setActiveSelector] = useState<SelectorKey | null>(null);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -107,6 +108,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         company: values.company.trim(),
       }),
     });
+
     const result = await response.json();
 
     setSaving(false);
@@ -126,9 +128,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
         <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#006cff]">
           Profile
         </p>
+
         <h1 className="mt-3 font-inter text-[clamp(38px,6vw,72px)] font-black leading-none tracking-[-0.05em] text-[#07111f]">
           Your PrepPeer identity.
         </h1>
+
         <p className="mt-4 max-w-2xl font-inter text-base font-medium leading-7 text-[#64748b]">
           Keep your role and target context ready for sharper interview sessions.
         </p>
@@ -179,6 +183,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                       <span className="font-inter text-xs font-bold uppercase tracking-[0.14em] text-[#8ba0b8] transition group-hover:text-[#006cff]">
                         {profileContextLabels[key]}
                       </span>
+
                       <span className="text-right font-inter text-sm font-black text-[#07111f]">
                         {values[key]}
                       </span>
@@ -190,8 +195,9 @@ export function ProfileForm({ user }: ProfileFormProps) {
               {values.college && (
                 <div className="mt-4 border-t border-[rgba(0,132,255,0.12)] pt-4">
                   <p className="font-inter text-xs font-bold uppercase tracking-[0.14em] text-[#8ba0b8]">
-                    Current Occupation
+                    College name
                   </p>
+
                   <p className="mt-1 font-inter text-sm font-black text-[#07111f]">
                     {values.college}
                   </p>
