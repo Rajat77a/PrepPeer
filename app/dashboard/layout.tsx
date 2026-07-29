@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { DashboardShell } from "@/components/dashboard/DashboardShell";
-import { getTrustedProfile } from "@/lib/profile";
+import { getAlphabeticNameFromEmail, getTrustedProfile } from "@/lib/profile";
 import { getCurrentUser } from "@/utils/supabase/user";
 
 export default async function DashboardLayout({
@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   if (!user) redirect("/login");
 
   const profile = getTrustedProfile(user);
-  const name = profile.fullName || user.email?.split("@")[0] || "PrepPeer user";
+  const name = profile.fullName || getAlphabeticNameFromEmail(user.email);
 
   return (
     <DashboardShell
