@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { authCookieOptions, AUTH_COOKIE_MAX_AGE_SECONDS } from "@/utils/authCookieOptions";
+import {
+  authCookieOptions,
+  AUTH_COOKIE_MAX_AGE_SECONDS,
+} from "@/utils/authCookieOptions";
 
 export const SESSION_GUARD_COOKIE = "pp_session_guard";
 
@@ -10,6 +13,7 @@ export const sessionGuardCookieOptions = {
   httpOnly: true,
   maxAge: AUTH_COOKIE_MAX_AGE_SECONDS,
 };
+
 type SessionGuard = {
   uid: string;
   ua: string;
@@ -27,7 +31,9 @@ const getSecret = () =>
 const toBase64Url = (value: ArrayBuffer | string) => {
   const bytes =
     typeof value === "string" ? encoder.encode(value) : new Uint8Array(value);
+
   let binary = "";
+
   bytes.forEach((byte) => {
     binary += String.fromCharCode(byte);
   });
@@ -37,10 +43,12 @@ const toBase64Url = (value: ArrayBuffer | string) => {
 
 const fromBase64Url = (value: string) => {
   const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+
   const padded = normalized.padEnd(
     normalized.length + ((4 - (normalized.length % 4)) % 4),
     "="
   );
+
   return atob(padded);
 };
 
@@ -49,6 +57,7 @@ const sha256 = async (value: string) =>
 
 const hmac = async (value: string) => {
   const secret = getSecret();
+
   if (!secret) return "";
 
   const key = await crypto.subtle.importKey(
@@ -64,6 +73,7 @@ const hmac = async (value: string) => {
 
 const getClientIp = (request: Request) => {
   const forwardedFor = request.headers.get("x-forwarded-for");
+
   const raw =
     forwardedFor?.split(",")[0]?.trim() ||
     request.headers.get("x-real-ip")?.trim() ||
@@ -78,17 +88,16 @@ const getClientIp = (request: Request) => {
 
 export const getSessionFingerprint = async (request: Request) => {
   const userAgent = request.headers.get("user-agent") ?? "unknown";
+
   return {
     ip: await sha256(getClientIp(request)),
     ua: await sha256(userAgent),
   };
 };
 
-export const createSessionGuard = async (
-  request: Request,
-  userId: string
-) => {
+export const createSessionGuard = async (request: Request, userId: string) => {
   const fingerprint = await getSessionFingerprint(request);
+
   const payload: SessionGuard = {
     uid: userId,
     ua: fingerprint.ua,
@@ -96,6 +105,7 @@ export const createSessionGuard = async (
     nonce: crypto.randomUUID(),
     iat: Date.now(),
   };
+
   const body = toBase64Url(JSON.stringify(payload));
   const signature = await hmac(body);
 
@@ -108,9 +118,11 @@ export const readSessionGuard = async (value: string | undefined) => {
   if (!value) return null;
 
   const [body, signature] = value.split(".");
+
   if (!body || !signature) return null;
 
   const expectedSignature = await hmac(body);
+
   if (!expectedSignature || expectedSignature !== signature) return null;
 
   try {
