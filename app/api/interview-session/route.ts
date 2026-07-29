@@ -206,7 +206,10 @@ async function postInterviewSession(req: NextRequest) {
       questionSet.domain !== setup.domain ||
       questionSet.experience !== setup.experience ||
       questionSet.companyType !== setup.companyType ||
-      questionSet.questions.length !== TOTAL_QUESTIONS
+      questionSet.questions.length !== TOTAL_QUESTIONS ||
+      !Number.isInteger(questionSet.currentIndex) ||
+      questionSet.currentIndex < 0 ||
+      questionSet.currentIndex >= TOTAL_QUESTIONS
     ) {
       return NextResponse.json(
         { error: "The interview question set is invalid or expired." },

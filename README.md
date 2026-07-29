@@ -1,6 +1,6 @@
 # PrepPeer
 
-AI mock interviews with real peer ranking, powered by Next.js 14, Supabase, and Groq.
+AI mock interviews with real peer ranking, powered by Next.js 15, Supabase, and Groq.
 
 ## Run locally
 
@@ -14,13 +14,23 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Fill the values in `.env.local` before testing authenticated flows or AI interview generation. The key variables are documented in `.env.example`.
 
+Generate a dedicated interview-encryption secret with:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
+```
+
+Set that output as `INTERVIEW_PROOF_SECRET` locally and in the production
+environment. It must be at least 32 characters and must not reuse another API
+key. Changing it invalidates interviews that are currently open.
+
 ## Deploy
 
 Optimized for [Vercel](https://vercel.com): import this repo, add the environment variables from `.env.example`, and deploy.
 
 ## Stack
 
-- Next.js 14 (App Router)
+- Next.js 15 (App Router)
 - TypeScript, Tailwind CSS
 - Supabase
 - Groq

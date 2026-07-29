@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardSessionsPage() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
   const user = await getCurrentUser();
 

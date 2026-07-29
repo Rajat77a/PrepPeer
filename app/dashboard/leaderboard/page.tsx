@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardLeaderboardPage() {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
   const leaderboardSupabase = createOptionalAdminClient() ?? supabase;
   const user = await getCurrentUser();

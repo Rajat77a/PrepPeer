@@ -1,6 +1,11 @@
 import "server-only";
 
-import { createHash, createHmac, timingSafeEqual } from "crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  randomBytes,
+} from "crypto";
 import type { FeedbackData } from "@/lib/types";
 
 type EvaluationPayload = {
@@ -37,6 +42,7 @@ type QuestionSetPayload = {
   experience: string;
   companyType: string;
   questions: string[];
+  currentIndex: number;
   issuedAt: number;
 };
 
@@ -46,24 +52,40 @@ export type InterviewProofPayload =
   | QuestionSetPayload;
 
 const getSigningSecret = () => {
-  const secret = process.env.INTERVIEW_PROOF_SECRET ?? process.env.GROQ_API_KEY;
+  const secret = process.env.INTERVIEW_PROOF_SECRET;
   if (!secret) throw new Error("Interview proof signing is not configured.");
+  if (secret.length < 32) {
+    throw new Error("INTERVIEW_PROOF_SECRET must be at least 32 characters.");
+  }
   return secret;
 };
 
 export const hashAnswer = (answer: string) =>
   createHash("sha256").update(answer.trim(), "utf8").digest("hex");
 
-const signEncodedPayload = (encodedPayload: string) =>
-  createHmac("sha256", getSigningSecret())
-    .update(encodedPayload)
-    .digest("base64url");
+const TOKEN_VERSION = "pp1";
+const IV_BYTES = 12;
+const AUTH_TAG_BYTES = 16;
+
+const getEncryptionKey = () =>
+  createHash("sha256").update(getSigningSecret(), "utf8").digest();
 
 export const createInterviewProof = (payload: InterviewProofPayload) => {
-  const encodedPayload = Buffer.from(JSON.stringify(payload)).toString(
-    "base64url"
-  );
-  return `${encodedPayload}.${signEncodedPayload(encodedPayload)}`;
+  const iv = randomBytes(IV_BYTES);
+  const cipher = createCipheriv("aes-256-gcm", getEncryptionKey(), iv);
+  cipher.setAAD(Buffer.from(TOKEN_VERSION, "utf8"));
+  const encrypted = Buffer.concat([
+    cipher.update(JSON.stringify(payload), "utf8"),
+    cipher.final(),
+  ]);
+  const authTag = cipher.getAuthTag();
+
+  return [
+    TOKEN_VERSION,
+    iv.toString("base64url"),
+    encrypted.toString("base64url"),
+    authTag.toString("base64url"),
+  ].join(".");
 };
 
 export const verifyInterviewProof = (
@@ -74,21 +96,31 @@ export const verifyInterviewProof = (
 ): InterviewProofPayload | null => {
   if (typeof token !== "string" || token.length > 24_000) return null;
 
-  const [encodedPayload, suppliedSignature, extra] = token.split(".");
-  if (!encodedPayload || !suppliedSignature || extra) return null;
-
-  const expectedSignature = signEncodedPayload(encodedPayload);
-  const supplied = Buffer.from(suppliedSignature);
-  const expected = Buffer.from(expectedSignature);
-
-  if (supplied.length !== expected.length || !timingSafeEqual(supplied, expected)) {
+  const [version, encodedIv, encodedPayload, encodedAuthTag, extra] =
+    token.split(".");
+  if (
+    version !== TOKEN_VERSION ||
+    !encodedIv ||
+    !encodedPayload ||
+    !encodedAuthTag ||
+    extra
+  ) {
     return null;
   }
 
   try {
-    const payload = JSON.parse(
-      Buffer.from(encodedPayload, "base64url").toString("utf8")
-    ) as InterviewProofPayload;
+    const iv = Buffer.from(encodedIv, "base64url");
+    const authTag = Buffer.from(encodedAuthTag, "base64url");
+    if (iv.length !== IV_BYTES || authTag.length !== AUTH_TAG_BYTES) return null;
+
+    const decipher = createDecipheriv("aes-256-gcm", getEncryptionKey(), iv);
+    decipher.setAAD(Buffer.from(TOKEN_VERSION, "utf8"));
+    decipher.setAuthTag(authTag);
+    const decrypted = Buffer.concat([
+      decipher.update(Buffer.from(encodedPayload, "base64url")),
+      decipher.final(),
+    ]).toString("utf8");
+    const payload = JSON.parse(decrypted) as InterviewProofPayload;
 
     if (
       payload.version !== 1 ||

@@ -38,7 +38,9 @@ export default function InterviewPage() {
   const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
   const [current, setCurrent] = useState(1);
-  const [questions, setQuestions] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<string[]>(
+    Array(TOTAL).fill("")
+  );
   const [answers, setAnswers] = useState<string[]>(Array(TOTAL).fill(""));
   const [questionSetToken, setQuestionSetToken] = useState("");
   const [loading, setLoading] = useState(false);
@@ -276,11 +278,15 @@ export default function InterviewPage() {
 
       if (
         res.ok &&
-        Array.isArray(data.questions) &&
-        data.questions.length === TOTAL &&
+        typeof data.question === "string" &&
+        data.questionIndex === 0 &&
+        data.totalQuestions === TOTAL &&
         typeof data.questionSetToken === "string"
       ) {
-        setQuestions(data.questions);
+        const releasedQuestions = Array(TOTAL).fill("");
+        releasedQuestions[0] = data.question;
+        setQuestions(releasedQuestions);
+        setCurrent(1);
         setAnswers(Array(TOTAL).fill(""));
         setQuestionSetToken(data.questionSetToken);
         setQuestionReviews([]);
@@ -340,27 +346,52 @@ export default function InterviewPage() {
     });
   };
 
-  const handlePreviousQuestion = () => {
-    if (endingSession || shouldAutoSubmit || evaluating) return;
-
-    setCurrent((value) => Math.max(1, value - 1));
-    setAiDetected(null);
+  const releaseNextQuestion = async () => {
     setEvaluationError("");
-    resetTimer();
-    setStage("interview");
+    setEvaluating(true);
+
+    try {
+      const response = await fetch("/api/interview-question", {
+        method: "POST",
+        headers: csrfHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ questionSetToken }),
+      });
+      const data = await response.json();
+
+      if (
+        !response.ok ||
+        typeof data.question !== "string" ||
+        data.questionIndex !== current ||
+        data.totalQuestions !== TOTAL ||
+        typeof data.questionSetToken !== "string"
+      ) {
+        throw new Error(data.error ?? "The next question could not be released.");
+      }
+
+      setQuestions((releasedQuestions) => {
+        const nextQuestions = [...releasedQuestions];
+        nextQuestions[data.questionIndex] = data.question;
+        return nextQuestions;
+      });
+      setQuestionSetToken(data.questionSetToken);
+      setCurrent(data.questionIndex + 1);
+      setAiDetected(null);
+      resetTimer();
+      setStage("interview");
+      return true;
+    } catch (nextQuestionError) {
+      setEvaluationError(
+        nextQuestionError instanceof Error
+          ? nextQuestionError.message
+          : "The next question could not be released."
+      );
+      return false;
+    } finally {
+      setEvaluating(false);
+    }
   };
 
-  const handleNextQuestion = () => {
-    if (endingSession || shouldAutoSubmit || evaluating) return;
-
-    setCurrent((value) => Math.min(TOTAL, value + 1));
-    setAiDetected(null);
-    setEvaluationError("");
-    resetTimer();
-    setStage("interview");
-  };
-
-  const handleSkipQuestion = () => {
+  const handleSkipQuestion = async () => {
     if (endingSession || shouldAutoSubmit || evaluating) return;
 
     const skippedReview: QuestionReview = {
@@ -386,11 +417,7 @@ export default function InterviewPage() {
       return;
     }
 
-    setCurrent((value) => value + 1);
-    setAiDetected(null);
-    setEvaluationError("");
-    resetTimer();
-    setStage("interview");
+    await releaseNextQuestion();
   };
 
   const handleQuitInterview = () => {
@@ -533,17 +560,13 @@ export default function InterviewPage() {
     }
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (endingSession || shouldAutoSubmit) return;
 
     if (current >= TOTAL) {
       completeInterview(questionReviewsRef.current);
     } else {
-      setCurrent((c) => c + 1);
-      setAiDetected(null);
-      setEvaluationError("");
-      resetTimer();
-      setStage("interview");
+      await releaseNextQuestion();
     }
   };
 
@@ -744,15 +767,17 @@ export default function InterviewPage() {
                   question={questions[current - 1]}
                   answer={answers[current - 1] ?? ""}
                   evaluationError={evaluationError}
-                  canGoPrevious={current > 1}
-                  canGoNext={current < TOTAL}
+                  canGoPrevious={false}
+                  canGoNext={false}
                   onAnswerChange={handleAnswerChange}
                   onSubmit={(answer) => {
                     void handleSubmit(answer);
                   }}
-                  onPrevious={handlePreviousQuestion}
-                  onNext={handleNextQuestion}
-                  onSkip={handleSkipQuestion}
+                  onPrevious={() => {}}
+                  onNext={() => {}}
+                  onSkip={() => {
+                    void handleSkipQuestion();
+                  }}
                   onComplete={() => completeInterview(questionReviewsRef.current)}
                   onQuit={handleQuitInterview}
                 />
@@ -796,7 +821,9 @@ export default function InterviewPage() {
                     </p>
 
                     <button
-                      onClick={handleNext}
+                      onClick={() => {
+                        void handleNext();
+                      }}
                       className="mt-4 bg-red-600 hover:bg-red-700 text-white font-inter font-semibold text-sm px-6 py-3 rounded-xl transition-all"
                     >
                       Continue
@@ -806,7 +833,9 @@ export default function InterviewPage() {
               ) : (
                 <FeedbackPanel
                   feedback={feedback}
-                  onNext={handleNext}
+                  onNext={() => {
+                    void handleNext();
+                  }}
                   isFinalQuestion={current === TOTAL}
                 />
               )}

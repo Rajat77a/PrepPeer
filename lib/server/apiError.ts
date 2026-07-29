@@ -26,7 +26,11 @@ export const withApiErrorHandler =
         if (csrfResponse) return csrfResponse;
       }
 
-      return await handler(...args);
+      const response = await handler(...args);
+      response.headers.set("Cache-Control", "no-store, private");
+      response.headers.set("Pragma", "no-cache");
+      response.headers.set("X-Content-Type-Options", "nosniff");
+      return response;
     } catch (error) {
       logServerError(context, error);
       return NextResponse.json(

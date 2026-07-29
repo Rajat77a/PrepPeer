@@ -9,7 +9,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  cookies();
+  await cookies();
   const user = await getCurrentUser();
 
   if (!user) redirect("/login");

@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=auth_not_configured`);
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookieOptions: authCookieOptions,
     cookies: {

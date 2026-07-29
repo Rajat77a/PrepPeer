@@ -1,21 +1,28 @@
 /** @type {import('next').NextConfig} */
+const scriptPolicy =
+  process.env.NODE_ENV === "development"
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
+    : "script-src 'self' 'unsafe-inline'";
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  scriptPolicy,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
   "img-src 'self' data: blob: https://images.unsplash.com https://future.co https://*.googleusercontent.com",
   "media-src 'self' https://future.co",
-  "connect-src 'self' https://*.supabase.co https://api.groq.com https://api.resend.com https://api.pwnedpasswords.com https://ipapi.co",
+  "connect-src 'self' https://*.supabase.co",
   "frame-src 'self' https://www.termsfeed.com",
   "form-action 'self'",
   "upgrade-insecure-requests",
 ].join("; ");
 
 const nextConfig = {
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   async headers() {
     return [
       {
@@ -31,6 +38,9 @@ const nextConfig = {
           },
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
+          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+          { key: "X-Permitted-Cross-Domain-Policies", value: "none" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
             key: "Permissions-Policy",

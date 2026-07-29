@@ -62,6 +62,7 @@ async function postEvaluateAnswer(req: NextRequest) {
       questionSet.kind !== "questionSet" ||
       questionSet.domain !== input.domain ||
       questionSet.experience !== input.experience ||
+      questionSet.currentIndex !== input.questionIndex ||
       questionSet.questions[input.questionIndex] !== input.question
     ) {
       return NextResponse.json(

@@ -10,12 +10,17 @@ import { scoreDimensions } from "@/components/dashboard/DashboardData";
 import { createClient } from "@/utils/supabase/server";
 import { getCurrentUser } from "@/utils/supabase/user";
 
-export default async function SessionDetailPage({ params }: { params: { id: string } }) {
-  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(params.id)) {
+export default async function SessionDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) {
     notFound();
   }
 
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
   const user = await getCurrentUser();
 
@@ -26,7 +31,7 @@ export default async function SessionDetailPage({ params }: { params: { id: stri
     .select(
       "id,user_id,role,experience,company_type,composite_score,dimensions,question_scores,summary,created_at"
     )
-    .eq("id", params.id)
+    .eq("id", id)
     .eq("user_id", user.id)
     .maybeSingle();
 

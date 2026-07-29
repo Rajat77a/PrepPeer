@@ -16,9 +16,12 @@ export const metadata = {
 export default async function OnboardingPage({
   searchParams,
 }: {
-  searchParams?: { next?: string | string[] };
+  searchParams?: Promise<{ next?: string | string[] }>;
 }) {
-  const cookieStore = cookies();
+  const [cookieStore, resolvedSearchParams] = await Promise.all([
+    cookies(),
+    searchParams,
+  ]);
   const supabase = createClient(cookieStore);
 
   const {
@@ -30,7 +33,9 @@ export default async function OnboardingPage({
   const profile = getTrustedProfile(user);
 
   const nextPath = safeDashboardPath(
-    Array.isArray(searchParams?.next) ? searchParams.next[0] : searchParams?.next
+    Array.isArray(resolvedSearchParams?.next)
+      ? resolvedSearchParams.next[0]
+      : resolvedSearchParams?.next
   );
 
   if (hasCompletedProfile(user)) {

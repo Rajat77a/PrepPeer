@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function DashboardProfilePage() {
-  cookies();
+  await cookies();
   const user = await getCurrentUser();
 
   if (!user) redirect("/login");

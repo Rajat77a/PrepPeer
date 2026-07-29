@@ -193,12 +193,20 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`;
       experience,
       companyType,
       questions: normalizedQuestions,
+      currentIndex: 0,
       issuedAt: Date.now(),
     });
 
     return NextResponse.json({
-      questions: normalizedQuestions,
+      question: normalizedQuestions[0],
+      questionIndex: 0,
+      totalQuestions: normalizedQuestions.length,
       questionSetToken,
+    }, {
+      headers: {
+        "Cache-Control": "no-store, private",
+        Pragma: "no-cache",
+      },
     });
   } catch (error) {
     logServerError("Question generation request failed", error, {
