@@ -173,15 +173,13 @@ function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps
           whileHover="hover"
           variants={orbHoverVariants}
         >
-          <div
-            className="orb-fallback absolute inset-[8%] z-[1]"
-            style={{
-              background:
-                "radial-gradient(circle at 35% 32%, #89CFFF 0%, #319AFF 30%, #0057CC 60%, #001F66 100%)",
-              boxShadow:
-                "0 0 80px rgba(49,154,255,0.45), inset 0 0 40px rgba(255,255,255,0.15)",
-            }}
-          />
+          <div className="hero-orb-local absolute inset-[5%] z-[1]" aria-hidden>
+            <span className="hero-orb-local__shell" />
+            <span className="hero-orb-local__ribbon hero-orb-local__ribbon--one" />
+            <span className="hero-orb-local__ribbon hero-orb-local__ribbon--two" />
+            <span className="hero-orb-local__caustic" />
+            <span className="hero-orb-local__shine" />
+          </div>
           <HeroMysteryBadge />
         </motion.div>
       </Link>
