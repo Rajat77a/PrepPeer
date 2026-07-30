@@ -153,6 +153,23 @@ interface HeroOrbProps {
 }
 
 function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps) {
+  const [videoFailed, setVideoFailed] = useState(false);
+  const [canPlayOrbVideo, setCanPlayOrbVideo] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+    const isIOSLike =
+      /iPad|iPhone|iPod/.test(window.navigator.userAgent) ||
+      (window.navigator.platform === "MacIntel" &&
+        window.navigator.maxTouchPoints > 1);
+    const syncVideoMode = () => setCanPlayOrbVideo(media.matches || !isIOSLike);
+
+    syncVideoMode();
+    media.addEventListener("change", syncVideoMode);
+
+    return () => media.removeEventListener("change", syncVideoMode);
+  }, []);
+
   return (
     <motion.div variants={orbVariants} className="shrink-0 transform-gpu">
       <Link
@@ -173,13 +190,28 @@ function HeroOrb({ linkRef, onHoverStart, onHoverEnd, onOrbClick }: HeroOrbProps
           whileHover="hover"
           variants={orbHoverVariants}
         >
-          <div className="hero-orb-local absolute inset-[5%] z-[1]" aria-hidden>
-            <span className="hero-orb-local__shell" />
-            <span className="hero-orb-local__ribbon hero-orb-local__ribbon--one" />
-            <span className="hero-orb-local__ribbon hero-orb-local__ribbon--two" />
-            <span className="hero-orb-local__caustic" />
-            <span className="hero-orb-local__shine" />
-          </div>
+          <div
+            className="orb-fallback absolute inset-[8%] z-[1]"
+            style={{
+              background:
+                "radial-gradient(circle at 35% 32%, #89CFFF 0%, #319AFF 30%, #0057CC 60%, #001F66 100%)",
+              boxShadow:
+                "0 0 80px rgba(49,154,255,0.45), inset 0 0 40px rgba(255,255,255,0.15)",
+            }}
+          />
+          {canPlayOrbVideo && !videoFailed && (
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              className="absolute right-0 bottom-0 z-[2] h-full w-full object-cover orb-video"
+              onError={() => setVideoFailed(true)}
+            >
+              <source src="/media/orb-purple.webm" type="video/webm" />
+            </video>
+          )}
           <HeroMysteryBadge />
         </motion.div>
       </Link>
