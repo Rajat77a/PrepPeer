@@ -112,6 +112,7 @@ body {
 
 .orb-logo-video {
   object-fit: cover;
+  border-radius: 50%;
   mix-blend-mode: screen;
   transform: scale(1.25);
   transform-origin: center center;
