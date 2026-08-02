@@ -146,7 +146,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           Profile
         </p>
 
-        <h1 className="mt-3 font-bricolage text-[clamp(38px,6vw,72px)] font-extrabold leading-none tracking-[-0.045em] text-[#07111f]">
+        <h1 className="mt-3 font-inter text-[clamp(38px,6vw,72px)] font-black leading-none tracking-[-0.05em] text-[#07111f]">
           Your PrepPeer identity.
         </h1>
 

@@ -618,7 +618,7 @@ export default function InterviewPage() {
         <Navbar variant="inner" />
 
         <div className="max-w-[560px] mx-auto px-6 py-28">
-          <h1 className="font-bricolage font-extrabold text-3xl text-text mb-2">
+          <h1 className="font-fustat font-extrabold text-3xl text-text mb-2">
             Set up your interview
           </h1>
 

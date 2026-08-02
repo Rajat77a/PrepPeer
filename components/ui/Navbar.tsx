@@ -37,12 +37,12 @@ export function Navbar({
         <div className="flex items-center justify-between px-4 sm:px-8 py-4 max-w-[1200px] mx-auto">
           <Logo href={homeHref} />
           {sessionLabel && (
-            <span className="font-instrument font-medium text-sm text-muted hidden sm:block">
+            <span className="font-inter font-medium text-sm text-muted hidden sm:block">
               Session: {sessionLabel}
             </span>
           )}
           {progress && (
-            <span className="font-instrument font-semibold text-sm text-blue">
+            <span className="font-inter font-semibold text-sm text-blue">
               Q {progress.current} of {progress.total}
             </span>
           )}
@@ -97,13 +97,13 @@ export function Navbar({
               href="/login"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full border border-[#07111f]/10 bg-white/72 px-4 py-2.5 text-center font-instrument text-sm font-bold tracking-[-0.02em] text-[#07111f] shadow-[0_10px_24px_rgba(0,108,255,0.10)] backdrop-blur-xl transition active:scale-[0.98]"
+              className="rounded-full border border-[#07111f]/10 bg-white/72 px-4 py-2.5 text-center font-inter text-sm font-extrabold tracking-[-0.02em] text-[#07111f] shadow-[0_10px_24px_rgba(0,108,255,0.10)] backdrop-blur-xl transition active:scale-[0.98]"
             >
               Sign in
             </Link>
             <Link
               href="/demo"
-              className="rounded-full border border-[#006cff]/20 bg-[#07111f] px-4 py-2.5 text-center font-instrument text-sm font-bold tracking-[-0.02em] text-white shadow-[0_12px_30px_rgba(7,17,31,0.16)] transition active:scale-[0.98]"
+              className="rounded-full border border-[#006cff]/20 bg-[#07111f] px-4 py-2.5 text-center font-inter text-sm font-extrabold tracking-[-0.02em] text-white shadow-[0_12px_30px_rgba(7,17,31,0.16)] transition active:scale-[0.98]"
             >
               Start free mock
             </Link>
@@ -115,13 +115,13 @@ export function Navbar({
                 href="/login"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-[#07111f]/10 bg-white/72 px-5 py-2.5 font-instrument text-sm font-bold tracking-[-0.02em] text-[#07111f] shadow-[0_10px_24px_rgba(0,108,255,0.10)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#006cff]/30 hover:text-[#006cff]"
+                className="rounded-full border border-[#07111f]/10 bg-white/72 px-5 py-2.5 font-inter text-sm font-extrabold tracking-[-0.02em] text-[#07111f] shadow-[0_10px_24px_rgba(0,108,255,0.10)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-[#006cff]/30 hover:text-[#006cff]"
               >
                 Sign in
               </Link>
               <Link
                 href="/demo"
-                className="rounded-full border border-[#07111f]/10 bg-[#07111f] px-5 py-2.5 font-instrument text-sm font-bold tracking-[-0.02em] text-white shadow-[0_12px_30px_rgba(7,17,31,0.16)] transition hover:-translate-y-0.5 hover:bg-[#006cff] hover:shadow-[0_16px_34px_rgba(0,108,255,0.22)]"
+                className="rounded-full border border-[#07111f]/10 bg-[#07111f] px-5 py-2.5 font-inter text-sm font-extrabold tracking-[-0.02em] text-white shadow-[0_12px_30px_rgba(7,17,31,0.16)] transition hover:-translate-y-0.5 hover:bg-[#006cff] hover:shadow-[0_16px_34px_rgba(0,108,255,0.22)]"
               >
                 Start free mock interview
               </Link>

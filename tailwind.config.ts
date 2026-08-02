@@ -25,8 +25,6 @@ const config: Config = {
         star: "#FF801E",
       },
       fontFamily: {
-        bricolage: ["var(--font-bricolage)", "sans-serif"],
-        instrument: ["var(--font-instrument)", "sans-serif"],
         fustat: ["var(--font-fustat)", "sans-serif"],
         inter: ["var(--font-inter)", "sans-serif"],
       },

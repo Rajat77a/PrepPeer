@@ -260,7 +260,7 @@ function NewUserDashboard({
         transition={{ duration: 0.6 }}
         className="relative z-10 mb-12 text-center"
       >
-        <h1 className="font-bricolage text-[clamp(42px,8vw,72px)] font-extrabold leading-none tracking-[-0.035em] text-[#07111f]">
+        <h1 className="font-inter text-[clamp(42px,8vw,72px)] font-black leading-none tracking-[-0.04em] text-[#07111f]">
           Welcome, {firstName}
         </h1>
         <p className="mx-auto mt-4 max-w-2xl font-inter text-lg font-medium leading-8 text-[#64748b]">
@@ -299,7 +299,7 @@ function NewUserDashboard({
             </span>
           </div>
 
-          <h2 className="font-bricolage text-[clamp(30px,5vw,48px)] font-extrabold leading-tight tracking-[-0.035em] text-[#07111f]">
+          <h2 className="font-inter text-[clamp(30px,5vw,48px)] font-black leading-tight tracking-[-0.04em] text-[#07111f]">
             Start your first mock interview
           </h2>
 
@@ -510,7 +510,7 @@ function ReturningDashboard({
           <p className="mb-2 font-inter text-xs font-black uppercase tracking-[0.22em] text-[#006cff]">
             Live practice room
           </p>
-          <h1 className="font-bricolage text-3xl font-extrabold tracking-[-0.03em] text-[#07111f] sm:text-4xl">
+          <h1 className="font-inter text-3xl font-black tracking-[-0.03em] text-[#07111f] sm:text-4xl">
             Welcome back, {firstName}
           </h1>
           <p className="mt-1 font-inter font-medium text-[#64748b]">
@@ -546,7 +546,7 @@ function ReturningDashboard({
           <p className="font-inter text-xs font-black uppercase tracking-[0.2em] text-[#006cff]">
             Recommended next
           </p>
-          <h2 className="mt-2 font-bricolage text-2xl font-extrabold tracking-[-0.03em] text-[#07111f]">
+          <h2 className="mt-2 font-inter text-2xl font-extrabold tracking-[-0.03em] text-[#07111f]">
             Strengthen {priorityDimension?.label ?? "your lowest-scoring skill"}
           </h2>
           <p className="mt-2 max-w-2xl font-inter text-sm font-medium leading-6 text-[#64748b]">

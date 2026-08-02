@@ -76,7 +76,7 @@ export default function ComparisonCards() {
 
         .comparison-title {
           margin: 0;
-          font-family: var(--font-bricolage);
+          font-family: var(--font-fustat), sans-serif;
           font-weight: 800;
           font-size: clamp(32px, 4vw, 48px);
           letter-spacing: -1.5px;

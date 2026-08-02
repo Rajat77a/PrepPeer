@@ -78,7 +78,7 @@ export default async function SessionDetailPage({
                 }).format(new Date(selectedSession.created_at))
               : "Session"}
           </p>
-          <h1 className="mt-4 font-bricolage text-[clamp(36px,6vw,68px)] font-extrabold leading-none tracking-[-0.045em] text-[#07111f]">
+          <h1 className="mt-4 font-inter text-[clamp(36px,6vw,68px)] font-black leading-none tracking-[-0.05em] text-[#07111f]">
             {selectedSession.role ?? "Interview"}
           </h1>
           <p className="mt-4 font-inter font-semibold text-[#64748b]">

@@ -24,7 +24,7 @@ export default function ProgressIndicator({
     <div className="flex flex-col items-center justify-center gap-8">
       {mode === "dots" && (
         <div className="px-7 py-3 text-center">
-          <p className="mb-3 font-instrument text-sm font-bold text-[#07111f]">
+          <p className="mb-3 font-inter text-sm font-bold text-[#07111f]">
             Step {step} of 3
           </p>
           <div className="relative flex items-center gap-6">

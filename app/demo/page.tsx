@@ -45,8 +45,8 @@ export default function DemoPage() {
             <section className="rounded-[30px] border border-blue/15 bg-white p-6 shadow-[0_28px_90px_rgba(0,108,255,0.12)] sm:p-9">
               <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="font-instrument text-xs font-bold uppercase tracking-[0.18em] text-blue">Free guided demo</p>
-                  <h1 className="mt-2 font-bricolage text-3xl font-extrabold tracking-[-0.04em] text-text sm:text-5xl">Try PrepPeer before signing up.</h1>
+                  <p className="font-inter text-xs font-bold uppercase tracking-[0.18em] text-blue">Free guided demo</p>
+                  <h1 className="mt-2 font-inter text-3xl font-black tracking-[-0.04em] text-text sm:text-5xl">Try PrepPeer before signing up.</h1>
                 </div>
                 <div className="flex gap-3 font-inter text-xs font-semibold text-muted">
                   <span className="inline-flex items-center gap-1.5"><Clock3 size={14} /> 5 minutes</span>
@@ -64,7 +64,7 @@ export default function DemoPage() {
                 </div>
               </div>
 
-              <h2 className="font-instrument text-2xl font-bold leading-snug text-text">{DEMO_QUESTIONS[current]}</h2>
+              <h2 className="font-inter text-2xl font-bold leading-snug text-text">{DEMO_QUESTIONS[current]}</h2>
               <label className="mt-6 block">
                 <span className="mb-2 flex items-center gap-2 font-inter text-sm font-bold text-text">
                   Your answer <span className="required-badge">Required</span>
@@ -88,7 +88,7 @@ export default function DemoPage() {
                 type="button"
                 disabled={!answers[current].trim()}
                 onClick={continueDemo}
-                className="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-blue px-6 font-instrument text-sm font-bold text-white shadow-[0_16px_38px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:bg-[#0067d8] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45"
+                className="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-blue px-6 font-inter text-sm font-bold text-white shadow-[0_16px_38px_rgba(0,132,255,0.24)] transition hover:-translate-y-0.5 hover:bg-[#0067d8] disabled:translate-y-0 disabled:cursor-not-allowed disabled:opacity-45"
               >
                 {current === DEMO_QUESTIONS.length - 1 ? "See my demo feedback" : "Next question"}
                 <ArrowRight size={17} />
@@ -97,8 +97,8 @@ export default function DemoPage() {
           ) : (
             <section className="rounded-[30px] border border-blue/15 bg-white p-7 shadow-[0_28px_90px_rgba(0,108,255,0.12)] sm:p-10">
               <Sparkles className="text-blue" size={30} />
-              <p className="mt-5 font-instrument text-xs font-bold uppercase tracking-[0.18em] text-blue">Your demo snapshot</p>
-              <h1 className="mt-2 font-bricolage text-4xl font-extrabold tracking-[-0.05em] text-text sm:text-6xl">{overall}/100</h1>
+              <p className="mt-5 font-inter text-xs font-bold uppercase tracking-[0.18em] text-blue">Your demo snapshot</p>
+              <h1 className="mt-2 font-inter text-4xl font-black tracking-[-0.05em] text-text sm:text-6xl">{overall}/100</h1>
               <p className="mt-4 max-w-2xl font-inter text-base leading-7 text-muted">
                 Your answers show {overall >= 70 ? "strong early structure" : "a useful starting point"}. Question {weakest} is your clearest next practice opportunity. A full interview adds role-specific AI evaluation, peer ranking, dimension scores and saved progress.
               </p>
@@ -106,14 +106,14 @@ export default function DemoPage() {
                 {scores.map((score, index) => (
                   <div key={DEMO_QUESTIONS[index]} className="rounded-2xl border border-blue/12 bg-[#f7fbff] p-4">
                     <p className="font-inter text-xs font-bold text-muted">Question {index + 1}</p>
-                    <p className="mt-1 font-instrument text-2xl font-bold text-text">{score}</p>
+                    <p className="mt-1 font-inter text-2xl font-bold text-text">{score}</p>
                   </div>
                 ))}
               </div>
               <div className="mt-7 rounded-2xl border border-green-200 bg-green-50 p-4 font-inter text-sm leading-6 text-green-900">
                 <CheckCircle2 className="mr-2 inline" size={17} /> Your demo answers stay in this browser and are not added to the public leaderboard.
               </div>
-              <Link href="/login?mode=signup&next=%2Fonboarding" className="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-navy px-6 font-instrument text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue">
+              <Link href="/login?mode=signup&next=%2Fonboarding" className="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-navy px-6 font-inter text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-blue">
                 Create account and start the full interview <ArrowRight size={17} />
               </Link>
             </section>

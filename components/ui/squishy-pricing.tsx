@@ -89,7 +89,7 @@ export default function SquishyPricing() {
           <p className="mb-3 font-inter text-xs font-bold uppercase tracking-[0.14em] text-blue">
             Pricing
           </p>
-          <h2 className="font-bricolage text-[clamp(36px,4vw,54px)] font-extrabold leading-[1.08] tracking-[-1.5px] text-text">
+          <h2 className="font-fustat text-[clamp(36px,4vw,54px)] font-extrabold leading-[1.08] tracking-[-1.5px] text-text">
             Pick what fits your prep.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl font-inter text-base leading-relaxed text-muted">

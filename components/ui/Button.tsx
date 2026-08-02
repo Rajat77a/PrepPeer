@@ -21,7 +21,7 @@ interface ButtonProps {
 }
 
 const base =
-  "inline-flex items-center justify-center gap-2.5 font-instrument transform-gpu cursor-pointer";
+  "inline-flex items-center justify-center gap-2.5 font-inter transform-gpu cursor-pointer";
 
 const variants: Record<ButtonVariant, string> = {
   primary: `${base} px-[26px] py-3.5 rounded-2xl bg-[rgba(0,132,255,0.85)] backdrop-blur-sm border border-[rgba(0,132,255,0.3)] text-white font-semibold text-base shadow-cta-primary`,

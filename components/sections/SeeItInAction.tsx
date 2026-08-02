@@ -331,7 +331,7 @@ export function SeeItInAction() {
             <p className="font-inter text-[clamp(20px,2vw,28px)] font-extrabold tracking-[-0.045em] text-[#006cff]">
               What a real interview looks like
             </p>
-            <h2 className="mt-5 max-w-[640px] font-bricolage text-[clamp(52px,7vw,92px)] font-extrabold leading-[0.92] tracking-[-0.065em] text-[#07111f]">
+            <h2 className="mt-5 max-w-[640px] font-inter text-[clamp(52px,7vw,92px)] font-black leading-[0.92] tracking-[-0.07em] text-[#07111f]">
               Answer. Get scored. Know your rank.
             </h2>
             <p className="mt-6 max-w-[520px] font-inter text-lg font-medium leading-8 text-[#64748b]">

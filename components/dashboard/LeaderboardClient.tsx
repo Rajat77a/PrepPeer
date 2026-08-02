@@ -79,7 +79,7 @@ export function LeaderboardClient({
           <p className="font-inter text-xs font-bold uppercase tracking-[0.22em] text-[#006cff]">
             Leaderboard
           </p>
-          <h1 className="mt-3 font-bricolage text-[clamp(38px,6vw,72px)] font-extrabold leading-none tracking-[-0.045em] text-[#07111f]">
+          <h1 className="mt-3 font-inter text-[clamp(38px,6vw,72px)] font-black leading-none tracking-[-0.05em] text-[#07111f]">
             The ranked board.
           </h1>
           <p className="mt-4 max-w-2xl font-inter text-base font-medium leading-7 text-[#64748b]">
@@ -142,7 +142,7 @@ export function LeaderboardClient({
         <div className="divide-y divide-[rgba(0,132,255,0.08)]">
           {entries.length === 0 && (
             <div className="px-5 py-12 text-center">
-              <p className="font-bricolage text-2xl font-extrabold tracking-[-0.03em] text-[#07111f]">
+              <p className="font-inter text-2xl font-extrabold tracking-[-0.03em] text-[#07111f]">
                 No matching candidates yet
               </p>
               <p className="mx-auto mt-2 max-w-md font-inter text-sm font-semibold leading-6 text-[#64748b]">

@@ -16,7 +16,7 @@ export function Logo({ variant = "dark", size = "sm", href = "/" }: LogoProps) {
         <OrbLogo size={orbSize} />
       </div>
       <span
-        className={`font-instrument font-bold tracking-[-0.025em] ${size === "md" ? "text-xl" : "text-[17px]"} ${textColor}`}
+        className={`font-fustat font-bold ${size === "md" ? "text-xl" : "text-[17px]"} ${textColor}`}
       >
         PrepPeer
       </span>

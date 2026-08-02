@@ -6,7 +6,7 @@ export default function AboutPage() {
       <Navbar />
       <main className="min-h-screen bg-white px-6 pb-20 pt-44 text-[#07111f] sm:px-10 sm:pt-40">
         <article className="mx-auto max-w-3xl">
-          <h1 className="font-bricolage text-4xl font-extrabold tracking-[-0.04em] text-black sm:text-6xl">
+          <h1 className="font-fustat text-4xl font-bold tracking-tight text-black sm:text-6xl">
             About PrepPeer
           </h1>
 

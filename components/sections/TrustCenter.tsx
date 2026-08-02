@@ -17,7 +17,7 @@ export function TrustCenter() {
           {items.map(({ icon: Icon, title, text }) => (
             <article key={title} className="rounded-3xl border border-blue/12 bg-white p-6 shadow-[0_18px_55px_rgba(0,108,255,0.08)]">
               <Icon className="text-blue" size={24} />
-              <h3 className="mt-5 font-instrument text-xl font-bold text-text">{title}</h3>
+              <h3 className="mt-5 font-inter text-xl font-bold text-text">{title}</h3>
               <p className="mt-3 font-inter text-sm leading-6 text-muted">{text}</p>
             </article>
           ))}
