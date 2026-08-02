@@ -143,7 +143,7 @@ export default async function LeaderboardPage() {
       <Navbar variant="inner" />
 
       <div className="max-w-4xl mx-auto px-6 py-20">
-        <h1 className="font-fustat font-extrabold text-[clamp(32px,4vw,48px)] tracking-[-1.5px] text-text">
+        <h1 className="font-bricolage font-extrabold text-[clamp(32px,4vw,48px)] tracking-[-1.5px] text-text">
           Leaderboard
         </h1>
 

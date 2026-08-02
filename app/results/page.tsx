@@ -358,7 +358,7 @@ export default function ResultsPage() {
         <div className="mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="font-fustat font-extrabold text-3xl text-text mb-2">
+              <h1 className="font-bricolage font-extrabold text-3xl text-text mb-2">
                 Session Report
               </h1>
 

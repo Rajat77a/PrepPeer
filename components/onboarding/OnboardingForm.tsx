@@ -135,7 +135,7 @@ export function OnboardingForm({
             Finish your profile
           </p>
 
-          <h1 className="mt-4 font-inter text-[clamp(42px,7vw,76px)] font-black leading-[0.92] tracking-[-0.06em] text-[#07111f]">
+          <h1 className="mt-4 font-bricolage text-[clamp(42px,7vw,76px)] font-extrabold leading-[0.92] tracking-[-0.055em] text-[#07111f]">
             Tell us who is preparing.
           </h1>
 

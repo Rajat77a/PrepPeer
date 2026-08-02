@@ -479,12 +479,12 @@ export default function LoginPage() {
               >
                 <div className="mb-8 flex items-center justify-center gap-3">
                   <OrbLogo size={36} />
-                  <span className="font-inter text-lg font-black tracking-[-0.03em] text-white">
+                  <span className="font-instrument text-lg font-bold tracking-[-0.03em] text-white">
                     PrepPeer
                   </span>
                 </div>
 
-                <h1 className="font-inter text-[clamp(38px,6vw,56px)] font-black leading-[0.95] tracking-[-0.06em] text-white drop-shadow-[0_18px_36px_rgba(0,38,96,0.22)]">
+                <h1 className="font-bricolage text-[clamp(38px,6vw,56px)] font-extrabold leading-[0.95] tracking-[-0.055em] text-white drop-shadow-[0_18px_36px_rgba(0,38,96,0.22)]">
                   {activeCopy.title}
                 </h1>
 
@@ -502,7 +502,7 @@ export default function LoginPage() {
                 <div className="mx-auto mt-4 max-w-[460px]">
                   <button
                     onClick={signInWithGoogle}
-                    className="group relative flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/22 bg-white/14 px-5 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-[#06142b] hover:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)]"
+                    className="group relative flex h-12 w-full items-center justify-center gap-3 overflow-hidden rounded-2xl border border-white/22 bg-white/14 px-5 font-instrument text-base font-bold text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-[#06142b] hover:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)]"
                   >
                     <GoogleIcon />
                     Sign in with Google
@@ -554,7 +554,7 @@ export default function LoginPage() {
                 </div>
 
                 {error && (
-                  <p className="mt-5 text-center font-inter text-sm font-black text-white">
+                  <p className="mt-5 text-center font-instrument text-sm font-bold text-white">
                     {error}
                   </p>
                 )}
@@ -586,7 +586,7 @@ export default function LoginPage() {
                     setOtp("");
                     setStep("email");
                   }}
-                  className="mx-auto mb-8 flex items-center gap-2 font-inter text-sm font-bold text-white/72 transition hover:text-white"
+                  className="mx-auto mb-8 flex items-center gap-2 font-instrument text-sm font-bold text-white/72 transition hover:text-white"
                 >
                   <ArrowLeft size={16} />
                   Back
@@ -598,7 +598,7 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                <h1 className="font-inter text-[clamp(44px,7vw,76px)] font-black leading-[0.9] tracking-[-0.06em] text-white">
+                <h1 className="font-bricolage text-[clamp(44px,7vw,76px)] font-extrabold leading-[0.9] tracking-[-0.055em] text-white">
                   Enter your code
                 </h1>
 
@@ -644,7 +644,7 @@ export default function LoginPage() {
                 <button
                   onClick={sendOtp}
                   disabled={loading}
-                  className="mt-6 font-inter text-sm font-black text-white transition hover:text-[#d7ecff] disabled:opacity-50"
+                  className="mt-6 font-instrument text-sm font-bold text-white transition hover:text-[#d7ecff] disabled:opacity-50"
                 >
                   Resend code
                 </button>
@@ -665,7 +665,7 @@ export default function LoginPage() {
               >
                 <button
                   onClick={() => setStep("otp")}
-                  className="mb-6 flex items-center gap-2 font-inter text-sm font-bold text-white/72 transition hover:text-white"
+                  className="mb-6 flex items-center gap-2 font-instrument text-sm font-bold text-white/72 transition hover:text-white"
                 >
                   <ArrowLeft size={16} />
                   Back
@@ -679,7 +679,7 @@ export default function LoginPage() {
                     <p className="font-inter text-xs font-black uppercase tracking-[0.2em] text-white/70">
                       Password
                     </p>
-                    <h1 className="font-inter text-3xl font-black tracking-[-0.04em] text-white">
+                    <h1 className="font-bricolage text-3xl font-extrabold tracking-[-0.035em] text-white">
                       Create your password
                     </h1>
                   </div>
@@ -704,7 +704,7 @@ export default function LoginPage() {
                   <Check size={34} strokeWidth={2.8} />
                 </motion.div>
 
-                <h1 className="mt-7 font-inter text-[clamp(44px,7vw,76px)] font-black leading-[0.9] tracking-[-0.06em] text-white">
+                <h1 className="mt-7 font-bricolage text-[clamp(44px,7vw,76px)] font-extrabold leading-[0.9] tracking-[-0.055em] text-white">
                   You&apos;re in
                 </h1>
 
@@ -714,7 +714,7 @@ export default function LoginPage() {
 
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="mt-10 h-14 w-full max-w-[460px] rounded-2xl bg-white px-5 font-inter text-base font-black text-[#006cff] shadow-[0_18px_48px_rgba(0,38,96,0.22)] transition hover:-translate-y-0.5 hover:bg-[#eef7ff]"
+                  className="mt-10 h-14 w-full max-w-[460px] rounded-2xl bg-white px-5 font-instrument text-base font-bold text-[#006cff] shadow-[0_18px_48px_rgba(0,38,96,0.22)] transition hover:-translate-y-0.5 hover:bg-[#eef7ff]"
                 >
                   Continue
                 </button>

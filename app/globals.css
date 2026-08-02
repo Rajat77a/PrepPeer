@@ -31,6 +31,24 @@
 }
 
 @font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 600 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/fonts/bricolage-grotesque-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 500 700;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/fonts/instrument-sans-latin.woff2") format("woff2");
+}
+
+@font-face {
   font-family: "Fustat";
   font-style: normal;
   font-weight: 800;
@@ -44,7 +62,9 @@
 
 :root {
   --font-inter: "Inter", Arial, sans-serif;
-  --font-fustat: "Fustat", sans-serif;
+  --font-bricolage: "Bricolage Grotesque", "Instrument Sans", sans-serif;
+  --font-instrument: "Instrument Sans", Inter, sans-serif;
+  --font-fustat: "Instrument Sans", Inter, sans-serif;
   --blue: #0084ff;
   --blue-glow: rgba(0, 132, 255, 0.8);
   --blue-light: #60b1ff;
@@ -86,12 +106,12 @@ body {
 }
 
 .font-headline {
-  font-family: var(--font-fustat), sans-serif;
+  font-family: var(--font-bricolage);
   font-weight: 800;
 }
 
 .section-title {
-  font-family: var(--font-fustat), sans-serif;
+  font-family: var(--font-bricolage);
   font-weight: 800;
   font-size: clamp(36px, 4vw, 54px);
   line-height: 1.1;
@@ -99,7 +119,7 @@ body {
 }
 
 .hero-h1 {
-  font-family: var(--font-fustat), sans-serif;
+  font-family: var(--font-bricolage);
   font-weight: 800;
   font-size: clamp(40px, 10vw, 75px);
   line-height: 1.05;
