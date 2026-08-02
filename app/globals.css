@@ -1,8 +1,25 @@
+@font-face {
+  font-family: "Fustat";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/fustat-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Fustat";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("/fonts/fustat-latin.woff2") format("woff2");
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  --font-fustat: "Fustat", sans-serif;
   --blue: #0084ff;
   --blue-glow: rgba(0, 132, 255, 0.8);
   --blue-light: #60b1ff;
