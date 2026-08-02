@@ -8,18 +8,20 @@ import { CTA } from "@/components/sections/CTA";
 import { Footer } from "@/components/sections/Footer";
 import ComparisonCards from "@/components/sections/ComparisonCards";
 import TestimonialCarousel from "@/components/sections/TestimonialCarousel";
+import { TrustCenter } from "@/components/sections/TrustCenter";
 
 export default function HomePage() {
   return (
     <>
       <Navbar />
-      <main className="overflow-x-hidden min-h-screen relative z-[1]">
+      <main id="main-content" className="overflow-x-hidden min-h-screen relative z-[1]">
         <Hero />
         <HowItWorks />
         <ComparisonCards />
         <Features />
         <LeaderboardSection />
         <TestimonialCarousel />
+        <TrustCenter />
         <SeeItInAction />
         <CTA />
         <Footer />

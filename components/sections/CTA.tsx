@@ -32,8 +32,8 @@ export function CTA() {
             first free interview in 60 seconds.
           </p>
           <div className="flex justify-center">
-            <Button href="/login?next=%2Finterview%3Fmode%3Daccount" variant="navy-cta">
-              Start Free Interview
+            <Button href="/demo" variant="navy-cta">
+              Start free mock interview
             </Button>
           </div>
         </div>

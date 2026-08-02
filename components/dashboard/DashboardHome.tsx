@@ -325,7 +325,7 @@ function NewUserDashboard({
               href={startInterviewHref}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-[#006cff] px-8 py-3 font-inter text-sm font-bold text-white transition-all hover:bg-[#0057cc] hover:shadow-[0_0_20px_rgba(0,108,255,0.4)]"
             >
-              Start Interview
+              Start full mock interview
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -420,6 +420,12 @@ function ReturningDashboard({
         label: dimension.label,
         value: dimension.score,
       }));
+
+  const priorityDimension = dimensions.reduce(
+    (lowest, dimension) =>
+      dimension.value < lowest.value ? dimension : lowest,
+    dimensions[0]
+  );
 
   const latestSession = sessions[0];
 
@@ -529,6 +535,33 @@ function ReturningDashboard({
           </Link>
         </motion.div>
       </div>
+
+      <motion.section
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08 }}
+        className="relative z-10 mb-6 flex flex-col gap-5 overflow-hidden rounded-[24px] border border-[#006cff]/16 bg-[linear-gradient(120deg,#f7fbff_0%,#ecf7ff_55%,#effff9_100%)] p-5 shadow-[0_18px_55px_rgba(0,108,255,0.09)] sm:flex-row sm:items-center sm:justify-between sm:p-6"
+      >
+        <div className="relative z-10">
+          <p className="font-inter text-xs font-black uppercase tracking-[0.2em] text-[#006cff]">
+            Recommended next
+          </p>
+          <h2 className="mt-2 font-bricolage text-2xl font-extrabold tracking-[-0.03em] text-[#07111f]">
+            Strengthen {priorityDimension?.label ?? "your lowest-scoring skill"}
+          </h2>
+          <p className="mt-2 max-w-2xl font-inter text-sm font-medium leading-6 text-[#64748b]">
+            Rehearse one concise STAR answer, make the result measurable, then run
+            another mock to compare your score.
+          </p>
+        </div>
+        <Link
+          href={practiceAgainHref}
+          className="relative z-10 inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#006cff] px-6 py-3 font-inter text-sm font-black text-white transition hover:bg-[#0057cc] hover:shadow-[0_0_24px_rgba(0,108,255,0.28)]"
+        >
+          Practice this skill
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </motion.section>
 
       <div className="relative z-10 mb-6 grid gap-4 xl:grid-cols-3">
         <motion.div
@@ -648,7 +681,10 @@ function ReturningDashboard({
           </div>
           <div className="mt-5 border-t border-[rgba(0,132,255,0.10)] pt-4">
             <p className="font-inter text-xs font-semibold text-[#64748b]">
-              Weakest: <span className="text-[#07111f]">Structure</span>
+              Priority: {" "}
+              <span className="text-[#07111f]">
+                {priorityDimension?.label ?? "Keep practising"}
+              </span>
             </p>
           </div>
         </motion.div>

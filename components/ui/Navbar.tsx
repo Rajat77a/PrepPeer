@@ -102,12 +102,10 @@ export function Navbar({
               Sign in
             </Link>
             <Link
-              href="/login?mode=signup"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/demo"
               className="rounded-full border border-[#006cff]/20 bg-[#07111f] px-4 py-2.5 text-center font-instrument text-sm font-bold tracking-[-0.02em] text-white shadow-[0_12px_30px_rgba(7,17,31,0.16)] transition active:scale-[0.98]"
             >
-              Sign up
+              Start free mock
             </Link>
           </div>
 
@@ -122,12 +120,10 @@ export function Navbar({
                 Sign in
               </Link>
               <Link
-                href="/login?mode=signup"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/demo"
                 className="rounded-full border border-[#07111f]/10 bg-[#07111f] px-5 py-2.5 font-instrument text-sm font-bold tracking-[-0.02em] text-white shadow-[0_12px_30px_rgba(7,17,31,0.16)] transition hover:-translate-y-0.5 hover:bg-[#006cff] hover:shadow-[0_16px_34px_rgba(0,108,255,0.22)]"
               >
-                Sign up
+                Start free mock interview
               </Link>
             </div>
           </div>

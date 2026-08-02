@@ -298,10 +298,10 @@ function Stats() {
       </div>
 
       <Link
-        href="/login?next=%2Finterview%3Fmode%3Daccount"
+        href="/demo"
         className="mt-12 inline-flex rounded-full bg-[#006cff] px-6 py-3 font-inter text-sm font-semibold text-white shadow-[0_14px_34px_rgba(0,108,255,0.24)] transition hover:bg-[#0057cc]"
       >
-        See where you rank -&gt;
+        Start free mock interview -&gt;
       </Link>
     </div>
   );

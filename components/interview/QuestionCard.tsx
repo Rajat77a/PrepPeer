@@ -76,7 +76,14 @@ export function QuestionCard({
         </div>
 
         <div className="relative">
+          <label htmlFor="interview-answer" className="mb-2 flex items-center gap-2 font-inter text-sm font-bold text-text">
+            Your answer <span className="required-badge">Required to submit</span>
+          </label>
           <textarea
+            id="interview-answer"
+            required
+            aria-required="true"
+            aria-describedby="answer-guidance"
             value={answer}
             onChange={(e) => onAnswerChange(e.target.value)}
             placeholder="Write your answer here. Use examples, tradeoffs, and clear reasoning."
@@ -88,8 +95,8 @@ export function QuestionCard({
           <div className="pointer-events-none absolute bottom-4 right-4 h-10 w-10 border-b-2 border-r-2 border-[rgba(0,132,255,0.2)]" />
         </div>
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-          <p className="font-inter text-[13px] font-medium text-muted">
+        <div id="answer-guidance" className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
+          <p className="font-inter text-[13px] font-medium text-muted" aria-live="polite">
             {wordCount} words. Short answers can be submitted, but may score lower.
           </p>
           <p className="font-inter text-[13px] font-semibold text-muted sm:text-right">

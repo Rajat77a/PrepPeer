@@ -117,7 +117,7 @@ export default function ProfileStepper({ onComplete }: ProfileStepperProps) {
         </p>
 
         <h2 className="font-fustat text-2xl font-extrabold tracking-[-0.04em] text-text sm:text-3xl">
-          {activeStep.title} <span className="text-[#dc2626]">*</span>
+          {activeStep.title} <span className="required-badge align-middle">Required</span>
         </h2>
 
         <p className="mt-3 max-w-[420px] font-inter text-sm leading-6 text-muted">
@@ -153,6 +153,9 @@ export default function ProfileStepper({ onComplete }: ProfileStepperProps) {
           </div>
         ) : (
           <input
+            required
+            aria-required="true"
+            aria-label={activeStep.title}
             value={selectedValue}
             onChange={(event) =>
               setSelections((current) => ({

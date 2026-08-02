@@ -144,12 +144,17 @@ export function OnboardingForm({
             your first session.
           </p>
 
+          <p className="mt-4 font-inter text-xs font-semibold text-[#64748b]">
+            Fields marked <span className="required-badge">Required</span> must be completed.
+          </p>
+
           <div className="mt-9 space-y-4 text-left">
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                Full name <span className="text-[#dc2626]">*</span>
+                Full name <span className="required-badge">Required</span>
               </span>
               <input
+                required
                 value={fullName}
                 onChange={(event) => {
                   setError("");
@@ -165,9 +170,11 @@ export function OnboardingForm({
 
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                Target role <span className="text-[#dc2626]">*</span>
+                Target role <span className="required-badge">Required</span>
               </span>
               <input
+                required
+                aria-required="true"
                 value={role}
                 onChange={(event) => {
                   setError("");
@@ -183,9 +190,11 @@ export function OnboardingForm({
 
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                College name <span className="text-[#dc2626]">*</span>
+                College name <span className="required-badge">Required</span>
               </span>
               <input
+                required
+                aria-required="true"
                 value={college}
                 onChange={(event) => {
                   setError("");
@@ -202,10 +211,11 @@ export function OnboardingForm({
             {selectorFields.map((field) => (
               <div key={field.id}>
                 <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                  {field.label} <span className="text-[#dc2626]">*</span>
+                  {field.label} <span className="required-badge">Required</span>
                 </span>
 
                 <button
+                  aria-label={`${field.label}, required. Current value: ${selectedValues[field.id]}`}
                   type="button"
                   onClick={() => {
                     setError("");
@@ -221,9 +231,11 @@ export function OnboardingForm({
 
             <label className="block">
               <span className="font-inter text-xs font-black uppercase tracking-[0.16em] text-[#64748b]">
-                Target company type <span className="text-[#dc2626]">*</span>
+                Target company type <span className="required-badge">Required</span>
               </span>
               <input
+                required
+                aria-required="true"
                 value={company}
                 onChange={(event) => {
                   setError("");

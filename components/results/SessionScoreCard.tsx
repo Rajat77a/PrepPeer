@@ -109,14 +109,20 @@ export function SessionScoreCard({
       </div>
       <div className="px-7 py-6 space-y-4">
         {report.dimensions.map((d) => (
-          <ScoreBar
-            key={d.label}
-            label={d.label}
-            value={d.value}
-            color={d.color}
-            labelWidth="130px"
-            barHeight={7}
-          />
+          <div key={d.label}>
+            <ScoreBar
+              label={d.label}
+              value={d.value}
+              color={d.color}
+              labelWidth="130px"
+              barHeight={7}
+            />
+            {d.reason && (
+              <p className="mt-1 font-inter text-xs leading-5 text-muted sm:ml-[142px]">
+                {d.reason}
+              </p>
+            )}
+          </div>
         ))}
         <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
           {rankLocked ? (

@@ -230,17 +230,23 @@ export function ProfileForm({ user }: ProfileFormProps) {
           transition={{ delay: 0.08 }}
           className="rounded-2xl border border-[rgba(0,132,255,0.12)] bg-white/88 p-6 shadow-[0_18px_60px_rgba(0,108,255,0.08)] backdrop-blur-xl"
         >
+          <p className="mb-5 font-inter text-sm font-semibold text-[#64748b]">
+            Fields marked <span className="required-badge">Required</span> must be
+            completed before your profile can be saved.
+          </p>
           <div className="grid gap-4">
             {textFields.map((field) => (
               <label key={field.id} className="block">
                 <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
-                  {field.label} <span className="text-[#dc2626]">*</span>
+                  {field.label} <span className="required-badge">Required</span>
                 </span>
 
                 <input
                   value={values[field.id]}
                   minLength={2}
                   maxLength={field.id === "fullName" ? 80 : 120}
+                  required
+                  aria-required="true"
                   onChange={(event) =>
                     setValues((current) => ({
                       ...current,
@@ -254,7 +260,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
             <label className="block">
               <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
-                Target role <span className="text-[#dc2626]">*</span>
+                Target role <span className="required-badge">Required</span>
               </span>
 
               <input
@@ -263,6 +269,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 maxLength={80}
                 placeholder="e.g. Backend Engineer, MBA Marketing, Data Analyst"
                 autoComplete="organization-title"
+                required
+                aria-required="true"
                 onChange={(event) =>
                   setValues((current) => ({
                     ...current,
@@ -276,11 +284,12 @@ export function ProfileForm({ user }: ProfileFormProps) {
             {selectorFields.map((field) => (
               <div key={field.id}>
                 <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
-                  {field.label} <span className="text-[#dc2626]">*</span>
+                  {field.label} <span className="required-badge">Required</span>
                 </span>
 
                 <button
                   type="button"
+                  aria-label={`${field.label}, required. Current value: ${values[field.id]}`}
                   onClick={() => setActiveSelector(field.id)}
                   className="mt-2 flex h-12 w-full items-center justify-between rounded-xl border border-[rgba(0,132,255,0.12)] bg-[#f7fbff] px-4 text-left font-inter text-sm font-semibold text-[#07111f] outline-none transition hover:border-[#006cff]/45 hover:bg-white hover:shadow-[0_0_24px_rgba(0,108,255,0.10)]"
                 >
@@ -292,7 +301,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
             <label className="block">
               <span className="font-inter text-xs font-bold uppercase tracking-[0.16em] text-[#64748b]">
-                Target company type <span className="text-[#dc2626]">*</span>
+                Target company type <span className="required-badge">Required</span>
               </span>
 
               <input
@@ -301,6 +310,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 maxLength={80}
                 placeholder="e.g. Fintech startup, FAANG, Consulting firm"
                 autoComplete="organization"
+                required
+                aria-required="true"
                 onChange={(event) =>
                   setValues((current) => ({
                     ...current,

@@ -35,7 +35,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-inter antialiased relative">
-        <Providers>{children}</Providers>
+        <a href="#app-content" className="skip-link">Skip to main content</a>
+        <div id="app-content">
+          <Providers>{children}</Providers>
+        </div>
       </body>
     </html>
   );

@@ -23,7 +23,10 @@ export default function ProgressIndicator({
   return (
     <div className="flex flex-col items-center justify-center gap-8">
       {mode === "dots" && (
-        <div className="px-7 py-4">
+        <div className="px-7 py-3 text-center">
+          <p className="mb-3 font-instrument text-sm font-bold text-[#07111f]">
+            Step {step} of 3
+          </p>
           <div className="relative flex items-center gap-6">
             {[1, 2, 3].map((dot) => (
               <div
@@ -50,6 +53,7 @@ export default function ProgressIndicator({
               }}
             />
           </div>
+          <p className="mt-3 font-inter text-xs text-muted">Your selections are kept while you move between steps.</p>
         </div>
       )}
 
@@ -64,7 +68,7 @@ export default function ProgressIndicator({
                 initial={{ opacity: 0, width: 0, scale: 0.8 }}
                 animate={{ opacity: 1, width: "64px", scale: 1 }}
                 onClick={onBack}
-                className="flex h-12 items-center justify-center rounded-xl bg-gray-100 px-4 text-sm font-semibold text-black"
+                className="flex min-h-12 items-center justify-center rounded-xl bg-gray-100 px-4 text-sm font-semibold text-black focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue"
                 type="button"
               >
                 Back
@@ -75,7 +79,7 @@ export default function ProgressIndicator({
               onClick={onContinue}
               disabled={!canContinue}
               animate={{ flex: isFirstStep ? 1 : "inherit" }}
-              className={`h-12 rounded-xl bg-[#006cff] px-4 text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`min-h-12 rounded-xl bg-[#006cff] px-4 text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue disabled:cursor-not-allowed disabled:opacity-50 ${
                 isFirstStep ? "w-full" : "w-44"
               }`}
               type="button"

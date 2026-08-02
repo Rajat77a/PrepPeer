@@ -66,10 +66,12 @@ export function AssistedPasswordConfirmation({
     >
       <div className="rounded-[22px] border border-[#28415f]/70 bg-[#0d1828]/82 p-4 shadow-[0_24px_76px_rgba(0,0,0,0.32),0_0_48px_rgba(0,108,255,0.1),inset_0_1px_1px_rgba(255,255,255,0.08)] backdrop-blur-xl">
         <label className="mb-2 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#60b1ff]">
-          Password
+          Password <span className="required-badge">Required</span>
         </label>
         <Input
           type="password"
+          required
+          aria-required="true"
           value={password}
           onChange={(e) => {
             setPassword(e.target.value);
@@ -130,10 +132,12 @@ export function AssistedPasswordConfirmation({
         </div>
 
         <label className="mb-2 mt-4 block font-inter text-xs font-bold uppercase tracking-[0.18em] text-[#60b1ff]">
-          Confirm password
+          Confirm password <span className="required-badge">Required</span>
         </label>
         <Input
           type="password"
+          required
+          aria-required="true"
           value={confirmPassword}
           onChange={handleConfirmPasswordChange}
           placeholder="Type it again"

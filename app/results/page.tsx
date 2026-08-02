@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { SessionScoreCard } from "@/components/results/SessionScoreCard";
 import { QuestionBreakdownChart } from "@/components/results/QuestionBreakdownChart";
 import { SessionSummary } from "@/components/results/SessionSummary";
+import { ResultsFeedback } from "@/components/results/ResultsFeedback";
 import { Navbar } from "@/components/ui/Navbar";
 import { SESSION_REPORT } from "@/lib/mockData";
 import type { QuestionReviewStatus, SessionReport } from "@/lib/types";
@@ -262,6 +263,9 @@ export default function ResultsPage() {
   const summaryPreview =
     report.summary?.overallSummary ??
     "Review the final assessment, priority improvements, and question-by-question notes.";
+  const strongestDimension = report.dimensions.reduce((best, item) => item.value > best.value ? item : best, report.dimensions[0] ?? { label: "Overall", value: report.compositeScore });
+  const priorityDimension = report.dimensions.reduce((lowest, item) => item.value < lowest.value ? item : lowest, report.dimensions[0] ?? { label: "Structure", value: report.compositeScore });
+  const nextImprovement = report.summary?.needsImprovement?.[0] ?? `Practise a clearer beginning, evidence-based middle, and concise result to improve ${priorityDimension.label.toLowerCase()}.`;
 
   const animateReviewScroll = () => {
     const scroller = reviewScrollRef.current;
@@ -363,7 +367,7 @@ export default function ResultsPage() {
               </h1>
 
               <p className="font-inter text-muted">
-                Your complete score card, per-question breakdown, and session review.
+                Start with the essentials below, then open the detailed review when you are ready.
               </p>
             </div>
 
@@ -375,6 +379,24 @@ export default function ResultsPage() {
               Dashboard
             </Link>
           </div>
+
+          <section className="mt-6 grid gap-3 sm:grid-cols-3" aria-label="Result at a glance">
+            <div className="rounded-2xl border border-blue/15 bg-white p-4 shadow-[0_12px_35px_rgba(0,108,255,0.07)]">
+              <p className="font-inter text-xs font-bold uppercase tracking-[0.14em] text-muted">How you performed</p>
+              <p className="mt-2 font-instrument text-2xl font-bold text-text">{report.compositeScore}/100</p>
+              <p className="mt-1 font-inter text-xs leading-5 text-muted">Strongest area: {strongestDimension.label}</p>
+            </div>
+            <div className="rounded-2xl border border-blue/15 bg-white p-4 shadow-[0_12px_35px_rgba(0,108,255,0.07)]">
+              <p className="font-inter text-xs font-bold uppercase tracking-[0.14em] text-muted">Where you rank</p>
+              <p className="mt-2 font-instrument text-2xl font-bold text-text">{report.percentile}</p>
+              <p className="mt-1 font-inter text-xs leading-5 text-muted">{report.rankDelta}</p>
+            </div>
+            <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4 shadow-[0_12px_35px_rgba(234,88,12,0.06)]">
+              <p className="font-inter text-xs font-bold uppercase tracking-[0.14em] text-orange-700">Improve next</p>
+              <p className="mt-2 font-instrument text-lg font-bold text-orange-950">{priorityDimension.label}</p>
+              <p className="mt-1 line-clamp-2 font-inter text-xs leading-5 text-orange-900">{nextImprovement}</p>
+            </div>
+          </section>
 
           <motion.button
             type="button"
@@ -437,6 +459,7 @@ export default function ResultsPage() {
           rankLocked={false}
         />
         <QuestionBreakdownChart data={report.questionScores} />
+        <ResultsFeedback />
       </div>
 
       <AnimatePresence>

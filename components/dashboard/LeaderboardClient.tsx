@@ -1,6 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import type { LeaderboardEntry } from "@/lib/types";
@@ -90,6 +91,7 @@ export function LeaderboardClient({
           <div className="relative w-full xl:w-[340px]">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8ba0b8]" />
             <input
+              aria-label="Search the leaderboard"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search name, college, role"
@@ -138,6 +140,23 @@ export function LeaderboardClient({
         </div>
 
         <div className="divide-y divide-[rgba(0,132,255,0.08)]">
+          {entries.length === 0 && (
+            <div className="px-5 py-12 text-center">
+              <p className="font-bricolage text-2xl font-extrabold tracking-[-0.03em] text-[#07111f]">
+                No matching candidates yet
+              </p>
+              <p className="mx-auto mt-2 max-w-md font-inter text-sm font-semibold leading-6 text-[#64748b]">
+                Try another role or search term. You can also complete a mock to
+                add your latest score to the board.
+              </p>
+              <Link
+                href="/interview?mode=account"
+                className="mt-5 inline-flex rounded-full bg-[#006cff] px-6 py-3 font-inter text-sm font-bold text-white transition hover:bg-[#0057cc]"
+              >
+                Start a mock interview
+              </Link>
+            </div>
+          )}
           {entries.map((entry) => (
             <div
               key={`${entry.rank}-${entry.name}`}

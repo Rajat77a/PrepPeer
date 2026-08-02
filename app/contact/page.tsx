@@ -47,12 +47,14 @@ export default function ContactPage() {
             onSubmit={handleSubmit}
             className="mt-12 space-y-6 border-t border-[#07111f]/10 pt-10"
           >
+            <p className="font-inter text-xs font-semibold text-[#667085]">Fields marked <span className="required-badge">Required</span> must be completed.</p>
             <label className="block">
               <span className="font-inter text-sm font-semibold text-[#07111f]">
-                Name
+                Name <span className="required-badge">Required</span>
               </span>
               <input
                 required
+                aria-required="true"
                 type="text"
                 name="name"
                 minLength={2}
@@ -64,10 +66,11 @@ export default function ContactPage() {
 
             <label className="block">
               <span className="font-inter text-sm font-semibold text-[#07111f]">
-                Email
+                Email <span className="required-badge">Required</span>
               </span>
               <input
                 required
+                aria-required="true"
                 type="email"
                 name="email"
                 maxLength={254}
@@ -78,10 +81,11 @@ export default function ContactPage() {
 
             <label className="block">
               <span className="font-inter text-sm font-semibold text-[#07111f]">
-                Message
+                Message <span className="required-badge">Required</span>
               </span>
               <textarea
                 required
+                aria-required="true"
                 name="message"
                 rows={6}
                 minLength={5}

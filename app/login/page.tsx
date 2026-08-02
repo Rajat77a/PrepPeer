@@ -524,7 +524,10 @@ export default function LoginPage() {
                     }}
                     className="space-y-4 text-left"
                   >
-                    <label className="block" aria-label="Email">
+                    <label className="block">
+                      <span className="mb-2 flex items-center gap-2 px-1 font-inter text-xs font-black uppercase tracking-[0.16em] text-white">
+                        Email address <span className="required-badge">Required</span>
+                      </span>
                       <div className="group/email relative flex h-12 w-full items-center overflow-hidden rounded-2xl border border-white/22 bg-white/14 font-inter text-base font-black text-white shadow-[0_22px_70px_rgba(0,38,96,0.18),inset_0_1px_2px_rgba(255,255,255,0.22)] backdrop-blur-xl transition duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-[#06142b] hover:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)] focus-within:-translate-y-0.5 focus-within:border-white focus-within:bg-white focus-within:text-[#06142b] focus-within:shadow-[0_22px_70px_rgba(255,255,255,0.26),inset_0_1px_2px_rgba(255,255,255,0.95)]">
                         <input
                           type="email"
@@ -537,6 +540,7 @@ export default function LoginPage() {
                           autoComplete="email"
                           maxLength={254}
                           required
+                          aria-required="true"
                           className="relative z-10 h-full min-w-0 flex-1 border-0 bg-transparent px-5 pr-14 text-left font-inter text-base font-black text-white outline-none transition duration-300 placeholder:text-white/62 group-hover/email:text-[#06142b] group-hover/email:placeholder:text-[#5f7188] group-focus-within/email:text-[#06142b] group-focus-within/email:placeholder:text-[#5f7188]"
                         />
                         <button

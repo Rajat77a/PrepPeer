@@ -18,6 +18,8 @@ import {
   ArrowRight,
   Clock,
   LockKeyhole,
+  MicOff,
+  Save,
   ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -58,6 +60,7 @@ export default function InterviewPage() {
   const [endingSession, setEndingSession] = useState(false);
   const [completionError, setCompletionError] = useState("");
   const [completionRetry, setCompletionRetry] = useState(0);
+  const [draftSavedAt, setDraftSavedAt] = useState<string>("");
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -72,6 +75,29 @@ export default function InterviewPage() {
   useEffect(() => {
     questionReviewsRef.current = questionReviews;
   }, [questionReviews]);
+
+  useEffect(() => {
+    if (stage !== "interview" || !answers.some((answer) => answer.trim())) return;
+
+    const timeout = window.setTimeout(() => {
+      try {
+        sessionStorage.setItem(
+          "preppeer_interview_draft",
+          JSON.stringify({ current, answers, savedAt: Date.now() })
+        );
+        setDraftSavedAt(
+          new Intl.DateTimeFormat(undefined, {
+            hour: "numeric",
+            minute: "2-digit",
+          }).format(new Date())
+        );
+      } catch {
+        setDraftSavedAt("kept in this tab");
+      }
+    }, 450);
+
+    return () => window.clearTimeout(timeout);
+  }, [answers, current, stage]);
 
   const {
     shouldAutoSubmit,
@@ -151,6 +177,7 @@ export default function InterviewPage() {
             summary: result.summary,
           })
         );
+        sessionStorage.removeItem("preppeer_interview_draft");
 
         setError("");
         return true;
@@ -599,6 +626,13 @@ export default function InterviewPage() {
             Tell us about the role so we can tailor your questions.
           </p>
 
+          <div className="mb-8 grid gap-3 rounded-2xl border border-blue/15 bg-[#f7fbff] p-4 font-inter text-sm text-muted sm:grid-cols-2">
+            <span><strong className="text-text">5 questions</strong> · approximately 10–15 minutes</span>
+            <span><strong className="text-text">Text answers</strong> · no camera or microphone required</span>
+            <span><strong className="text-text">Scored on</strong> clarity, structure, confidence and depth</span>
+            <span><strong className="text-text">You receive</strong> feedback, improvement steps and a peer rank</span>
+          </div>
+
           <ProfileStepper
             onComplete={(data) => {
               const nextSetup = {
@@ -650,7 +684,7 @@ export default function InterviewPage() {
 
       <div className="max-w-[800px] mx-auto px-6 py-20">
         {stage === "interview" && !evaluating && !endingSession && (
-          <div className="mb-6 border-y border-[rgba(0,0,0,0.08)] py-3">
+          <div className="mb-6 rounded-2xl border border-[rgba(0,132,255,0.12)] bg-[#f8fbff] px-4 py-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <span className="h-8 w-px bg-[#00A07A]" />
@@ -678,6 +712,10 @@ export default function InterviewPage() {
                   </p>
                 </div>
               </div>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-blue/10 pt-3 font-inter text-xs font-semibold text-muted">
+              <span className="inline-flex items-center gap-2"><Save size={14} className="text-blue" />{draftSavedAt ? `Draft saved ${draftSavedAt}` : "Your draft saves as you type"}</span>
+              <span>Suggested pace: 2–3 minutes per answer · no hard countdown</span>
             </div>
           </div>
         )}
@@ -910,6 +948,13 @@ function IntegrityTermsModal({
               To ensure honest participation and fair scoring, this interview
               session will run with anti-cheating controls enabled.
             </p>
+
+            <div className="mt-5 grid gap-3 rounded-2xl border border-blue/15 bg-[#f7fbff] p-4 sm:grid-cols-2">
+              <p className="font-inter text-sm font-semibold leading-6 text-text"><Clock className="mr-2 inline text-blue" size={16} />5 questions · about 10–15 minutes</p>
+              <p className="font-inter text-sm font-semibold leading-6 text-text"><MicOff className="mr-2 inline text-blue" size={16} />No camera or microphone required</p>
+              <p className="font-inter text-sm font-semibold leading-6 text-text"><ShieldCheck className="mr-2 inline text-blue" size={16} />Clarity, structure, confidence and depth</p>
+              <p className="font-inter text-sm font-semibold leading-6 text-text"><Save className="mr-2 inline text-blue" size={16} />Draft status is visible while you answer</p>
+            </div>
 
             <ul className="mt-5 list-disc space-y-3 pl-5 font-inter text-sm leading-6 text-text">
               <li>

@@ -66,9 +66,21 @@ export default async function DashboardSessionsPage() {
 
         <div className="divide-y divide-[rgba(0,132,255,0.08)]">
           {userSessions.length === 0 && (
-            <div className="px-5 py-10 text-center font-inter text-sm font-semibold text-[#64748b]">
-              No interview sessions yet. Complete your first interview to enter
-              the ranked board.
+            <div className="px-5 py-12 text-center">
+              <p className="font-bricolage text-2xl font-extrabold tracking-[-0.03em] text-[#07111f]">
+                Your practice history starts here
+              </p>
+              <p className="mx-auto mt-2 max-w-md font-inter text-sm font-semibold leading-6 text-[#64748b]">
+                Complete a five-question mock to unlock your score, feedback, and
+                rank movement in this timeline.
+              </p>
+              <Link
+                href="/interview?mode=account"
+                className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#006cff] px-6 py-3 font-inter text-sm font-bold text-white transition hover:bg-[#0057cc]"
+              >
+                Start your first mock
+                <ArrowUpRight className="h-4 w-4" />
+              </Link>
             </div>
           )}
 
