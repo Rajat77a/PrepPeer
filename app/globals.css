@@ -1,4 +1,28 @@
 @font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/inter-latin.woff2") format("woff2");
+}
+
+@font-face {
   font-family: "Fustat";
   font-style: normal;
   font-weight: 700;
@@ -19,6 +43,7 @@
 @tailwind utilities;
 
 :root {
+  --font-inter: "Inter", Arial, sans-serif;
   --font-fustat: "Fustat", sans-serif;
   --blue: #0084ff;
   --blue-glow: rgba(0, 132, 255, 0.8);
