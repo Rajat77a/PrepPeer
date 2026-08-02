@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="orb-base" cx="29%" cy="23%" r="78%">
+      <stop offset="0" stop-color="#f4ffff"/>
+      <stop offset="0.12" stop-color="#91fbff"/>
+      <stop offset="0.32" stop-color="#24cfff"/>
+      <stop offset="0.57" stop-color="#087cff"/>
+      <stop offset="0.78" stop-color="#123cba"/>
+      <stop offset="1" stop-color="#03072d"/>
+    </radialGradient>
+    <radialGradient id="orb-glow" cx="46%" cy="42%" r="59%">
+      <stop offset="0" stop-color="#56eeff" stop-opacity="0.9"/>
+      <stop offset="0.5" stop-color="#0084ff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#031054" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="liquid-ribbon" x1="12" y1="10" x2="49" y2="55" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity="0.82"/>
+      <stop offset="0.24" stop-color="#b8ffff" stop-opacity="0.12"/>
+      <stop offset="0.58" stop-color="#001a88" stop-opacity="0.52"/>
+      <stop offset="0.82" stop-color="#071146" stop-opacity="0.88"/>
+      <stop offset="1" stop-color="#00051f" stop-opacity="0.2"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="15" y1="8" x2="51" y2="57" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity="0.92"/>
+      <stop offset="0.2" stop-color="#75f7ff" stop-opacity="0.42"/>
+      <stop offset="0.55" stop-color="#1798ff" stop-opacity="0.1"/>
+      <stop offset="0.82" stop-color="#001450" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#95f9ff" stop-opacity="0.4"/>
+    </linearGradient>
+    <filter id="orb-shadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0077ff" flood-opacity="0.45"/>
+      <feDropShadow dx="0" dy="1" stdDeviation="0.8" flood-color="#00134f" flood-opacity="0.8"/>
+    </filter>
+    <clipPath id="orb-clip">
+      <path d="M31.7 3.6c8.9-.4 17.9 3.9 23 11.6 5.2 7.8 6.6 18.6 2.2 27.1-4.5 8.7-14.9 16.9-25 17.8-9.7.8-20.4-5.6-25.2-14.3C2.2 37.7 3 27.1 7.2 19.1 11.5 10.9 22.1 4 31.7 3.6Z"/>
+    </clipPath>
+  </defs>
+
+  <g filter="url(#orb-shadow)">
+    <path fill="url(#orb-base)" d="M31.7 3.6c8.9-.4 17.9 3.9 23 11.6 5.2 7.8 6.6 18.6 2.2 27.1-4.5 8.7-14.9 16.9-25 17.8-9.7.8-20.4-5.6-25.2-14.3C2.2 37.7 3 27.1 7.2 19.1 11.5 10.9 22.1 4 31.7 3.6Z"/>
+    <g clip-path="url(#orb-clip)">
+      <ellipse cx="30" cy="29" rx="27" ry="26" fill="url(#orb-glow)"/>
+      <path fill="url(#liquid-ribbon)" d="M-2 32C8 18 13 28 23 21 33 14 37 8 52 12c9 2 14 8 18 14v41H-5Z" opacity="0.78"/>
+      <path fill="#001056" fill-opacity="0.6" d="M5 50c10-10 18-3 27-9 11-7 14-17 31-12l3 35H3Z"/>
+      <path fill="#70f5ff" fill-opacity="0.42" d="M5 29C16 13 25 28 36 15c7-8 17-7 26-2l3 10c-12-6-19 2-27 9-11 10-22-3-33 9Z"/>
+      <ellipse cx="21" cy="17" rx="10.5" ry="7" fill="#fff" fill-opacity="0.62" transform="rotate(-25 21 17)"/>
+      <ellipse cx="17.5" cy="13.5" rx="4.3" ry="2.7" fill="#fff" fill-opacity="0.94" transform="rotate(-25 17.5 13.5)"/>
+      <ellipse cx="46" cy="46" rx="12" ry="13" fill="#000522" fill-opacity="0.5"/>
+      <circle cx="48" cy="21" r="2.2" fill="#d9ffff" fill-opacity="0.68"/>
+    </g>
+    <path fill="none" stroke="url(#rim)" stroke-width="1.7" d="M31.7 4.4c8.7-.4 17.3 3.7 22.3 11.2 5 7.6 6.4 18.1 2.1 26.3-4.3 8.5-14.5 16.4-24.3 17.2-9.4.8-19.7-5.4-24.4-13.7C3 37.5 3.8 27.3 7.9 19.5 12.1 11.5 22.4 4.8 31.7 4.4Z"/>
+  </g>
+</svg>
