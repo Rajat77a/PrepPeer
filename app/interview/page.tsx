@@ -33,6 +33,23 @@ type SetupData = {
 
 type Stage = "setup" | "terms" | "interview" | "feedback";
 
+const normalizeAutostartExperience = (value: string | null) => {
+  const cleanValue = value?.trim();
+
+  if (
+    cleanValue === "Fresher" ||
+    cleanValue === "0-1 years" ||
+    cleanValue === "1-3 years" ||
+    cleanValue === "3-6 years" ||
+    cleanValue === "6+ years" ||
+    cleanValue === "Senior (7+ Years)"
+  ) {
+    return cleanValue;
+  }
+
+  return "Fresher";
+};
+
 export default function InterviewPage() {
   const router = useRouter();
   const [accessChecked, setAccessChecked] = useState(false);
@@ -309,13 +326,18 @@ export default function InterviewPage() {
 
     if (!shouldAutoStart) return;
 
+    const cleanRole = params.get("role")?.trim();
+    const cleanCompany = params.get("company")?.trim();
+
     const nextSetup = {
-      domain: params.get("role") ?? "",
-      experience: params.get("experience") ?? "",
-      companyType: params.get("company") ?? "",
+      domain: cleanRole && cleanRole.length >= 2 ? cleanRole : "Interview",
+      experience: normalizeAutostartExperience(params.get("experience")),
+      companyType:
+        cleanCompany && cleanCompany.length >= 2 ? cleanCompany : "General",
     };
 
     if (!isValidSetup(nextSetup)) {
+      setError("Could not start automatically. Please try Practice again.");
       return;
     }
 
