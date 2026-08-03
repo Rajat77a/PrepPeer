@@ -11,6 +11,7 @@ import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
 import { createClient } from "@/utils/supabase/client";
 import { csrfHeaders } from "@/utils/csrf";
+import { getTrustedProfile } from "@/lib/profile";
 import type { QuestionReview } from "@/lib/types";
 import { isValidSetup } from "@/lib/validation";
 import {
@@ -326,26 +327,49 @@ export default function InterviewPage() {
 
     if (!shouldAutoStart) return;
 
-    const cleanRole = params.get("role")?.trim();
-    const cleanCompany = params.get("company")?.trim();
-
-    const nextSetup = {
-      domain: cleanRole && cleanRole.length >= 2 ? cleanRole : "Interview",
-      experience: normalizeAutostartExperience(params.get("experience")),
-      companyType:
-        cleanCompany && cleanCompany.length >= 2 ? cleanCompany : "General",
-    };
-
-    if (!isValidSetup(nextSetup)) {
-      setError("Could not start automatically. Please try Practice again.");
-      return;
-    }
-
     autoStartRef.current = true;
     setDirectStarting(true);
-    setPendingSetup(nextSetup);
-    setSetup(nextSetup);
-    void handleStart(nextSetup);
+
+    const startFromSavedProfile = async () => {
+      const requestedExperience = params.get("experience");
+      let nextSetup: SetupData = {
+        domain: params.get("role")?.trim() ?? "",
+        experience: requestedExperience
+          ? normalizeAutostartExperience(requestedExperience)
+          : "",
+        companyType: params.get("company")?.trim() ?? "",
+      };
+
+      if (!isValidSetup(nextSetup)) {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+
+        if (user) {
+          const profile = getTrustedProfile(user);
+          nextSetup = {
+            domain: profile.role,
+            experience: profile.experience,
+            companyType: profile.company,
+          };
+        }
+      }
+
+      if (!isValidSetup(nextSetup)) {
+        setDirectStarting(false);
+        return;
+      }
+
+      setPendingSetup(nextSetup);
+      setSetup(nextSetup);
+      await handleStart(nextSetup);
+    };
+
+    void startFromSavedProfile().catch(() => {
+      setDirectStarting(false);
+      setError("Your saved interview profile could not be loaded. Please confirm the details below.");
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stage]);
 

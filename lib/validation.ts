@@ -417,7 +417,8 @@ const isFilledHoneypot = (value: unknown) => {
 export const findAbusePattern = (
   value: unknown,
   fieldPath = "body",
-  depth = 0
+  depth = 0,
+  opaqueFieldNames: ReadonlySet<string> = new Set()
 ): AbuseMatch | null => {
   if (depth > 8) {
     return { fieldPath, reason: "payload nesting is too deep" };
@@ -446,7 +447,8 @@ export const findAbusePattern = (
       const match = findAbusePattern(
         value[index],
         `${fieldPath}[${index}]`,
-        depth + 1
+        depth + 1,
+        opaqueFieldNames
       );
       if (match) return match;
     }
@@ -461,11 +463,20 @@ export const findAbusePattern = (
     }
 
     for (const [key, child] of entries) {
+      if (opaqueFieldNames.has(key)) {
+        continue;
+      }
+
       if (HONEYPOT_FIELDS.has(key) && isFilledHoneypot(child)) {
         return { fieldPath: `${fieldPath}.${key}`, reason: "honeypot field" };
       }
 
-      const match = findAbusePattern(child, `${fieldPath}.${key}`, depth + 1);
+      const match = findAbusePattern(
+        child,
+        `${fieldPath}.${key}`,
+        depth + 1,
+        opaqueFieldNames
+      );
       if (match) return match;
     }
   }

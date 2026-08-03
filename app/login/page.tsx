@@ -10,7 +10,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { csrfHeaders } from "@/utils/csrf";
 import { hasCompletedProfile } from "@/lib/profile";
@@ -121,13 +121,11 @@ function LoginBackground() {
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [mode, setMode] = useState<AuthMode>(() => {
-    if (typeof window === "undefined") return "signin";
-
-    const requestedMode = new URLSearchParams(window.location.search).get("mode");
-    return requestedMode === "signup" ? "signup" : "signin";
-  });
+  const [mode, setMode] = useState<AuthMode>(() =>
+    searchParams.get("mode") === "signup" ? "signup" : "signin"
+  );
 
   const [step, setStep] = useState<AuthStep>("email");
   const [email, setEmail] = useState("");
@@ -448,7 +446,7 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#031b4f] text-white">
+    <main className="auth-shell relative min-h-screen overflow-hidden bg-[#031b4f] text-white">
       <LoginBackground />
 
       <Link
@@ -479,12 +477,12 @@ export default function LoginPage() {
               >
                 <div className="mb-8 flex items-center justify-center gap-3">
                   <OrbLogo size={36} />
-                  <span className="font-inter text-lg font-black tracking-[-0.03em] text-white">
+                  <span className="font-fustat text-lg font-bold tracking-[-0.03em] text-white">
                     PrepPeer
                   </span>
                 </div>
 
-                <h1 className="font-inter text-[clamp(38px,6vw,56px)] font-black leading-[0.95] tracking-[-0.06em] text-white drop-shadow-[0_18px_36px_rgba(0,38,96,0.22)]">
+                <h1 className="font-fustat text-[clamp(38px,6vw,56px)] font-extrabold leading-[0.95] tracking-[-0.055em] text-white drop-shadow-[0_18px_36px_rgba(0,38,96,0.22)]">
                   {activeCopy.title}
                 </h1>
 
@@ -602,7 +600,7 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                <h1 className="font-inter text-[clamp(44px,7vw,76px)] font-black leading-[0.9] tracking-[-0.06em] text-white">
+                <h1 className="font-fustat text-[clamp(44px,7vw,76px)] font-extrabold leading-[0.9] tracking-[-0.055em] text-white">
                   Enter your code
                 </h1>
 
@@ -683,7 +681,7 @@ export default function LoginPage() {
                     <p className="font-inter text-xs font-black uppercase tracking-[0.2em] text-white/70">
                       Password
                     </p>
-                    <h1 className="font-inter text-3xl font-black tracking-[-0.04em] text-white">
+                    <h1 className="font-fustat text-3xl font-extrabold tracking-[-0.035em] text-white">
                       Create your password
                     </h1>
                   </div>
@@ -708,7 +706,7 @@ export default function LoginPage() {
                   <Check size={34} strokeWidth={2.8} />
                 </motion.div>
 
-                <h1 className="mt-7 font-inter text-[clamp(44px,7vw,76px)] font-black leading-[0.9] tracking-[-0.06em] text-white">
+                <h1 className="mt-7 font-fustat text-[clamp(44px,7vw,76px)] font-extrabold leading-[0.9] tracking-[-0.055em] text-white">
                   You&apos;re in
                 </h1>
 

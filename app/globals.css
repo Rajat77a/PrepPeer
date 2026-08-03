@@ -92,18 +92,24 @@
 }
 
 .required-badge {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 6px;
-  border-radius: 999px;
-  background: #fff0f0;
-  color: #b42318;
-  padding: 2px 7px;
+  display: inline;
+  margin-left: 3px;
+  color: #c81e1e;
+  padding: 0;
   font-family: var(--font-inter);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: none;
+  font-size: 0;
+  line-height: 1;
+  vertical-align: super;
+}
+
+.required-badge::after {
+  content: "*";
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.auth-shell .required-badge {
+  color: #fecaca;
 }
 
 @media (prefers-reduced-motion: reduce) {
