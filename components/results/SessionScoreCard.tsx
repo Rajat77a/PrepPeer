@@ -35,18 +35,13 @@ export function SessionScoreCard({
   const hasLiveRank =
     !rankLocked && report.currentRank > 0 && report.totalCandidates > 0;
 
-  const accountPracticePath = `/interview?mode=account&autostart=1&role=${encodeURIComponent(
-    report.role || "Interview"
-  )}&experience=${encodeURIComponent("Fresher")}&company=${encodeURIComponent(
-    report.companyType || "General"
-  )}`;
+  const accountPracticePath = "/interview?mode=account&autostart=1";
 
   const encodedAccountPracticePath = encodeURIComponent(accountPracticePath);
 
   const practiceHref = isAccountResult
     ? accountPracticePath
     : `/login?next=${encodedAccountPracticePath}`;
-
   const leaderboardHref =
     isAccountResult || hasLiveRank ? "/dashboard/leaderboard" : "/leaderboard";
 

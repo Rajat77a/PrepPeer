@@ -10,11 +10,9 @@ import {
 } from "@/lib/server/interviewProof";
 import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
-import {
-  normalizeFeedback,
-  parseEvaluationInput,
-  readJsonBody,
-} from "@/lib/validation";
+import { isAgentConfigured } from "@/lib/server/agents/groq";
+import { evaluateInterviewAnswer } from "@/lib/server/agents/evaluationWorkflow";
+import { parseEvaluationInput, readJsonBody } from "@/lib/validation";
 
 async function postEvaluateAnswer(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
@@ -40,6 +38,7 @@ async function postEvaluateAnswer(req: NextRequest) {
     userId: user.id,
     route: "evaluate-answer",
     body: body.data,
+    opaqueFieldNames: ["questionSetToken"],
   });
   if (!abuseGuard.ok) return abuseGuard.response;
 
@@ -62,7 +61,6 @@ async function postEvaluateAnswer(req: NextRequest) {
       questionSet.kind !== "questionSet" ||
       questionSet.domain !== input.domain ||
       questionSet.experience !== input.experience ||
-      questionSet.currentIndex !== input.questionIndex ||
       questionSet.questions[input.questionIndex] !== input.question
     ) {
       return NextResponse.json(
@@ -90,8 +88,7 @@ async function postEvaluateAnswer(req: NextRequest) {
       return NextResponse.json({ feedback, evaluationToken });
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
+    if (!isAgentConfigured()) {
       logServerError("Evaluation is not configured", new Error("Missing GROQ_API_KEY"));
       return NextResponse.json(
         { error: "Evaluation is unavailable." },
@@ -99,76 +96,12 @@ async function postEvaluateAnswer(req: NextRequest) {
       );
     }
 
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
-          messages: [
-            {
-              role: "user",
-              content: `You are a strict technical interviewer. Evaluate whether the answer genuinely addresses the exact question.
-
-Question: ${input.question}
-Candidate level: ${input.experience}
-Domain: ${input.domain}
-Answer: ${input.answer}
-
-Score Communication, Problem Solving, Specificity, and Accuracy from 0 to 10.
-A meta-answer, filler, irrelevant response, or non-answer receives 0 on every dimension even if it is grammatical.
-Only award high scores for question-specific, accurate reasoning with concrete details.
-
-Return only:
-{
-  "compositeScore": 0,
-  "dimensions": [
-    {"label":"Communication","value":0,"reason":"one sentence"},
-    {"label":"Problem Solving","value":0,"reason":"one sentence"},
-    {"label":"Specificity","value":0,"reason":"one sentence"},
-    {"label":"Accuracy","value":0,"reason":"one sentence"}
-  ],
-  "modelAnswer":"a strong concise model answer"
-}`,
-            },
-          ],
-          max_tokens: 1024,
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      logServerError("Evaluation provider failed", {
-        status: response.status,
-        statusText: response.statusText,
-      });
-      return NextResponse.json(
-        { error: "Evaluation is temporarily unavailable." },
-        { status: 502 }
-      );
-    }
-
-    const json = await response.json();
-    const text = json.choices?.[0]?.message?.content ?? "";
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) {
-      logServerError("Evaluation returned malformed content", {
-        textPreview: text.slice(0, 500),
-      });
-      return NextResponse.json(
-        { error: "Evaluation is temporarily unavailable." },
-        { status: 502 }
-      );
-    }
-
-    const feedback = normalizeFeedback(JSON.parse(match[0]));
-    if (!feedback) {
-      logServerError("Evaluation returned invalid feedback payload", {
-        payloadPreview: match[0].slice(0, 500),
+    let feedback;
+    try {
+      feedback = await evaluateInterviewAnswer(input);
+    } catch (error) {
+      logServerError("Multi-agent evaluation workflow failed", error, {
+        userId: user.id,
       });
       return NextResponse.json(
         { error: "Evaluation is temporarily unavailable." },

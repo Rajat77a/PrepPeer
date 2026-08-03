@@ -37,11 +37,13 @@ export const enforceRequestAbuseGuards = ({
   userId,
   route,
   body,
+  opaqueFieldNames = [],
 }: {
   request: Request;
   userId: string;
   route: string;
   body: unknown;
+  opaqueFieldNames?: readonly string[];
 }):
   | { ok: true }
   | {
@@ -81,7 +83,12 @@ export const enforceRequestAbuseGuards = ({
     };
   }
 
-  const abuseMatch = findAbusePattern(body);
+  const abuseMatch = findAbusePattern(
+    body,
+    "body",
+    0,
+    new Set(opaqueFieldNames)
+  );
   if (abuseMatch) {
     logBlockedAttempt(
       route,

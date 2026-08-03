@@ -1,12 +1,38 @@
-import { NextRequest, NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedContext } from "@/lib/server/auth";
 import { withApiErrorHandler } from "@/lib/server/apiError";
 import { createInterviewProof } from "@/lib/server/interviewProof";
 import { logServerError } from "@/lib/server/errorLog";
 import { enforceCostRateLimit } from "@/lib/server/costRateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
+import { isAgentConfigured } from "@/lib/server/agents/groq";
+import {
+  generateInterviewQuestions,
+  readPreviousQuestions,
+} from "@/lib/server/agents/questionWorkflow";
 import { isValidSetup, readJsonBody } from "@/lib/validation";
+import { createOptionalAdminClient } from "@/utils/supabase/admin";
+
+const loadQuestionHistory = async (userId: string, role: string) => {
+  const admin = createOptionalAdminClient();
+  if (!admin) return [];
+
+  const { data, error } = await admin
+    .from("interview_sessions")
+    .select("summary")
+    .eq("user_id", userId)
+    .eq("role", role)
+    .order("created_at", { ascending: false })
+    .limit(8);
+
+  if (error) {
+    logServerError("Question history lookup failed", error, { userId });
+    return [];
+  }
+
+  return readPreviousQuestions(Array.isArray(data) ? data : []);
+};
 
 async function postGenerateQuestions(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
@@ -35,153 +61,31 @@ async function postGenerateQuestions(req: NextRequest) {
   });
   if (!abuseGuard.ok) return abuseGuard.response;
 
-  try {
-    const input = body.data;
-    if (!isValidSetup(input)) {
-      return NextResponse.json(
-        { error: "Invalid interview setup." },
-        { status: 400 }
-      );
-    }
-
-    const { domain, experience, companyType } = input;
-    const isLeadSreRole =
-      /\bsite reliability\b|\bsre\b/i.test(domain) && /\blead\b/i.test(domain);
-
-    const questionPrompt = isLeadSreRole
-      ? `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for a Lead Site Reliability Engineer role at a ${companyType} company.
-
-Role context:
-A Lead Site Reliability Engineer is responsible for ensuring highly available, scalable, secure, and cost-efficient cloud infrastructure. The role combines software engineering and operations to build reliable distributed systems, automate infrastructure, improve observability, optimize performance, manage incidents, and collaborate with development teams to improve system reliability.
-
-The interviewer should behave like a Senior Engineering Manager at Google, Amazon, Microsoft, or Meta hiring for a Lead SRE position.
-
-Question mix:
-- 2 deeply technical questions covering Linux, networking, cloud infrastructure, Kubernetes, Docker, Terraform, Helm, CI/CD, observability, databases, distributed systems, scalability, high availability, disaster recovery, security, or cost optimization
-- 1 production incident scenario focused on real production incidents, debugging distributed systems, Kubernetes troubleshooting, RCA, post-mortems, SLOs, SLIs, alerting, incident response, or escalation
-- 1 leadership question covering mentoring, ownership, cross-functional collaboration, decision making under pressure, communication, reliability culture, or leading through incidents
-- 1 behavioral question requiring a specific example, actions, tradeoffs, outcome, and reflection
-
-Difficulty distribution for this 5-question interview:
-- 1 Medium
-- 2 Hard
-- 2 Expert
-
-Primary responsibilities to test:
-- Develop and improve observability using monitoring, logging, tracing, and alerting tools
-- Optimize system performance and troubleshoot production incidents
-- Conduct Root Cause Analysis and post-mortems after incidents
-- Collaborate closely with software engineers to improve reliability, scalability, and performance
-- Drive cloud infrastructure cost optimization initiatives
-- Monitor and manage databases like MongoDB, Redis, Elasticsearch, and queue-based systems
-- Build automation for infrastructure and operational tasks
-- Improve deployment reliability using CI/CD pipelines
-- Define and maintain SLOs, SLIs, and incident response processes
-
-Required skills to emphasize:
-AWS, Google Cloud Platform, Docker, Kubernetes, GKE, Terraform, Helm, Prometheus, Grafana, ELK Stack, OpenTelemetry, Jenkins, GitHub Actions, ArgoCD, MongoDB, Redis, Elasticsearch, queue-based messaging systems, Python, Bash, shell scripting, Linux, networking, REST APIs, JSON parsing, on-call rotations, SLIs, SLOs, SLAs, escalation policies, and incident response.
-
-Interview focus areas:
-Linux and operating systems, networking fundamentals, cloud infrastructure, Kubernetes, Docker, infrastructure as code, CI/CD pipelines, monitoring and observability, incident response, performance optimization, distributed systems, scalability, reliability engineering, automation, security best practices, cost optimization, database scaling, disaster recovery, high availability, leadership, and team collaboration.
-
-Evaluation criteria:
-Technical Accuracy 30%, Problem Solving 20%, System Design 20%, Reliability & Operational Excellence 15%, Leadership & Communication 10%, Best Practices & Security 5%.
-
-Calibrate difficulty to ${experience}. Avoid generic questions. Each question must be one clear sentence or two short sentences and require senior-level reasoning.
-
-Return a JSON array of exactly 5 strings. No preamble or markdown.`
-      : `Generate exactly 5 high-quality mock interview questions for a ${experience} candidate applying for this user-entered target role: "${domain}".
-Company or interview environment entered by the user: "${companyType}".
-
-Question mix:
-- 2 role-specific technical questions that test real "${domain}" knowledge, tradeoffs, debugging, implementation details, or architecture decisions
-- 1 practical problem-solving scenario with a clear constraint
-- 1 behavioral question requiring a specific example, actions, outcome, and reflection
-- 1 company-fit question tailored to a "${companyType}" environment
-
-Calibrate difficulty to ${experience}. Avoid generic questions. Each question must be one clear sentence or two short sentences and require reasoning.
-
-Return a JSON array of exactly 5 strings. No preamble or markdown.`;
-
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
-      logServerError(
-        "Question generation is not configured",
-        new Error("Missing GROQ_API_KEY")
-      );
-      return NextResponse.json(
-        { error: "Question generation is unavailable." },
-        { status: 503 }
-      );
-    }
-
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
-          messages: [
-            {
-              role: "user",
-              content: questionPrompt,
-            },
-          ],
-          max_tokens: 1024,
-        }),
-      }
+  if (!isValidSetup(body.data)) {
+    return NextResponse.json(
+      { error: "Invalid interview setup." },
+      { status: 400 }
     );
+  }
 
-    if (!response.ok) {
-      logServerError("Question generation provider failed", {
-        status: response.status,
-        statusText: response.statusText,
-      });
-      return NextResponse.json(
-        { error: "Question generation is temporarily unavailable." },
-        { status: 502 }
-      );
-    }
+  if (!isAgentConfigured()) {
+    logServerError(
+      "Question agents are not configured",
+      new Error("Missing GROQ_API_KEY")
+    );
+    return NextResponse.json(
+      { error: "Question generation is unavailable." },
+      { status: 503 }
+    );
+  }
 
-    const json = await response.json();
-    const text = json.choices?.[0]?.message?.content ?? "";
-    const match = text.match(/\[[\s\S]*\]/);
-
-    if (!match) {
-      logServerError("Question generation returned malformed content", {
-        textPreview: text.slice(0, 500),
-      });
-      return NextResponse.json(
-        { error: "Question generation is temporarily unavailable." },
-        { status: 502 }
-      );
-    }
-
-    const questions: unknown = JSON.parse(match[0]);
-    if (
-      !Array.isArray(questions) ||
-      questions.length !== 5 ||
-      questions.some(
-        (question) =>
-          typeof question !== "string" ||
-          question.trim().length < 8 ||
-          question.length > 1200
-      )
-    ) {
-      logServerError("Question generation returned invalid question payload", {
-        questions,
-      });
-      return NextResponse.json(
-        { error: "Question generation is temporarily unavailable." },
-        { status: 502 }
-      );
-    }
-
-    const normalizedQuestions = questions.map((question) => question.trim());
+  try {
+    const setup = body.data;
+    const previousQuestions = await loadQuestionHistory(user.id, setup.domain);
+    const questions = await generateInterviewQuestions(
+      setup,
+      previousQuestions
+    );
     const sessionId = randomUUID();
 
     const questionSetToken = createInterviewProof({
@@ -189,30 +93,37 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`;
       version: 1,
       userId: user.id,
       sessionId,
-      domain,
-      experience,
-      companyType,
-      questions: normalizedQuestions,
+      domain: setup.domain,
+      experience: setup.experience,
+      companyType: setup.companyType,
+      questions,
       currentIndex: 0,
       issuedAt: Date.now(),
     });
 
-    return NextResponse.json({
-      question: normalizedQuestions[0],
-      questionIndex: 0,
-      totalQuestions: normalizedQuestions.length,
-      questionSetToken,
-    }, {
-      headers: {
-        "Cache-Control": "no-store, private",
-        Pragma: "no-cache",
+    return NextResponse.json(
+      {
+        questions,
+        question: questions[0],
+        questionIndex: 0,
+        totalQuestions: questions.length,
+        questionSetToken,
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "no-store, private",
+          Pragma: "no-cache",
+        },
+      }
+    );
   } catch (error) {
-    logServerError("Question generation request failed", error, {
+    logServerError("Multi-agent question workflow failed", error, {
       userId: user.id,
     });
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Question generation is temporarily unavailable." },
+      { status: 502 }
+    );
   }
 }
 

@@ -30,6 +30,7 @@ async function postInterviewQuestion(request: NextRequest) {
     userId: user.id,
     route: "interview-question",
     body: body.data,
+    opaqueFieldNames: ["questionSetToken"],
   });
   if (!abuseGuard.ok) return abuseGuard.response;
 
