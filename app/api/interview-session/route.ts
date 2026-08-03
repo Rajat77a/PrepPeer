@@ -29,8 +29,16 @@ import {
 } from "@/lib/validation";
 
 const TOTAL_QUESTIONS = 5;
-const SESSION_COLUMNS =
-  "composite_score,dimensions,question_scores,summary";
+const SESSION_COLUMNS = "composite_score,dimensions,question_scores,summary";
+
+const questionDifficultyByIndex = [
+  { difficulty: "Medium", weight: 1 },
+  { difficulty: "Hard", weight: 1.25 },
+  { difficulty: "Hard", weight: 1.25 },
+  { difficulty: "Expert", weight: 1.5 },
+  { difficulty: "Expert", weight: 1.5 },
+] as const;
+
 const zeroDimensions: DimensionScore[] = [
   "Communication",
   "Problem Solving",
@@ -51,6 +59,21 @@ type ReviewInput = {
   detectionToken?: string;
   reason?: string;
 };
+
+type WeightedDimensions = {
+  dimensions: DimensionScore[];
+  weight: number;
+};
+
+const getQuestionIndex = (question: string) => {
+  const index = Number(question.replace("Q", "")) - 1;
+  return Number.isFinite(index) && index >= 0 && index < TOTAL_QUESTIONS
+    ? index
+    : 0;
+};
+
+const getQuestionWeight = (question: string) =>
+  questionDifficultyByIndex[getQuestionIndex(question)]?.weight ?? 1;
 
 const parseReviews = (value: unknown): ReviewInput[] | null => {
   if (!Array.isArray(value) || value.length > TOTAL_QUESTIONS) return null;
@@ -124,7 +147,10 @@ async function postInterviewSession(req: NextRequest) {
 
   const admin = createOptionalAdminClient();
   if (!admin) {
-    logServerError("Interview storage is not configured", new Error("Missing Supabase admin client"));
+    logServerError(
+      "Interview storage is not configured",
+      new Error("Missing Supabase admin client")
+    );
     return NextResponse.json(
       { error: "Interview saving is temporarily unavailable. Please try again later." },
       { status: 503 }
@@ -200,16 +226,14 @@ async function postInterviewSession(req: NextRequest) {
       "questionSet",
       user.id
     );
+
     if (
       !questionSet ||
       questionSet.kind !== "questionSet" ||
       questionSet.domain !== setup.domain ||
       questionSet.experience !== setup.experience ||
       questionSet.companyType !== setup.companyType ||
-      questionSet.questions.length !== TOTAL_QUESTIONS ||
-      !Number.isInteger(questionSet.currentIndex) ||
-      questionSet.currentIndex < 0 ||
-      questionSet.currentIndex >= TOTAL_QUESTIONS
+      questionSet.questions.length !== TOTAL_QUESTIONS
     ) {
       return NextResponse.json(
         { error: "The interview question set is invalid or expired." },
@@ -244,7 +268,7 @@ async function postInterviewSession(req: NextRequest) {
       });
     }
 
-    const feedbackDimensions: DimensionScore[][] = [];
+    const feedbackDimensions: WeightedDimensions[] = [];
     const trustedReviews: QuestionReview[] = [];
 
     for (let index = 0; index < TOTAL_QUESTIONS; index += 1) {
@@ -383,7 +407,11 @@ async function postInterviewSession(req: NextRequest) {
         );
       }
 
-      feedbackDimensions.push(evaluation.feedback.dimensions);
+      feedbackDimensions.push({
+        dimensions: evaluation.feedback.dimensions,
+        weight: getQuestionWeight(submitted.question),
+      });
+
       trustedReviews.push({
         question: submitted.question,
         prompt: submitted.prompt,
@@ -400,31 +428,47 @@ async function postInterviewSession(req: NextRequest) {
     const attemptedReviews = trustedReviews.filter(
       (review) => review.status !== "autoSkipped"
     );
+
     const attemptedCount = attemptedReviews.length;
-    const attemptedAverage =
-      attemptedCount > 0
-        ? attemptedReviews.reduce((sum, review) => sum + review.score, 0) /
-          attemptedCount
-        : 0;
+
+    const attemptedWeightTotal = attemptedReviews.reduce(
+      (sum, review) => sum + getQuestionWeight(review.question),
+      0
+    );
+
+    const weightedScoreTotal = attemptedReviews.reduce(
+      (sum, review) => sum + review.score * getQuestionWeight(review.question),
+      0
+    );
+
+    const weightedAverage =
+      attemptedWeightTotal > 0 ? weightedScoreTotal / attemptedWeightTotal : 0;
+
     const completionFactor =
       attemptedCount > 0
         ? 0.5 + 0.5 * (attemptedCount / TOTAL_QUESTIONS)
         : 0;
-    const compositeScore = Math.round(attemptedAverage * completionFactor);
+
+    const compositeScore = Math.round(weightedAverage * completionFactor);
 
     const dimensions =
       feedbackDimensions.length > 0 && attemptedCount > 0
         ? zeroDimensions.map((fallback, index) => {
-            const source = feedbackDimensions[0]?.[index] ?? fallback;
-            const total = feedbackDimensions.reduce(
-              (sum, item) => sum + (item[index]?.value ?? 0),
+            const source = feedbackDimensions[0]?.dimensions[index] ?? fallback;
+
+            const weightedTotal = feedbackDimensions.reduce(
+              (sum, item) =>
+                sum + (item.dimensions[index]?.value ?? 0) * item.weight,
               0
             );
 
             return {
               ...source,
               value: Number(
-                ((total / attemptedCount) * completionFactor).toFixed(1)
+                (
+                  (weightedTotal / Math.max(attemptedWeightTotal, 1)) *
+                  completionFactor
+                ).toFixed(1)
               ),
             };
           })
@@ -434,10 +478,12 @@ async function postInterviewSession(req: NextRequest) {
       question: review.question,
       score: review.score,
     }));
+
     const generatedSummary = await generateInterviewSummary(
       input.completionReason,
       trustedReviews
     );
+
     const summary = {
       sessionAttemptId: questionSet.sessionId,
       completionReason: input.completionReason,
@@ -449,6 +495,7 @@ async function postInterviewSession(req: NextRequest) {
         const generated = generatedSummary.questionReviews.find(
           (item) => item.question === review.question
         );
+
         return {
           ...review,
           summary: generated?.summary,
@@ -458,18 +505,16 @@ async function postInterviewSession(req: NextRequest) {
       }),
     };
 
-    const { error } = await admin
-      .from("interview_sessions")
-      .insert({
-        user_id: user.id,
-        role: setup.domain,
-        experience: setup.experience,
-        company_type: setup.companyType,
-        composite_score: compositeScore,
-        dimensions,
-        question_scores: questionScores,
-        summary,
-      });
+    const { error } = await admin.from("interview_sessions").insert({
+      user_id: user.id,
+      role: setup.domain,
+      experience: setup.experience,
+      company_type: setup.companyType,
+      composite_score: compositeScore,
+      dimensions,
+      question_scores: questionScores,
+      summary,
+    });
 
     if (error) {
       logServerError("Interview result insert failed", error, {
