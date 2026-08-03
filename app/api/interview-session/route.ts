@@ -139,6 +139,29 @@ const parseReviews = (value: unknown): ReviewInput[] | null => {
   return parsed;
 };
 
+const getSafeAbuseCheckBody = (value: unknown) => {
+  if (!isPlainObject(value)) return value;
+
+  return {
+    setup: value.setup,
+    completionReason: value.completionReason,
+    questionSetToken:
+      typeof value.questionSetToken === "string"
+        ? "present"
+        : value.questionSetToken,
+    questionReviews: Array.isArray(value.questionReviews)
+      ? value.questionReviews.slice(0, TOTAL_QUESTIONS).map((item) =>
+          isPlainObject(item)
+            ? {
+                question: item.question,
+                status: item.status,
+              }
+            : item
+        )
+      : value.questionReviews,
+  };
+};
+
 async function postInterviewSession(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
   if (!user) {
@@ -152,7 +175,10 @@ async function postInterviewSession(req: NextRequest) {
       new Error("Missing Supabase admin client")
     );
     return NextResponse.json(
-      { error: "Interview saving is temporarily unavailable. Please try again later." },
+      {
+        error:
+          "Interview saving is temporarily unavailable. Please try again later.",
+      },
       { status: 503 }
     );
   }
@@ -189,7 +215,7 @@ async function postInterviewSession(req: NextRequest) {
     request: req,
     userId: user.id,
     route: "interview-session",
-    body: body.data,
+    body: getSafeAbuseCheckBody(body.data),
   });
   if (!abuseGuard.ok) return abuseGuard.response;
 
