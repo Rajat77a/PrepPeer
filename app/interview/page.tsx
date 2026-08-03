@@ -18,8 +18,6 @@ import {
   ArrowRight,
   Clock,
   LockKeyhole,
-  MicOff,
-  Save,
   ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -40,9 +38,7 @@ export default function InterviewPage() {
   const [accessChecked, setAccessChecked] = useState(false);
   const [stage, setStage] = useState<Stage>("setup");
   const [current, setCurrent] = useState(1);
-  const [questions, setQuestions] = useState<string[]>(
-    Array(TOTAL).fill("")
-  );
+  const [questions, setQuestions] = useState<string[]>([]);
   const [answers, setAnswers] = useState<string[]>(Array(TOTAL).fill(""));
   const [questionSetToken, setQuestionSetToken] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,7 +56,6 @@ export default function InterviewPage() {
   const [endingSession, setEndingSession] = useState(false);
   const [completionError, setCompletionError] = useState("");
   const [completionRetry, setCompletionRetry] = useState(0);
-  const [draftSavedAt, setDraftSavedAt] = useState<string>("");
   const [setup, setSetup] = useState<SetupData>({
     domain: "",
     experience: "",
@@ -76,34 +71,7 @@ export default function InterviewPage() {
     questionReviewsRef.current = questionReviews;
   }, [questionReviews]);
 
-  useEffect(() => {
-    if (stage !== "interview" || !answers.some((answer) => answer.trim())) return;
-
-    const timeout = window.setTimeout(() => {
-      try {
-        sessionStorage.setItem(
-          "preppeer_interview_draft",
-          JSON.stringify({ current, answers, savedAt: Date.now() })
-        );
-        setDraftSavedAt(
-          new Intl.DateTimeFormat(undefined, {
-            hour: "numeric",
-            minute: "2-digit",
-          }).format(new Date())
-        );
-      } catch {
-        setDraftSavedAt("kept in this tab");
-      }
-    }, 450);
-
-    return () => window.clearTimeout(timeout);
-  }, [answers, current, stage]);
-
-  const {
-    shouldAutoSubmit,
-    timerDisplay,
-    resetTimer,
-  } = useAntiCheat(
+  const { shouldAutoSubmit, timerDisplay, resetTimer } = useAntiCheat(
     questions.length === TOTAL &&
       (stage === "interview" || stage === "feedback") &&
       !endingSession
@@ -177,7 +145,6 @@ export default function InterviewPage() {
             summary: result.summary,
           })
         );
-        sessionStorage.removeItem("preppeer_interview_draft");
 
         setError("");
         return true;
@@ -305,15 +272,11 @@ export default function InterviewPage() {
 
       if (
         res.ok &&
-        typeof data.question === "string" &&
-        data.questionIndex === 0 &&
-        data.totalQuestions === TOTAL &&
+        Array.isArray(data.questions) &&
+        data.questions.length === TOTAL &&
         typeof data.questionSetToken === "string"
       ) {
-        const releasedQuestions = Array(TOTAL).fill("");
-        releasedQuestions[0] = data.question;
-        setQuestions(releasedQuestions);
-        setCurrent(1);
+        setQuestions(data.questions);
         setAnswers(Array(TOTAL).fill(""));
         setQuestionSetToken(data.questionSetToken);
         setQuestionReviews([]);
@@ -373,78 +336,66 @@ export default function InterviewPage() {
     });
   };
 
-  const releaseNextQuestion = async () => {
-    setEvaluationError("");
-    setEvaluating(true);
-
-    try {
-      const response = await fetch("/api/interview-question", {
-        method: "POST",
-        headers: csrfHeaders({ "Content-Type": "application/json" }),
-        body: JSON.stringify({ questionSetToken }),
-      });
-      const data = await response.json();
-
-      if (
-        !response.ok ||
-        typeof data.question !== "string" ||
-        data.questionIndex !== current ||
-        data.totalQuestions !== TOTAL ||
-        typeof data.questionSetToken !== "string"
-      ) {
-        throw new Error(data.error ?? "The next question could not be released.");
-      }
-
-      setQuestions((releasedQuestions) => {
-        const nextQuestions = [...releasedQuestions];
-        nextQuestions[data.questionIndex] = data.question;
-        return nextQuestions;
-      });
-      setQuestionSetToken(data.questionSetToken);
-      setCurrent(data.questionIndex + 1);
-      setAiDetected(null);
-      resetTimer();
-      setStage("interview");
-      return true;
-    } catch (nextQuestionError) {
-      setEvaluationError(
-        nextQuestionError instanceof Error
-          ? nextQuestionError.message
-          : "The next question could not be released."
-      );
-      return false;
-    } finally {
-      setEvaluating(false);
-    }
-  };
-
-  const handleSkipQuestion = async () => {
+  const handlePreviousQuestion = () => {
     if (endingSession || shouldAutoSubmit || evaluating) return;
 
+    setCurrent((value) => Math.max(1, value - 1));
+    setAiDetected(null);
+    setEvaluationError("");
+    resetTimer();
+    setStage("interview");
+  };
+
+  const handleNextQuestion = () => {
+    if (endingSession || shouldAutoSubmit || evaluating) return;
+
+    setCurrent((value) => Math.min(TOTAL, value + 1));
+    setAiDetected(null);
+    setEvaluationError("");
+    resetTimer();
+    setStage("interview");
+  };
+
+  const handleSkipQuestion = () => {
+    if (endingSession || shouldAutoSubmit || evaluating) return;
+
+    const questionLabel = `Q${current}`;
+
     const skippedReview: QuestionReview = {
-      question: `Q${current}`,
+      question: questionLabel,
       prompt: questions[current - 1],
       score: 0,
-      status: "autoSkipped",
-      reason: "The question was skipped by the candidate.",
+      status: "skipped",
+      reason: "You skipped this question, so it was not evaluated.",
     };
 
     const nextReviews = [
       ...questionReviewsRef.current.filter(
-        (review) => review.question !== skippedReview.question
+        (review) => review.question !== questionLabel
       ),
       skippedReview,
     ];
 
+    setAnswers((currentAnswers) => {
+      const nextAnswers = [...currentAnswers];
+      nextAnswers[current - 1] = "";
+      return nextAnswers;
+    });
+
     setQuestionReviews(nextReviews);
     questionReviewsRef.current = nextReviews;
+
+    setAiDetected(null);
+    setEvaluationError("");
+    resetTimer();
 
     if (current >= TOTAL) {
       completeInterview(nextReviews);
       return;
     }
 
-    await releaseNextQuestion();
+    setCurrent((value) => value + 1);
+    setStage("interview");
   };
 
   const handleQuitInterview = () => {
@@ -587,13 +538,17 @@ export default function InterviewPage() {
     }
   };
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (endingSession || shouldAutoSubmit) return;
 
     if (current >= TOTAL) {
       completeInterview(questionReviewsRef.current);
     } else {
-      await releaseNextQuestion();
+      setCurrent((c) => c + 1);
+      setAiDetected(null);
+      setEvaluationError("");
+      resetTimer();
+      setStage("interview");
     }
   };
 
@@ -625,13 +580,6 @@ export default function InterviewPage() {
           <p className="font-inter text-muted text-base mb-10">
             Tell us about the role so we can tailor your questions.
           </p>
-
-          <div className="mb-8 grid gap-3 rounded-2xl border border-blue/15 bg-[#f7fbff] p-4 font-inter text-sm text-muted sm:grid-cols-2">
-            <span><strong className="text-text">5 questions</strong> · approximately 10–15 minutes</span>
-            <span><strong className="text-text">Text answers</strong> · no camera or microphone required</span>
-            <span><strong className="text-text">Scored on</strong> clarity, structure, confidence and depth</span>
-            <span><strong className="text-text">You receive</strong> feedback, improvement steps and a peer rank</span>
-          </div>
 
           <ProfileStepper
             onComplete={(data) => {
@@ -684,7 +632,7 @@ export default function InterviewPage() {
 
       <div className="max-w-[800px] mx-auto px-6 py-20">
         {stage === "interview" && !evaluating && !endingSession && (
-          <div className="mb-6 rounded-2xl border border-[rgba(0,132,255,0.12)] bg-[#f8fbff] px-4 py-3">
+          <div className="mb-6 border-y border-[rgba(0,0,0,0.08)] py-3">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <span className="h-8 w-px bg-[#00A07A]" />
@@ -712,10 +660,6 @@ export default function InterviewPage() {
                   </p>
                 </div>
               </div>
-            </div>
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-blue/10 pt-3 font-inter text-xs font-semibold text-muted">
-              <span className="inline-flex items-center gap-2"><Save size={14} className="text-blue" />{draftSavedAt ? `Draft saved ${draftSavedAt}` : "Your draft saves as you type"}</span>
-              <span>Suggested pace: 2–3 minutes per answer · no hard countdown</span>
             </div>
           </div>
         )}
@@ -805,17 +749,15 @@ export default function InterviewPage() {
                   question={questions[current - 1]}
                   answer={answers[current - 1] ?? ""}
                   evaluationError={evaluationError}
-                  canGoPrevious={false}
-                  canGoNext={false}
+                  canGoPrevious={current > 1}
+                  canGoNext={current < TOTAL}
                   onAnswerChange={handleAnswerChange}
                   onSubmit={(answer) => {
                     void handleSubmit(answer);
                   }}
-                  onPrevious={() => {}}
-                  onNext={() => {}}
-                  onSkip={() => {
-                    void handleSkipQuestion();
-                  }}
+                  onPrevious={handlePreviousQuestion}
+                  onNext={handleNextQuestion}
+                  onSkip={handleSkipQuestion}
                   onComplete={() => completeInterview(questionReviewsRef.current)}
                   onQuit={handleQuitInterview}
                 />
@@ -859,9 +801,7 @@ export default function InterviewPage() {
                     </p>
 
                     <button
-                      onClick={() => {
-                        void handleNext();
-                      }}
+                      onClick={handleNext}
                       className="mt-4 bg-red-600 hover:bg-red-700 text-white font-inter font-semibold text-sm px-6 py-3 rounded-xl transition-all"
                     >
                       Continue
@@ -871,9 +811,7 @@ export default function InterviewPage() {
               ) : (
                 <FeedbackPanel
                   feedback={feedback}
-                  onNext={() => {
-                    void handleNext();
-                  }}
+                  onNext={handleNext}
                   isFinalQuestion={current === TOTAL}
                 />
               )}
@@ -949,13 +887,6 @@ function IntegrityTermsModal({
               session will run with anti-cheating controls enabled.
             </p>
 
-            <div className="mt-5 grid gap-3 rounded-2xl border border-blue/15 bg-[#f7fbff] p-4 sm:grid-cols-2">
-              <p className="font-inter text-sm font-semibold leading-6 text-text"><Clock className="mr-2 inline text-blue" size={16} />5 questions · about 10–15 minutes</p>
-              <p className="font-inter text-sm font-semibold leading-6 text-text"><MicOff className="mr-2 inline text-blue" size={16} />No camera or microphone required</p>
-              <p className="font-inter text-sm font-semibold leading-6 text-text"><ShieldCheck className="mr-2 inline text-blue" size={16} />Clarity, structure, confidence and depth</p>
-              <p className="font-inter text-sm font-semibold leading-6 text-text"><Save className="mr-2 inline text-blue" size={16} />Draft status is visible while you answer</p>
-            </div>
-
             <ul className="mt-5 list-disc space-y-3 pl-5 font-inter text-sm leading-6 text-text">
               <li>
                 Ctrl/Cmd + C, Ctrl/Cmd + V, Ctrl/Cmd + A, copy, cut, paste,
@@ -981,6 +912,7 @@ function IntegrityTermsModal({
                 size={18}
                 color="#996600"
               />
+
               <p className="font-inter text-sm font-semibold leading-6 text-[#664400]">
                 Continue only when you are ready to stay on this page until the
                 session ends.
