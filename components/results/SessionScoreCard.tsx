@@ -37,9 +37,7 @@ export function SessionScoreCard({
 
   const accountPracticePath = `/interview?mode=account&autostart=1&role=${encodeURIComponent(
     report.role || "Interview"
-  )}&experience=${encodeURIComponent("Fresher")}&company=${encodeURIComponent(
-    report.companyType || "General"
-  )}`;
+  )}&company=${encodeURIComponent(report.companyType || "General")}`;
 
   const encodedAccountPracticePath = encodeURIComponent(accountPracticePath);
 
@@ -61,11 +59,9 @@ export function SessionScoreCard({
         <p className="font-inter text-[13px] text-white/60 mb-1.5">
           {report.role} · {report.companyType}
         </p>
-
         <h1 className="font-fustat font-extrabold text-[22px] text-white mb-5">
           {report.name}
         </h1>
-
         <div className="flex items-center gap-5 flex-wrap">
           <div
             className="relative w-[88px] h-[88px] rounded-full flex items-center justify-center shrink-0"
@@ -81,7 +77,6 @@ export function SessionScoreCard({
               <span className="font-inter text-[10px] text-white/50">/100</span>
             </div>
           </div>
-
           <div>
             {rankLocked ? (
               <div className="select-none">
@@ -93,12 +88,10 @@ export function SessionScoreCard({
                   <div className="absolute left-4 top-1/2 h-3 w-24 -translate-y-1/2 rounded-full bg-white/35 blur-[3px]" />
                   <div className="absolute right-4 top-1/2 h-3 w-9 -translate-y-1/2 rounded-full bg-[#7DFFD9]/45 blur-[3px]" />
                 </div>
-
                 <p className="flex items-center gap-2 font-inter text-[13px] font-bold text-white/78">
                   <LockKeyhole size={14} />
                   Sign in to continue
                 </p>
-
                 <p className="mt-2 max-w-[260px] font-inter text-[12px] leading-5 text-white/58">
                   Create an account or sign in to save interviews and enter the live board.
                 </p>
@@ -121,7 +114,6 @@ export function SessionScoreCard({
           </div>
         </div>
       </div>
-
       <div className="px-7 py-6 space-y-4">
         {report.dimensions.map((d) => (
           <div key={d.label}>
@@ -139,7 +131,6 @@ export function SessionScoreCard({
             )}
           </div>
         ))}
-
         <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
           {rankLocked ? (
             <button
@@ -157,20 +148,14 @@ export function SessionScoreCard({
               Practice Again
             </Link>
           )}
-
           <Link
-            href={
-              rankLocked
-                ? "/login?next=%2Fdashboard%2Fleaderboard"
-                : leaderboardHref
-            }
+            href={rankLocked ? "/login?next=%2Fdashboard%2Fleaderboard" : leaderboardHref}
             target={rankLocked ? "_blank" : undefined}
             rel={rankLocked ? "noopener noreferrer" : undefined}
             className="flex-1 text-center py-2.5 rounded-[10px] border border-[rgba(0,0,0,0.08)] font-inter font-semibold text-[13px] hover:scale-[1.02] transition-transform cursor-pointer"
           >
             {rankLocked ? "Sign in to unlock" : "View Leaderboard"}
           </Link>
-
           {rankLocked && (
             <Link
               href={`/login?next=${encodedAccountPracticePath}&mode=signup`}
@@ -183,7 +168,6 @@ export function SessionScoreCard({
           )}
         </div>
       </div>
-
       {practiceGateOpen && (
         <div
           className="fixed inset-0 z-[500] flex items-center justify-center bg-[#07111f]/55 px-4 backdrop-blur-sm"
@@ -194,7 +178,6 @@ export function SessionScoreCard({
           <div className="relative w-full max-w-[520px] overflow-hidden rounded-[28px] border border-[rgba(0,132,255,0.18)] bg-white shadow-[0_34px_90px_rgba(0,40,90,0.24)]">
             <div className="absolute right-[-80px] top-[-90px] h-60 w-60 rounded-full bg-[#0084ff]/15 blur-[55px]" />
             <div className="absolute bottom-[-120px] left-[-80px] h-64 w-64 rounded-full bg-[#7dffd9]/12 blur-[65px]" />
-
             <button
               type="button"
               onClick={() => setPracticeGateOpen(false)}
@@ -203,18 +186,15 @@ export function SessionScoreCard({
             >
               <X size={18} />
             </button>
-
             <div className="relative z-10 p-7 sm:p-8">
               <div className="mb-6 flex items-center gap-4">
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#EAF5FF] shadow-[inset_0_0_0_1px_rgba(0,132,255,0.14)]">
                   <LockKeyhole size={24} className="text-blue" strokeWidth={2.1} />
                 </div>
-
                 <div>
                   <p className="font-inter text-[11px] font-extrabold uppercase tracking-[0.22em] text-blue">
                     Account required
                   </p>
-
                   <h2
                     id="practice-gate-title"
                     className="mt-1 font-fustat text-2xl font-extrabold tracking-[-0.04em] text-text"
@@ -223,13 +203,11 @@ export function SessionScoreCard({
                   </h2>
                 </div>
               </div>
-
               <p className="font-inter text-[15px] leading-7 text-muted">
                 Interviews now run inside your PrepPeer account. Sign in or
                 create an account to start a session, save every result, and track
                 your rank on the live board.
               </p>
-
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 <Link
                   href={`/login?next=${encodedAccountPracticePath}`}
@@ -240,7 +218,6 @@ export function SessionScoreCard({
                   Sign in to continue
                   <ArrowRight size={16} className="transition group-hover:translate-x-0.5" />
                 </Link>
-
                 <Link
                   href={`/login?next=${encodedAccountPracticePath}&mode=signup`}
                   target="_blank"
