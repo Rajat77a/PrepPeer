@@ -5,10 +5,32 @@ import { logServerError } from "@/lib/server/errorLog";
 import { checkRateLimit } from "@/lib/server/rateLimit";
 import { enforceRequestAbuseGuards } from "@/lib/server/requestAbuse";
 import { createOptionalAdminClient } from "@/utils/supabase/admin";
+import { getTrustedProfile } from "@/lib/profile";
 import {
   parseProfileInput,
   readJsonBody,
 } from "@/lib/validation";
+
+async function getProfile() {
+  const { user } = await getAuthenticatedContext();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const profile = getTrustedProfile(user);
+
+  return NextResponse.json({
+    profile: {
+      fullName: profile.fullName,
+      college: profile.college,
+      role: profile.role,
+      experience: profile.experience,
+      company: profile.company,
+      onboardingComplete: profile.onboardingComplete,
+    },
+  });
+}
 
 async function patchProfile(req: NextRequest) {
   const { user } = await getAuthenticatedContext();
@@ -18,7 +40,10 @@ async function patchProfile(req: NextRequest) {
 
   const admin = createOptionalAdminClient();
   if (!admin) {
-    logServerError("Profile storage is not configured", new Error("Missing Supabase admin client"));
+    logServerError(
+      "Profile storage is not configured",
+      new Error("Missing Supabase admin client")
+    );
     return NextResponse.json(
       { error: "Profile saving is temporarily unavailable. Please try again later." },
       { status: 503 }
@@ -100,6 +125,11 @@ async function patchProfile(req: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 }
+
+export const GET = withApiErrorHandler(
+  getProfile,
+  "Unhandled profile API error"
+);
 
 export const PATCH = withApiErrorHandler(
   patchProfile,
