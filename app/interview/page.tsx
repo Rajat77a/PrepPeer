@@ -9,7 +9,6 @@ import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
-import { getTrustedProfile } from "@/lib/profile";
 import { createClient } from "@/utils/supabase/client";
 import { csrfHeaders } from "@/utils/csrf";
 import type { QuestionReview } from "@/lib/types";
@@ -34,7 +33,16 @@ type SetupData = {
 
 type Stage = "setup" | "terms" | "interview" | "feedback";
 
-const normalizeAutostartExperience = (value: string | null) => {
+type SavedProfileResponse = {
+  profile?: {
+    role?: string;
+    experience?: string;
+    company?: string;
+  };
+  error?: string;
+};
+
+const normalizeAutostartExperience = (value: string | null | undefined) => {
   const cleanValue = value?.trim();
 
   if (
@@ -327,47 +335,61 @@ export default function InterviewPage() {
 
       if (!isAccountMode || autoStartRef.current) return;
 
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) return;
-
-      const profile = getTrustedProfile(user);
-
-      const cleanRole = params.get("role")?.trim();
-      const cleanExperience = params.get("experience")?.trim();
-      const cleanCompany = params.get("company")?.trim();
-
-      const nextSetup = {
-        domain:
-          cleanRole && cleanRole.length >= 2
-            ? cleanRole
-            : profile.role,
-        experience: normalizeAutostartExperience(
-          cleanExperience && cleanExperience.length > 0
-            ? cleanExperience
-            : profile.experience
-        ),
-        companyType:
-          cleanCompany && cleanCompany.length >= 2
-            ? cleanCompany
-            : profile.company,
-      };
-
-      if (!isValidSetup(nextSetup)) {
-        setError(
-          "Your saved profile is incomplete. Please update your profile before starting another interview."
-        );
-        return;
-      }
-
-      autoStartRef.current = true;
       setDirectStarting(true);
-      setPendingSetup(nextSetup);
-      setSetup(nextSetup);
-      void handleStart(nextSetup);
+      setError("");
+
+      try {
+        const response = await fetch("/api/profile", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        const data = (await response.json()) as SavedProfileResponse;
+
+        if (!response.ok || !data.profile) {
+          setDirectStarting(false);
+          setError(
+            data.error || "Could not load your saved profile. Please try again."
+          );
+          return;
+        }
+
+        const cleanRole = params.get("role")?.trim();
+        const cleanExperience = params.get("experience")?.trim();
+        const cleanCompany = params.get("company")?.trim();
+
+        const nextSetup = {
+          domain:
+            cleanRole && cleanRole.length >= 2
+              ? cleanRole
+              : data.profile.role ?? "",
+          experience: normalizeAutostartExperience(
+            cleanExperience && cleanExperience.length > 0
+              ? cleanExperience
+              : data.profile.experience
+          ),
+          companyType:
+            cleanCompany && cleanCompany.length >= 2
+              ? cleanCompany
+              : data.profile.company ?? "",
+        };
+
+        if (!isValidSetup(nextSetup)) {
+          setDirectStarting(false);
+          setError(
+            "Your saved profile is incomplete. Please update your profile before starting another interview."
+          );
+          return;
+        }
+
+        autoStartRef.current = true;
+        setPendingSetup(nextSetup);
+        setSetup(nextSetup);
+        void handleStart(nextSetup);
+      } catch {
+        setDirectStarting(false);
+        setError("Could not load your saved profile. Please try again.");
+      }
     };
 
     void startFromSavedProfile();
@@ -643,14 +665,7 @@ export default function InterviewPage() {
             }}
           />
 
-          {error === "Please fill in all fields." && (
-            <p className="mt-5 text-center font-inter text-sm text-red-500">
-              {error}
-            </p>
-          )}
-
-          {error ===
-            "Your saved profile is incomplete. Please update your profile before starting another interview." && (
+          {error && (
             <p className="mt-5 text-center font-inter text-sm text-red-500">
               {error}
             </p>
