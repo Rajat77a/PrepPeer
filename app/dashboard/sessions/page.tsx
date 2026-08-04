@@ -75,7 +75,7 @@ export default async function DashboardSessionsPage() {
                 rank movement in this timeline.
               </p>
               <Link
-                href="/interview?mode=account"
+                href="/interview?mode=account&autostart=1"
                 className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#006cff] px-6 py-3 font-inter text-sm font-bold text-white transition hover:bg-[#0057cc]"
               >
                 Start your first mock
