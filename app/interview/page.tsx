@@ -321,12 +321,11 @@ export default function InterviewPage() {
   useEffect(() => {
     if (autoStartRef.current || stage !== "setup" || !accessChecked) return;
 
-    const autoStartInterview = async () => {
+    const startFromSavedProfile = async () => {
       const params = new URLSearchParams(window.location.search);
-      const shouldAutoStart =
-        params.get("mode") === "account" && params.get("autostart") === "1";
+      const isAccountMode = params.get("mode") === "account";
 
-      if (!shouldAutoStart || autoStartRef.current) return;
+      if (!isAccountMode || autoStartRef.current) return;
 
       const supabase = createClient();
       const {
@@ -371,7 +370,7 @@ export default function InterviewPage() {
       void handleStart(nextSetup);
     };
 
-    void autoStartInterview();
+    void startFromSavedProfile();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessChecked, stage]);
 
@@ -645,6 +644,13 @@ export default function InterviewPage() {
           />
 
           {error === "Please fill in all fields." && (
+            <p className="mt-5 text-center font-inter text-sm text-red-500">
+              {error}
+            </p>
+          )}
+
+          {error ===
+            "Your saved profile is incomplete. Please update your profile before starting another interview." && (
             <p className="mt-5 text-center font-inter text-sm text-red-500">
               {error}
             </p>
