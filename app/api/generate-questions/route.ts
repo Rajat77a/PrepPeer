@@ -162,6 +162,7 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`;
     }
 
     const questions: unknown = JSON.parse(match[0]);
+
     if (
       !Array.isArray(questions) ||
       questions.length !== 5 ||
@@ -197,17 +198,21 @@ Return a JSON array of exactly 5 strings. No preamble or markdown.`;
       issuedAt: Date.now(),
     });
 
-    return NextResponse.json({
-      question: normalizedQuestions[0],
-      questionIndex: 0,
-      totalQuestions: normalizedQuestions.length,
-      questionSetToken,
-    }, {
-      headers: {
-        "Cache-Control": "no-store, private",
-        Pragma: "no-cache",
+    return NextResponse.json(
+      {
+        questions: normalizedQuestions,
+        question: normalizedQuestions[0],
+        questionIndex: 0,
+        totalQuestions: normalizedQuestions.length,
+        questionSetToken,
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "no-store, private",
+          Pragma: "no-cache",
+        },
+      }
+    );
   } catch (error) {
     logServerError("Question generation request failed", error, {
       userId: user.id,
