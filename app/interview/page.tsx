@@ -9,6 +9,7 @@ import ProfileStepper from "@/components/ProfileStepper";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
 import { createZeroFeedback, evaluateAnswerQuality } from "@/lib/answerQuality";
 import { MOCK_FEEDBACK } from "@/lib/mockData";
+import { getTrustedProfile } from "@/lib/profile";
 import { createClient } from "@/utils/supabase/client";
 import { csrfHeaders } from "@/utils/csrf";
 import type { QuestionReview } from "@/lib/types";
@@ -318,36 +319,61 @@ export default function InterviewPage() {
   };
 
   useEffect(() => {
-    if (autoStartRef.current || stage !== "setup") return;
+    if (autoStartRef.current || stage !== "setup" || !accessChecked) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const shouldAutoStart =
-      params.get("mode") === "account" && params.get("autostart") === "1";
+    const autoStartInterview = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const shouldAutoStart =
+        params.get("mode") === "account" && params.get("autostart") === "1";
 
-    if (!shouldAutoStart) return;
+      if (!shouldAutoStart || autoStartRef.current) return;
 
-    const cleanRole = params.get("role")?.trim();
-    const cleanCompany = params.get("company")?.trim();
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-    const nextSetup = {
-      domain: cleanRole && cleanRole.length >= 2 ? cleanRole : "Interview",
-      experience: normalizeAutostartExperience(params.get("experience")),
-      companyType:
-        cleanCompany && cleanCompany.length >= 2 ? cleanCompany : "General",
+      if (!user) return;
+
+      const profile = getTrustedProfile(user);
+
+      const cleanRole = params.get("role")?.trim();
+      const cleanExperience = params.get("experience")?.trim();
+      const cleanCompany = params.get("company")?.trim();
+
+      const nextSetup = {
+        domain:
+          cleanRole && cleanRole.length >= 2
+            ? cleanRole
+            : profile.role,
+        experience: normalizeAutostartExperience(
+          cleanExperience && cleanExperience.length > 0
+            ? cleanExperience
+            : profile.experience
+        ),
+        companyType:
+          cleanCompany && cleanCompany.length >= 2
+            ? cleanCompany
+            : profile.company,
+      };
+
+      if (!isValidSetup(nextSetup)) {
+        setError(
+          "Your saved profile is incomplete. Please update your profile before starting another interview."
+        );
+        return;
+      }
+
+      autoStartRef.current = true;
+      setDirectStarting(true);
+      setPendingSetup(nextSetup);
+      setSetup(nextSetup);
+      void handleStart(nextSetup);
     };
 
-    if (!isValidSetup(nextSetup)) {
-      setError("Could not start automatically. Please try Practice again.");
-      return;
-    }
-
-    autoStartRef.current = true;
-    setDirectStarting(true);
-    setPendingSetup(nextSetup);
-    setSetup(nextSetup);
-    void handleStart(nextSetup);
+    void autoStartInterview();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage]);
+  }, [accessChecked, stage]);
 
   const handleAnswerChange = (answer: string) => {
     setEvaluationError("");
